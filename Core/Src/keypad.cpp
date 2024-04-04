@@ -53,10 +53,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 		GPIO_init_struct_private.Speed = GPIO_SPEED_FREQ_LOW;
 		HAL_GPIO_Init(GPIOD, &GPIO_init_struct_private);
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 0);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 		if(GPIO_pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4)) {
 			key = '1';
 		}
@@ -70,10 +70,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = '*';
 		}
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 0);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 		if(GPIO_pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4)) {
 			key = '2';
 		}
@@ -87,10 +87,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = '0';
 		}
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 0);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 		if(GPIO_pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4)) {
 			key = '3';
 		}
@@ -104,10 +104,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = '#';
 		}
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 1);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 		if(GPIO_pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4)) {
 			key = 'A';
 		}
@@ -121,10 +121,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = 'D';
 		}
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1);
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 1);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 		GPIO_init_struct_private.Mode = GPIO_MODE_IT_RISING;
 		GPIO_init_struct_private.Pull = GPIO_PULLDOWN;
 		HAL_GPIO_Init(GPIOD, &GPIO_init_struct_private);

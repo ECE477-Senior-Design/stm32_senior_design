@@ -75,7 +75,7 @@ extern SPI_HandleTypeDef LCD_SPI_PORT;
 //#define FONT Font_16x26
 
 // call before initializing any SPI devices
-void LCD_Unselect();
+void LCD_Unselect(void);
 
 void LCD_Init(void);
 void LCD_DrawPixel(uint16_t x, uint16_t y, uint16_t color);
