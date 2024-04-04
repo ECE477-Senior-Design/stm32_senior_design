@@ -54,8 +54,10 @@ DMA_HandleTypeDef hdma_tim1_ch3;
 DMA_HandleTypeDef hdma_tim1_ch4_trig_com;
 
 //usb variables
-uint8_t buffer[64];
+uint8_t buffer[256];
 int sent_flag = 0;
+char gs[256];
+int headPos = 0;
 
 GameMap *map;
 
@@ -417,20 +419,33 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void load_map(void) {
-	int cur_flag = sent_flag;
-	std::string gamestring = "";
-//	while (buffer[0] != '\n') {
-//		if(cur_flag != sent_flag) {
-//			cur_flag = sent_flag;
-//			gamestring.append(std::string((char*)buffer));
-//		}
-//	}
-	while(1);
+
+	while(headPos != 256);
+
+	//used these to double check values
+	uint8_t secondLast = buffer[254];
+	uint8_t last = buffer[255];
+
+	std::string gamestring = std::string((char *)buffer);
 
 
 	map = new GameMap(gamestring);
 	int cols = map->GetColumns();
 	int rows = map->GetRows();
+	int counter = 0;
+
+	HexagonType checkType;
+	for(int i = 0; i < 16; i++)
+	{
+		for(int j = 0; j < 16; j++)
+		{
+			checkType = map->GetHex(i,j)->GetType();
+			if(checkType == PlayerHex)
+			{
+				counter++;
+			}
+		}
+	}
 }
 
 /* USER CODE END 4 */

@@ -96,6 +96,9 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 /* USER CODE BEGIN PRIVATE_VARIABLES */
 extern uint8_t buffer[64];
 extern int sent_flag;
+extern char gs[256];
+extern int headPos;
+uint8_t rxBuffer[256];
 
 /* USER CODE END PRIVATE_VARIABLES */
 
@@ -263,12 +266,18 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-	memset(buffer, '\0', sizeof(buffer));
-	USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+	uint8_t len = (uint8_t) *Len; // Get length
+	uint16_t tempHeadPos = headPos; // Increment temp head pos while writing, then update main variable when complete
+
+
+	for (uint32_t i = 0; i < len; i++) {
+		buffer[tempHeadPos] = Buf[i];
+		tempHeadPos+=1;
+	}
+
+	headPos = tempHeadPos;
 	USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-	memcpy(buffer, Buf, *Len);
-	memset(Buf, '\0', *Len);
-	sent_flag = sent_flag ^ 1;
+
 	return (USBD_OK);
   /* USER CODE END 6 */
 }
