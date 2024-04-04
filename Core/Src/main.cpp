@@ -19,9 +19,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
+#include "states.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "fonts.h"
+#include "lcd.h"
+#include "keypad.h"
+
 #include "math.h"
 #include "stdio.h"
 #include "mcp23017.h"
@@ -45,6 +50,18 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
+/*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
+SPI_HandleTypeDef hspi1;
+
+GPIO_InitTypeDef GPIO_init_struct_private = {0};
+uint32_t current_mill = 0;
+uint32_t previous_mill = 0;
+char key = '\0';
+GameState game_state;
+/* ---------------------------------------------------------------------------*/
+
+/* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
 TIM_HandleTypeDef htim1;
@@ -52,12 +69,14 @@ DMA_HandleTypeDef hdma_tim1_ch1;
 DMA_HandleTypeDef hdma_tim1_ch2;
 DMA_HandleTypeDef hdma_tim1_ch3;
 DMA_HandleTypeDef hdma_tim1_ch4_trig_com;
+/* ---------------------------------------------------------------------------*/
 
-//usb variables
+/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
 uint8_t buffer[256];
 int sent_flag = 0;
 char gs[256];
 int headPos = 0;
+/* ---------------------------------------------------------------------------*/
 
 GameMap *map;
 
@@ -71,6 +90,8 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_SPI1_Init(void);
+
 
 void load_map(void);
 /* USER CODE BEGIN PFP */
@@ -146,6 +167,7 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM1_Init();
   MX_USB_DEVICE_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 //  MCP23017_HandleTypeDef hmcps[1];
 //
@@ -192,21 +214,45 @@ int main(void)
   WS2812_Send(&htim1,2);
   WS2812_Send(&htim1,3);
 
-  load_map();
 
-  /* USER CODE END 2 */
+  game_state = WELCOME_STATE;
+
+  LCD_Unselect();
+  LCD_Init();
+
+//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 1);
+//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 1);
+//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1);
+//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 1);
+
+    /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-	  for(int i = 0; i < numExpanders; i++){
-		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
-	  }
-
-
-
+//	  for(int i = 0; i < numExpanders; i++){
+//		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
+//	  }
+	  switch (game_state) {
+	  		case WELCOME_STATE:
+	  			Welcome();
+	  			break;
+	  		case MENU_STATE:
+	  			Menu();
+	  			break;
+	  		case DM_MODE_STATE:
+	  			DM_Mode();
+	  			break;
+	  		case PLAYING_MODE_STATE:
+	  			break;
+	  		case UPLOAD_MAP_STATE:
+	  			load_map();
+	  			break;
+	  		case VIEW_MAP_STATE:
+	  			break;
+	  	}
 
 
 //	  ledHallPCBSystemCheck(hmcps[0],&htim1,channels[0]); //array of MCP23017s,tim1, channel_1
@@ -260,6 +306,40 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
 }
 
 /**
@@ -405,13 +485,52 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4|GPIO_PIN_8, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PD0 PD1 PD2 PD3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PD4 PD5 PD6 PD7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB4 PB8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
