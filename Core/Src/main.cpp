@@ -220,10 +220,10 @@ int main(void)
   LCD_Unselect();
   LCD_Init();
 
-//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, 1);
-//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 1);
-//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1);
-//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 1);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
     /* USER CODE END 2 */
   /* Infinite loop */
@@ -253,12 +253,13 @@ int main(void)
 	  		case VIEW_MAP_STATE:
 	  			break;
 	  	}
+	 // Keypad_Test();
 
 
 //	  ledHallPCBSystemCheck(hmcps[0],&htim1,channels[0]); //array of MCP23017s,tim1, channel_1
 //	  ledHallPCBSystemCheck(hmcps[2],&htim1,channels[2]); //array of MCP23017s,tim1, channel_1
 
-	  HAL_Delay(100);
+	 // HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -531,6 +532,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

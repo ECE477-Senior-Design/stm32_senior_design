@@ -5,7 +5,7 @@ static void LCD_Select() {
     HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
 }
 
-void LCD_Unselect() {
+void LCD_Unselect(void) {
     HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
 }
 
