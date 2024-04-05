@@ -20,6 +20,7 @@
 #include "main.h"
 #include "usb_device.h"
 #include "states.h"
+#include "usb.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -72,13 +73,8 @@ DMA_HandleTypeDef hdma_tim1_ch4_trig_com;
 /* ---------------------------------------------------------------------------*/
 
 /* USB COM GLOBAL VARIABLES --------------------------------------------------*/
-uint8_t buffer[256];
-int sent_flag = 0;
-char gs[256];
-int headPos = 0;
-/* ---------------------------------------------------------------------------*/
 
-GameMap *map;
+/* ---------------------------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 
@@ -93,7 +89,6 @@ static void MX_TIM1_Init(void);
 static void MX_SPI1_Init(void);
 
 
-void load_map(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -248,7 +243,7 @@ int main(void)
 	  		case PLAYING_MODE_STATE:
 	  			break;
 	  		case UPLOAD_MAP_STATE:
-	  			load_map();
+	  			Upload_Map();
 	  			break;
 	  		case VIEW_MAP_STATE:
 	  			break;
@@ -545,35 +540,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void load_map(void) {
-
-	while(headPos != 256);
-
-	//used these to double check values
-	uint8_t secondLast = buffer[254];
-	uint8_t last = buffer[255];
-
-	std::string gamestring = std::string((char *)buffer);
-
-
-	map = new GameMap(gamestring);
-	int cols = map->GetColumns();
-	int rows = map->GetRows();
-	int counter = 0;
-
-	HexagonType checkType;
-	for(int i = 0; i < 16; i++)
-	{
-		for(int j = 0; j < 16; j++)
-		{
-			checkType = map->GetHex(i,j)->GetType();
-			if(checkType == PlayerHex)
-			{
-				counter++;
-			}
-		}
-	}
-}
 
 /* USER CODE END 4 */
 

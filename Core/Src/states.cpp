@@ -9,6 +9,7 @@
 #include "main.h"
 #include "lcd.h"
 #include "keypad.h"
+#include "usb.h"
 
 extern GameState game_state;
 extern char key;
@@ -126,6 +127,73 @@ void DM_Mode(void) {
 		if (key == 'D') {
 			key = '\0';
 		    selection = (selection < 3) ? selection + 1 : 3;
+		}
+
+		if (selection != prev_selection) {
+			LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			prev_selection = selection;
+		}
+	}
+}
+
+void Upload_Map(void)
+{
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 50;
+	//int err = 0;
+	key = '\0';
+	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
+
+	//need to add checks for no response
+	if(load_map() != 0){
+		LCD_FillScreen(LCD_WHITE);
+		LCD_WriteStringCentered(100, "Map Send Timeout", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(1000);
+		LCD_WriteStringCentered(150, "Returning to Menu", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(1000);
+		LCD_FillScreen(LCD_WHITE);
+		HAL_Delay(500);
+		game_state = MENU_STATE;
+		return;
+
+	}
+
+
+	LCD_FillScreen(LCD_WHITE);
+	HAL_Delay(500);
+	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
+	HAL_Delay(500);
+
+	LCD_FillScreen(LCD_WHITE);
+
+	LCD_WriteStringCentered(50, "View Map", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+
+	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	while (1) {
+		if (key == '#') {
+			key = '\0';
+			switch (selection) {
+				case (1):
+					game_state = VIEW_MAP_STATE;
+					break;
+				case (2):
+					game_state = MENU_STATE;
+					break;
+			}
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+			break;
+		}
+		if (key == 'A') {
+			key = '\0';
+		    selection = (selection > 1) ? selection - 1 : 1;
+		}
+		if (key == 'D') {
+			key = '\0';
+		    selection = (selection < 2) ? selection + 1 : 2;
 		}
 
 		if (selection != prev_selection) {

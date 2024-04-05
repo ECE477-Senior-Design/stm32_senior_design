@@ -23,6 +23,7 @@ void LED_Test(void);
 void Welcome(void);
 void Menu(void);
 void DM_Mode(void);
+void Upload_Map(void);
 
 
 

@@ -1,5 +1,6 @@
 #include "stm32f4xx_hal.h"
 #include "lcd.h"
+#include <cstring>
 
 static void LCD_Select() {
     HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
@@ -265,6 +266,45 @@ void LCD_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint
 
     LCD_Unselect();
 }
+
+void LCD_WriteStringCentered(uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
+	LCD_Select();
+
+	//this function is written assuming the 11x18 font
+	uint16_t x;
+
+	size_t len = strlen(str);
+	int fullWidth = len * 11;
+
+	x = (LCD_WIDTH - fullWidth) / 2;
+	if(x < 0)
+	{
+		x = 0;
+	}
+
+    while(*str) {
+        if(x + font.width >= LCD_WIDTH) {
+            x = 0;
+            y += font.height;
+            if(y + font.height >= LCD_HEIGHT) {
+                break;
+            }
+
+            if(*str == ' ') {
+                // skip spaces in the beginning of the new line
+                str++;
+                continue;
+            }
+        }
+
+        LCD_WriteChar(x, y, *str, font, color, bgcolor);
+        x += font.width;
+        str++;
+    }
+
+    LCD_Unselect();
+}
+
 
 void LCD_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
     // clipping
