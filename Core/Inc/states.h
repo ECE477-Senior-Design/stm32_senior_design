@@ -8,6 +8,8 @@
 #ifndef INC_STATES_H_
 #define INC_STATES_H_
 
+#include "GameMap.h"
+
 
 typedef enum {
 	WELCOME_STATE,
@@ -24,6 +26,7 @@ void Welcome(void);
 void Menu(void);
 void DM_Mode(void);
 void Upload_Map(void);
+void display_map(GameMap *map);
 
 
 

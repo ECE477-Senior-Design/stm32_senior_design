@@ -5,14 +5,21 @@
  *      Author: neilt
  */
 
+#include "ws2812b.h"
 #include "states.h"
 #include "main.h"
 #include "lcd.h"
 #include "keypad.h"
 #include "usb.h"
+#include "boardLighting.h"
 
 extern GameState game_state;
 extern char key;
+
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
+
+extern GameMap *map;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -202,6 +209,34 @@ void Upload_Map(void)
 			prev_selection = selection;
 		}
 	}
+}
+
+void display_map(GameMap *map) {
+	uint8_t mapBuffer[256];
+
+	for(int row = 0; row < map->GetRows(); row++){
+		for(int col = 0; col < map->GetColumns(); col++){
+			switch(map->GetHex(row, col)->GetType()){
+			case WallHex:
+				mapBuffer[col + (row*16)] = 1;
+				break;
+
+			case PlayerHex:
+				mapBuffer[col + (row*16)] = 2;
+				break;
+
+			case MonsterHex:
+				mapBuffer[col + (row*16)] = 3;
+				break;
+
+			case BaseHex:
+				mapBuffer[col + (row*16)] = 0;
+				break;
+			}
+		}
+	}
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+
 }
 
 

@@ -9,7 +9,7 @@ int headPos = 0;
 int startTick;
 int curTick;
 
-GameMap *map;
+extern GameMap *map;
 
 int load_map(void) {
 
