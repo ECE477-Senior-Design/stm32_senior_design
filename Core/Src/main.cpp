@@ -19,8 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "states.h"
-#include "usb.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -33,6 +31,8 @@
 #include "mcp23017.h"
 #include "ws2812b.h"
 #include "GameMap.h"
+#include "states.h"
+#include "usb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,23 +47,18 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
-SPI_HandleTypeDef hspi1;
-
 GPIO_InitTypeDef GPIO_init_struct_private = {0};
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
 char key = '\0';
 GameState game_state;
-/* ---------------------------------------------------------------------------*/
+/* USER CODE END PM */
 
-/* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
+SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
@@ -75,14 +70,9 @@ DMA_HandleTypeDef hdma_tim3_ch1_trig;
 DMA_HandleTypeDef hdma_tim3_ch2;
 DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
-/* ---------------------------------------------------------------------------*/
-
-/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
-GameMap *map;
-
-/* ---------------------------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+GameMap *map;
 
 /* USER CODE END PV */
 
@@ -94,8 +84,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
-
-
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -171,6 +160,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI1_Init();
   MX_TIM3_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 //  MCP23017_HandleTypeDef hmcps[1];
 //
@@ -181,15 +171,22 @@ int main(void)
   //MCP23017_HandleTypeDef hmcps[1];
  //mcp23017_init_array(&hmcps,numExpanders,hi2c1); //number of expanders,i2c system used
 
-//  int numExpanders = 3;
-//  unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21,MCP23017_ADDRESS_22,MCP23017_ADDRESS_23,MCP23017_ADDRESS_24,MCP23017_ADDRESS_25,MCP23017_ADDRESS_26,MCP23017_ADDRESS_27};
-//  int channels[] = {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4};
-//  MCP23017_HandleTypeDef hmcps[numExpanders];
-//  for(int i = 0; i < numExpanders; i++){
-//	  mcp23017_init(&hmcps[i], &hi2c1, mcpAddress[i]);
-//	  mcp23017_iodir(&hmcps[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
-//	  mcp23017_iodir(&hmcps[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
-//  }
+  int numExpanders = 8;
+  unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21,MCP23017_ADDRESS_22,MCP23017_ADDRESS_23,MCP23017_ADDRESS_24,MCP23017_ADDRESS_25,MCP23017_ADDRESS_26,MCP23017_ADDRESS_27};
+  int channels[] = {4 ,4, 3, 3, 2, 2, 1, 1};
+  MCP23017_HandleTypeDef hmcps1[numExpanders];
+  MCP23017_HandleTypeDef hmcps2[numExpanders];
+  for(int i = 0; i < numExpanders; i++){
+	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
+	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
+	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
+  }
+
+  for(int i = 0; i < numExpanders; i++){
+  	  mcp23017_init(&hmcps2[i], &hi2c2, mcpAddress[i]);
+  	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
+  	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
+   }
 //
 //
 //
@@ -228,16 +225,43 @@ int main(void)
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
-    /* USER CODE END 2 */
+
+  //std::vector<Hexagon*> possibleMoves = map.PossibleMovements(map.GetHex(0,1), 3);
+
+
+ 	  //uint8_t mapBufferPrev[sizeof(mapBuffer)];
+ 	  //mapHexes(mapBuffer, mapBufferPrev, possibleMoves, 4);
+ 	  //displayMap(htim1, htim3, htim4, htim5, mapBuffer, sizeof(mapBuffer)/sizeof(mapBuffer[0]));
+
+  /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
+
+//	  ledHallPCBSystemCheck(hmcps1[0],&htim1,channels[0], 1); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[1],&htim1,channels[1], 2); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[2],&htim1,channels[2], 3); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[3],&htim1,channels[3], 4); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[4],&htim1,channels[4], 5); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[5],&htim1,channels[5], 6); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[6],&htim1,channels[6], 7); //array of MCP23017s,tim1, channel_1
+//	  ledHallPCBSystemCheck(hmcps1[7],&htim1,channels[7], 8); //array of MCP23017s,tim1, channel_1
 //	  for(int i = 0; i < numExpanders; i++){
-//		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
+//		  ledHallPCBSystemCheck(hmcps1[i],&htim1,channels[i], i + 1);
 //	  }
+//	  for(int i = 0; i < numExpanders; i++){
+//		  ledHallPCBSystemCheck(hmcps2[i],&htim3,channels[i], i + 1);
+//	  }
+	  //mapHexesToBuffer(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> hexes, int colorMod);
+
+
+
+
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();
@@ -264,7 +288,7 @@ int main(void)
 //	  ledHallPCBSystemCheck(hmcps[0],&htim1,channels[0]); //array of MCP23017s,tim1, channel_1
 //	  ledHallPCBSystemCheck(hmcps[2],&htim1,channels[2]); //array of MCP23017s,tim1, channel_1
 
-	 // HAL_Delay(100);
+	 HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -314,40 +338,6 @@ void SystemClock_Config(void)
   }
 }
 
-
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
-
-}
-
 /**
   * @brief I2C1 Initialization Function
   * @param None
@@ -383,6 +373,78 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -404,7 +466,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 105-1;
+  htim1.Init.Period = 60-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -459,6 +521,11 @@ static void MX_TIM1_Init(void)
 
 }
 
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_TIM3_Init(void)
 {
 
@@ -514,6 +581,7 @@ static void MX_TIM3_Init(void)
   HAL_TIM_MspPostInit(&htim3);
 
 }
+
 /**
   * Enable DMA controller clock
   */
@@ -565,10 +633,10 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);

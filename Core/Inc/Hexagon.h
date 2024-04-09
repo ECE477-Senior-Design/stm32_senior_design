@@ -22,6 +22,7 @@ enum HexagonType {
     WallHex,
     PlayerHex,
     MonsterHex,
+	MoveHex,
 };
 
 // //Includes weight for each hex (everything except for base should be high)

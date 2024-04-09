@@ -240,5 +240,10 @@ void display_map(GameMap *map) {
 }
 
 
+//void playing_mode(){
+//
+//}
+
+
 
 

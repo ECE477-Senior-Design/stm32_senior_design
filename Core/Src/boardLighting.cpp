@@ -6,7 +6,10 @@
 #include "boardLighting.h"
 #include <cstddef>
 #include "stm32f4xx_hal.h"
-
+#include "main.h"
+#include "mcp23017.h"
+#include "keypad.h"
+#include "lcd.h"
 
 
 
@@ -61,7 +64,7 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 
 
 
-void mapHexes(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> hexes, int colorMod){
+void mapHexesToBuffer(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> hexes, int colorMod){
 	std::memcpy(mapBufferPrev, mapBuffer, sizeof(uint8_t) * 256);
 	int sizeHexes = hexes.size();
 	int colN;
@@ -74,9 +77,137 @@ void mapHexes(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> 
 }
 
 
+void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type){
+	int sizeHexes = hexes.size();
+	for(int i = 0; i < sizeHexes; i++){
+		 map->ChangeHex(hexes[i]->GetHexRow(), hexes[i]->GetHexColumn(), type);
+	}
+}
 
 
 
+void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
+
+	for(int row = 0; row < map->GetRows(); row++){
+		for(int col = 0; col < map->GetColumns(); col++){
+			switch(map->GetHex(row, col)->GetType()){
+			case WallHex:
+				mapBuffer[col + (row*16)] = 1;
+				break;
+
+			case PlayerHex:
+				mapBuffer[col + (row*16)] = 2;
+				break;
+
+			case MonsterHex:
+				mapBuffer[col + (row*16)] = 3;
+				break;
+
+			case BaseHex:
+				mapBuffer[col + (row*16)] = 0;
+				break;
+
+			case MoveHex:
+				mapBuffer[col + (row*16)] = 4;
+				break;
+			}
+		}
+	}
+
+}
+
+
+void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
+
+	for(int row = 0; row < map->GetRows(); row++){
+		for(int col = 0; col < map->GetColumns(); col++){
+			switch(mapBuffer[col + (row*16)]){
+			case 1:
+				map->ChangeHex(row, col, WallHex);
+				break;
+
+			case 2:
+				map->ChangeHex(row, col, PlayerHex);
+				break;
+
+			case 3:
+				map->ChangeHex(row, col, MonsterHex);
+				break;
+
+			case 0:
+				map->ChangeHex(row, col, BaseHex);
+				break;
+			}
+		}
+	}
+}
+
+
+
+GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+	  TIM_HandleTypeDef timers[] = {htim1, htim3};
+	  uint8_t mapBuffer[256];
+	  mapToBuffer(map, mapBuffer);
+	  uint8_t prevMapBuffer[256];
+	  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+
+	  int movement = 3;
+	  //Hexagon* currHex = map->GetHex(0,1);
+	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
+	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 4);
+
+	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+	  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
+
+	  key = '\0';
+
+	  LCD_FillScreen(LCD_WHITE);
+	  LCD_WriteString(15, 50, "MOVE PIECE", FONT, LCD_BLACK, LCD_WHITE);
+	  HAL_Delay(2000);
+
+
+	  while (1) {
+		  if (key == '#') {
+			  key = '\0';
+
+			  for(int hex = 0; hex < (int)possibleMoves.size(); hex++){
+				  int row = possibleMoves[hex]->GetHexRow();
+				  int col = possibleMoves[hex]->GetHexColumn();
+
+				  bool hallTrig = checkHallSensor(row, column, hmcps1, hmcps2);
+
+				  if(hallTrig){
+					  //update buffer or map
+					  mapBuffer[col + 16*row] = 2;
+					  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = 0;
+					  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
+					  currHex = map->GetHex(row,col);
+
+
+					  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+					  if(movement > 0){
+						  possibleMoves = map->PossibleMovements(currHex, movement);
+						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 4);
+						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+						  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
+					  }
+					  else{
+						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+						  break;
+					  }
+				  }
+
+			  }
+
+		  }
+	  }
+
+	  //change state here
+
+	  bufferToMap(map,mapBuffer);
+
+	  return map;
+}
 
 
 
