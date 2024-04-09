@@ -19,7 +19,8 @@ extern char key;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
-extern GameMap *map;
+extern GameMap* map;
+extern GameCharacters characters;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -211,34 +212,214 @@ void Upload_Map(void)
 	}
 }
 
-void display_map(GameMap *map) {
+void View_Map() {
 	uint8_t mapBuffer[256];
 
 	for(int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
 			case WallHex:
-				mapBuffer[col + (row*16)] = 1;
+				mapBuffer[col + (row * 16)] = 1;
 				break;
 
 			case PlayerHex:
-				mapBuffer[col + (row*16)] = 2;
+				mapBuffer[col + (row * 16)] = 2;
 				break;
 
 			case MonsterHex:
-				mapBuffer[col + (row*16)] = 3;
+				mapBuffer[col + (row * 16)] = 3;
 				break;
 
 			case BaseHex:
-				mapBuffer[col + (row*16)] = 0;
+				mapBuffer[col + (row * 16)] = 0;
 				break;
 			}
 		}
 	}
-	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+	game_state = MENU_STATE;
 }
 
+void Playing_Mode() {
+	int i = 0;
+    while (i < characters.GetNumberCharacters()) {
+    	Character& character = characters.GetCharacter(i);
+    	if (character.GetCharacterType() == Player) {
+    		std::pair<int, int> position = character.GetPosition();
+    		LCD_WriteStringCentered(10, "Please place token for", FONT, LCD_BLACK, LCD_WHITE);
+    		std::string name = character.GetName();
+    		const char* char_name = name.c_str();
+    		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
+    		int start_tick = HAL_GetTick();
+    		while (1) {
+        		//Clear pixel at position
+        		//Set pixel at position
+    			//The pixel should flash to mark where the token should be placed
+    			//Read HE at position
+    			//If engaged, set pixel to blue, break
+    			int cur_tick = HAL_GetTick();
+    			if ((cur_tick - start_tick) >= 60000) {
+    				return;
+    			}
+    			//INSERT CODE HERE
+    		}
 
+    		int selection = 1;
+    		int prev_selection = 0;
+    		int y_pos = 50;
+    		key = '\0';
+    		LCD_WriteStringCentered(50, "Confirm", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, "Retry", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1): {
+							LCD_FillScreen(LCD_WHITE);
+							LCD_WriteStringCentered(50, "Please do not remove token", FONT, LCD_BLACK, LCD_WHITE);
+							HAL_Delay(1000);
+							LCD_FillScreen(LCD_WHITE);
+							LCD_WriteStringCentered(10, "Insert initiative roll", FONT, LCD_WHITE, LCD_BLACK);
+							key = '\0';
+							char* initiative = new char[3];
+							int no_character = 0;
+							int start_tick = HAL_GetTick();
+							while (1) {
+								int cur_tick = HAL_GetTick();
+								if ((cur_tick - start_tick) >= 60000) {
+									return;
+								}
+							    if (key == '#' && no_character != 0) {
+							        key = '\0';
+							        initiative[no_character] = '\0';
+							        character.SetInitiative(atoi(initiative));
+							        break;
+							    }
+							    else if (key == '*') {
+							        key = '\0';
+							        if (no_character > 0) {
+							        	LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+							            no_character--;
+							            initiative[no_character] = '\0';
+							            LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+							        }
+							    }
+							    else if (no_character < 2 && Key_Is_Number(key)) {
+							    	LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+							        initiative[no_character] = key;
+							        no_character++;
+							        initiative[no_character] = '\0';
+							        LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+							    }
+							}
+							i++;
+							break;
+						}
+						case (2):
+							break;
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+					selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+					selection = (selection < 2) ? selection + 1 : 2;
+				}
 
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
+    	}
+    	else {
+    		LCD_WriteStringCentered(10, "Insert initiative roll for", FONT, LCD_WHITE, LCD_BLACK);
+    		std::string name = character.GetName();
+    		const char* char_name = name.c_str();
+    		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
+			key = '\0';
+			char* initiative = new char[3];
+			int no_character = 0;
+			int start_tick = HAL_GetTick();
+			while (1) {
+				int cur_tick = HAL_GetTick();
+				if ((cur_tick - start_tick) >= 60000) {
+					return;
+				}
+				if (key == '#' && no_character != 0) {
+					key = '\0';
+					initiative[no_character] = '\0';
+					character.SetInitiative(atoi(initiative));
+					break;
+				}
+				else if (key == '*') {
+					key = '\0';
+					if (no_character > 0) {
+						LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+						no_character--;
+						initiative[no_character] = '\0';
+						LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+					}
+				}
+				else if (no_character < 2 && Key_Is_Number(key)) {
+					LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+					initiative[no_character] = key;
+					no_character++;
+					initiative[no_character] = '\0';
+					LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+				}
+			}
+			i++;
+    	}
+    }
+    game_state = GAME_START_STATE;
+}
 
+void Game_Start() {
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 50;
+	key = '\0';
+	LCD_WriteStringCentered(50, "Start Game", FONT, LCD_WHITE, LCD_BLACK);
+	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_WHITE, LCD_BLACK);
+	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	while (1) {
+		if (key == '#') {
+			key = '\0';
+			switch (selection) {
+				case (1):
+					break;
+				case (2):
+					game_state = MENU_STATE;
+					return;
+			}
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+			break;
+		}
+		if (key == 'A') {
+			key = '\0';
+			selection = (selection > 1) ? selection - 1 : 1;
+		}
+		if (key == 'D') {
+			key = '\0';
+			selection = (selection < 2) ? selection + 1 : 2;
+		}
+
+		if (selection != prev_selection) {
+			LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			prev_selection = selection;
+		}
+	}
+
+	//THIS DOES NOT WORK
+	characters.SortCharacters();
+}

@@ -33,6 +33,7 @@
 #include "mcp23017.h"
 #include "ws2812b.h"
 #include "GameMap.h"
+#include "GameCharacters.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +62,11 @@ uint32_t previous_mill = 0;
 char key = '\0';
 GameState game_state;
 /* ---------------------------------------------------------------------------*/
+
+/*Gameplay Global Variables --------------------------------------------------*/
+GameCharacters* characters;
+
+/*----------------------------------------------------------------------------*/
 
 /* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
@@ -249,13 +255,16 @@ int main(void)
 	  			DM_Mode();
 	  			break;
 	  		case PLAYING_MODE_STATE:
+	  			Playing_Mode();
 	  			break;
 	  		case UPLOAD_MAP_STATE:
 	  			Upload_Map();
 	  			break;
 	  		case VIEW_MAP_STATE:
-	  			display_map(map);
-	  			game_state = MENU_STATE;
+	  			View_Map();
+	  			break;
+	  		case GAME_START_STATE:
+	  			Game_Start();
 	  			break;
 	  	}
 	 // Keypad_Test();
