@@ -4,6 +4,7 @@
 #include "GameCharacters.h"
 #include "usb.h"
 
+
 uint8_t buffer[256];
 int headPos = 0;
 int tempPos = 0;
@@ -58,7 +59,18 @@ int load_map(void) {
 		}
 	}
 
+
 	characters = new GameCharacters(characterStrings);
 
 	return 0;
+}
+
+int check_usb_connection(void) {
+	GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9);
+	if(state == GPIO_PIN_RESET) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
 }
