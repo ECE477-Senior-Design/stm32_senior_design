@@ -7,16 +7,16 @@ DATE: 10/27/2023
 #include "GameCharacters.h"
 
 //Constructor of characters vector
-GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
-
-}
+//GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
+//
+//}
 
 //Constructor of characters vector from string
 GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
-    _number_characters = input_strlist.size() - 1; //original input string list contains number of characters -1 for the map
+    _number_characters = input_strlist.size(); //original input string list contains number of characters -1 for the map
     std::string delimiter = ",";
     std::vector<std::string> character_info;
-    for(size_t i = 1; i < input_strlist.size(); i++) {
+    for(size_t i = 0; i < input_strlist.size(); i++) {
         character_info.clear();
         std::string input = input_strlist[i];
         size_t pos = 0;

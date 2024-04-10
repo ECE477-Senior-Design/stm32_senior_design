@@ -68,6 +68,7 @@ GameCharacters* characters;
 
 /*----------------------------------------------------------------------------*/
 
+
 /* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
@@ -85,6 +86,8 @@ DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 /* USB COM GLOBAL VARIABLES --------------------------------------------------*/
 GameMap *map;
+GameCharacters * characters;
+
 
 /* ---------------------------------------------------------------------------*/
 
@@ -170,9 +173,6 @@ int main(void)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-//	  for(int i = 0; i < numExpanders; i++){
-//		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
-//	  }
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();

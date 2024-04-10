@@ -17,7 +17,7 @@ class GameCharacters {
         std::vector<Character> characters; //Characters vector
 
     public:
-        GameCharacters(int number_characters); //Constructor of characters vector
+        //GameCharacters(int number_characters); //Constructor of characters vector
         GameCharacters(std::vector<std::string> input_strlist); //Constructor of characters vector from string
 
         int GetNumberCharacters(void); //Returns number of characters
