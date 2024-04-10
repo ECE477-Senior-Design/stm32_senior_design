@@ -195,6 +195,9 @@ int main(void)
 	  		case GAME_START_STATE:
 	  			Game_Start();
 	  			break;
+	  		case GAME_LOOP_STATE:
+	  			Game_Loop();
+	  			break;
 	  	}
 	 // Keypad_Test();
 

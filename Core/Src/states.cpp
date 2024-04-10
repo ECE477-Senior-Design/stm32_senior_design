@@ -429,5 +429,19 @@ void Game_Start() {
 
 	//THIS DOES NOT WORK
 	characters.SortCharacters();
+
+	game_state = GAME_LOOP_STATE;
+}
+
+void Game_Loop(void) {
+	while(characters.GetNumberCharacters() > 1) {
+		for(int i = 0; i < characters.GetNumberCharacters(); i++) {
+			//check conditions for continuing game
+			//Display character name ex: it is neils turn
+			//Give option for info, action, move
+			//branch based on selection
+
+		}
+	}
 }
 
