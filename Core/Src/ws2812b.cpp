@@ -1,10 +1,12 @@
 
 #include "ws2812b.h"
+#include <string.h>
+
 
 int datasentflag = 0;
 uint8_t LED_Data[MAX_LED][4];
 uint8_t LED_Mod[MAX_LED][4]; //for brightness
-uint16_t pwmData[(24*MAX_LED)+100]; //50 added for reset code
+uint16_t pwmData[(24*MAX_LED)+50]; //50 added for reset code
 
 void Set_LED(int LEDnum, int Red, int Green, int Blue)
 {
@@ -33,13 +35,14 @@ void Set_Brightness(int brightness)
 
 #endif
 }
-
+//memset(pwmData, 0, sizeof(pwmData));
 void WS2812_Send (TIM_HandleTypeDef* htim1, int channelNum)
 {
+	uint16_t pwmDataTest[(24*MAX_LED)+50];
 	uint32_t indx=0;
 	uint32_t color;
 	unsigned int channels[] = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4};
-
+	memset(pwmData, 0, sizeof(pwmData));
 	for (int i= 0; i<MAX_LED; i++)
 	{
 #if USE_BRIGHTNESS
@@ -53,9 +56,13 @@ void WS2812_Send (TIM_HandleTypeDef* htim1, int channelNum)
 			if (color&(1<<i))
 			{
 				pwmData[indx] = 40; //14;// 2/3 of 20 = 16MHz / 800kHz  // 2/3 of 105 = 84MHz / 800kHz
+				pwmDataTest[indx] = pwmData[indx];
 			}
 
-			else pwmData[indx] = 20; //7; // 1/3 of 20 = 16MHz / 800kHz // 1/3 of 105 = 84MHz / 800kHz
+			else{
+				pwmData[indx] = 20; //7; // 1/3 of 20 = 16MHz / 800kHz // 1/3 of 105 = 84MHz / 800kHz
+				pwmDataTest[indx] = pwmData[indx];
+			}
 
 			indx++;
 		}
@@ -66,10 +73,19 @@ void WS2812_Send (TIM_HandleTypeDef* htim1, int channelNum)
 	for (int i=0; i<50; i++)
 	{
 		pwmData[indx] = 0;
+		pwmDataTest[indx] = pwmData[indx];
 		indx++;
 	}
+
+//	pwmData[indx] = 1;
+//	indx++;
 	//channels[channelNum-1]
+	//uint32_t start = HAL_GetTick() * 1000 + HAL_GetTick()/1000;
 	HAL_TIM_PWM_Start_DMA(htim1, channels[channelNum-1], (uint32_t *)pwmData, indx);
+	//HAL_Delay(500);
+	//uint32_t end = HAL_GetTick() * 1000 + HAL_GetTick()/1000;
+	//uint32_t duration = end - start;
+
 	while (!datasentflag){};
 	datasentflag = 0;
 }

@@ -15,6 +15,7 @@
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
+	clearMap(htim1,htim3);
 	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
 	int test[256] = {};
 	uint32_t color;
@@ -30,12 +31,12 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				  break;
 
 			  case 1:
-				  Set_LED(led,50, 50, 50); //wall
+				  Set_LED(led,255,0,255); //wall
 				  test[led + (pcb*32)] = 1;
 				  break;
 
 			  case 2:
-				 Set_LED(led,0,0,255); //character/player
+				 Set_LED(led,0, 0, 255); //character/player
 				 test[led + (pcb*32)] = 2;
 				  break;
 
@@ -48,6 +49,11 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				 Set_LED(led,100,100,0); //chest
 				 test[led + (pcb*32)] = 4;
 				  break;
+
+			 case 5:
+				 Set_LED(led,81, 142, 240); //possible moves
+				 test[led + (pcb*32)] = 2;
+				 break;
 
 			 default:
 				 Set_LED(led,0,0,0); //default off
@@ -154,9 +160,11 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 	  int movement = 3;
 	  //Hexagon* currHex = map->GetHex(0,1);
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
-	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 4);
+	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 5);
 
+	  //clearMap(htim1,htim3);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+	  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 	  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 
 	  key = '\0';
@@ -187,16 +195,24 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 					  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
 					  if(movement > 0){
 						  possibleMoves = map->PossibleMovements(currHex, movement);
-						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 4);
+						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 5);
+						  //clearMap(htim1,htim3);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+						  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+						  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 					  }
 					  else{
+						  //clearMap(htim1,htim3);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  break;
 					  }
 				  }
 
+			  }
+
+			  if(movement <= 0){
+				  break;
 			  }
 
 		  }
@@ -207,6 +223,22 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 	  bufferToMap(map,mapBuffer);
 
 	  return map;
+}
+
+
+void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
+
+	for(int i= 0; i < 32; i++){
+		Set_LED(i,0,0,0);
+	}
+	for(int ch = 1; ch < 5; ch++){
+	  Set_Brightness(20);
+	  WS2812_Send(&htim1,ch);
+	}
+	for(int ch = 1; ch < 5; ch++){
+	  Set_Brightness(20);
+	  WS2812_Send(&htim3,ch);
+	}
 }
 
 
