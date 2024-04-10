@@ -25,39 +25,39 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 		for(int led = 0; led < MAX_LED; led++){
 			color = ((LED_Data[led][1]<<16) | (LED_Data[led][2]<<8) | (LED_Data[led][3]));
 		  switch(mapBuffer[(MAX_LED*pcb) + led]){
-			  case 0:
+			  case BaseHex:
 				  Set_LED(led,0,0,0); //nothing/floor
 				  test[led + (pcb*32)] = 0;
 				  break;
 
-			  case 1:
+			  case WallHex:
 				  Set_LED(led,255,0,255); //wall
 				  test[led + (pcb*32)] = 1;
 				  break;
 
-			  case 2:
+			  case PlayerHex:
 				 Set_LED(led,0, 0, 255); //character/player
 				 test[led + (pcb*32)] = 2;
 				  break;
 
-			 case 3:
+			 case MonsterHex:
 				 Set_LED(led,255,0,0); //enemy
 				 test[led + (pcb*32)] = 3;
 				  break;
 
-			 case 4:
+			 case ChestHex:
 				 Set_LED(led,100,100,0); //chest
 				 test[led + (pcb*32)] = 4;
 				  break;
 
-			 case 5:
+			 case MoveHex:
 				 Set_LED(led,81, 142, 240); //possible moves
-				 test[led + (pcb*32)] = 2;
+				 test[led + (pcb*32)] = 5;
 				 break;
 
 			 default:
 				 Set_LED(led,0,0,0); //default off
-				 test[led + (pcb*32)] = 5;
+				 test[led + (pcb*32)] = 0;
 				  break;
 
 		  }
@@ -97,6 +97,10 @@ void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
 	for(int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
+			case BaseHex:
+				mapBuffer[col + (row*16)] = 0;
+				break;
+
 			case WallHex:
 				mapBuffer[col + (row*16)] = 1;
 				break;
@@ -109,12 +113,14 @@ void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
 				mapBuffer[col + (row*16)] = 3;
 				break;
 
-			case BaseHex:
-				mapBuffer[col + (row*16)] = 0;
+
+			case ChestHex:
+				mapBuffer[col + (row*16)] = 4;
 				break;
 
+
 			case MoveHex:
-				mapBuffer[col + (row*16)] = 4;
+				mapBuffer[col + (row*16)] = 5;
 				break;
 			}
 		}
@@ -128,6 +134,10 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 	for(int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(mapBuffer[col + (row*16)]){
+			case 0:
+				map->ChangeHex(row, col, BaseHex);
+				break;
+
 			case 1:
 				map->ChangeHex(row, col, WallHex);
 				break;
@@ -140,10 +150,19 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 				map->ChangeHex(row, col, MonsterHex);
 				break;
 
-			case 0:
-				map->ChangeHex(row, col, BaseHex);
+			case 4:
+				map->ChangeHex(row, col, ChestHex);
 				break;
+
+			case 5:
+				map->ChangeHex(row, col, MoveHex);
+				break;
+
+
 			}
+
+
+
 		}
 	}
 }
@@ -160,7 +179,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 	  int movement = 3;
 	  //Hexagon* currHex = map->GetHex(0,1);
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
-	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 5);
+	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
 
 	  //clearMap(htim1,htim3);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
@@ -195,7 +214,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 					  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
 					  if(movement > 0){
 						  possibleMoves = map->PossibleMovements(currHex, movement);
-						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, 5);
+						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
 						  //clearMap(htim1,htim3);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));

@@ -23,7 +23,7 @@ void mapHexesToBuffer(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<He
 
 void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type);
 
-void mapToBuffer(GameMap *map);
+void mapToBuffer(GameMap *map, uint8_t* mapBuffer);
 
 void bufferToMap(GameMap *map,uint8_t* mapBuffer);
 

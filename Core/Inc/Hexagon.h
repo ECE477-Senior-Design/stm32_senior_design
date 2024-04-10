@@ -22,6 +22,7 @@ enum HexagonType {
     WallHex,
     PlayerHex,
     MonsterHex,
+	ChestHex,
 	MoveHex,
 };
 
