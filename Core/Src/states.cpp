@@ -20,6 +20,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
 extern GameMap* map;
+extern GameCharacters characters;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
