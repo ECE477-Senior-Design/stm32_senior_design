@@ -10,9 +10,9 @@ int tempPos = 0;
 int charSend = 0;
 int startTick;
 int curTick;
-GameCharacters * characters;
 
 extern GameMap *map;
+extern GameCharacters *characters;
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 int load_map(void) {
@@ -58,19 +58,7 @@ int load_map(void) {
 		}
 	}
 
-	std::string test1 = characterStrings[0];
-	std::string test2 = characterStrings[1];
-	int size = characterStrings.size();
-
 	characters = new GameCharacters(characterStrings);
-	int num = characters->GetNumberCharacters();
-	std::string name1 = characters->GetCharacter(0).GetName();
-	std::string name2 = characters->GetCharacter(1).GetName();
-	if(num != size)
-	{
-		return -1;
-	}
-
 
 	return 0;
 }
