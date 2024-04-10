@@ -7,6 +7,7 @@ DATE: 10/27/2023
 #define GAMECHARACTERS_H
 
 #include <vector>
+#include <algorithm>
 #include "BaseCharacter.h"
 
 //Class for both player and monster characters
@@ -25,6 +26,13 @@ class GameCharacters {
         int max_health_points, int current_health_points, int armor_class, int initiative, int speed, CharacterType character_type, Class class_); //Adds character to character vector
         Character& GetCharacter(int index); //Returns character at index
         ~GameCharacters(); //Destructor for characters vector
+
+        //THIS DOES NOT WORK
+        void SortCharacters(void) {
+        	std::sort(characters.begin(), characters.end(), [](const Character& character1, const Character& character2) {
+        		return character1.GetInitiative() > character2.GetInitiative();
+        	});
+        }
 };
 
 #endif

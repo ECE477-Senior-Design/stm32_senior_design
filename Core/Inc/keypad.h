@@ -21,6 +21,7 @@ extern char key;
 
 void Keypad_Test(void);
 char Get_Key(void);
+bool Key_Is_Number(char key);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin);
 
 #endif

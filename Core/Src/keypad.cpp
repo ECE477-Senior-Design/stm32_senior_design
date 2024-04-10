@@ -43,6 +43,21 @@ void Keypad_Test(void) {
 	}
 }
 
+bool Key_Is_Number(char key) {
+	if (key == '\0') {
+		return false;
+	}
+	else if (key == '*' || key == '#') {
+		return false;
+	}
+	else if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 {
 	current_mill = HAL_GetTick();
