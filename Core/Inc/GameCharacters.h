@@ -7,6 +7,7 @@ DATE: 10/27/2023
 #define GAMECHARACTERS_H
 
 #include <vector>
+#include <algorithm>
 #include "BaseCharacter.h"
 
 //Class for both player and monster characters

@@ -158,6 +158,7 @@ void Upload_Map(void)
 
 	}
 	while(check_usb_connection());
+	LCD_FillScreen(LCD_WHITE);
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
 	//need to add checks for no response
@@ -429,3 +430,4 @@ void Game_Start() {
 	//THIS DOES NOT WORK
 	characters.SortCharacters();
 }
+

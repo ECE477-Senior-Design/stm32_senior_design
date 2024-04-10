@@ -53,7 +53,7 @@ class Character {
         int GetMaxHealthPoints(void); //Returns max health points of character
         int GetCurrentHealthPoints(void); //Returns current health points of character
         int GetArmorClass(void); //Returns armor class of character
-        int GetInitiative(void); //Returns initiative of character
+        int GetInitiative(void)const; //Returns initiative of character
         int GetSpeed(void); //Returns speed of character
         void DisplayCharacterInfo(void); //Displays character info
         CharacterType GetCharacterType(void); //Returns type of character

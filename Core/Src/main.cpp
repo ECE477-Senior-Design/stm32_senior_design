@@ -195,6 +195,9 @@ int main(void)
 	  		case GAME_START_STATE:
 	  			Game_Start();
 	  			break;
+	  		case UPLOAD_CHARACTER_STATE:
+	  			Upload_Characters();
+	  			break;
 	  	}
 	 // Keypad_Test();
 
