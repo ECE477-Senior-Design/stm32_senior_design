@@ -53,6 +53,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+/* USER CODE BEGIN PV */
 /*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
@@ -87,9 +88,6 @@ DMA_HandleTypeDef hdma_tim3_ch4_up;
 GameMap *map;
 
 /* ---------------------------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,10 +145,6 @@ int main(void)
 //
 //	 //Find the shortest path between two hexes
 //	 std::vector<Hexagon*> path = map.PathFind(map.GetHex(0, 0), map.GetHex(0, 3));
-
-
-
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

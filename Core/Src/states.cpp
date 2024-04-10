@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
 extern GameMap* map;
-extern GameCharacters characters;
+extern GameCharacters* characters;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -150,12 +150,11 @@ void Upload_Map(void)
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	//int err = 0;
 	key = '\0';
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
 	//need to add checks for no response
-	if(load_map() != 0){
+	if (load_map() != 0){
 		LCD_FillScreen(LCD_WHITE);
 		LCD_WriteStringCentered(100, "Map Send Timeout", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(1000);
@@ -168,17 +167,13 @@ void Upload_Map(void)
 
 	}
 
-
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
 	HAL_Delay(500);
-
 	LCD_FillScreen(LCD_WHITE);
-
 	LCD_WriteStringCentered(50, "View Map", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
-
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
@@ -214,25 +209,21 @@ void Upload_Map(void)
 
 void View_Map() {
 	uint8_t mapBuffer[256];
-
-	for(int row = 0; row < map->GetRows(); row++){
+	for (int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
-			case WallHex:
-				mapBuffer[col + (row * 16)] = 1;
-				break;
-
-			case PlayerHex:
-				mapBuffer[col + (row * 16)] = 2;
-				break;
-
-			case MonsterHex:
-				mapBuffer[col + (row * 16)] = 3;
-				break;
-
-			case BaseHex:
-				mapBuffer[col + (row * 16)] = 0;
-				break;
+				case WallHex:
+					mapBuffer[col + (row * 16)] = 1;
+					break;
+				case PlayerHex:
+					mapBuffer[col + (row * 16)] = 2;
+					break;
+				case MonsterHex:
+					mapBuffer[col + (row * 16)] = 3;
+					break;
+				case BaseHex:
+					mapBuffer[col + (row * 16)] = 0;
+					break;
 			}
 		}
 	}
@@ -242,12 +233,12 @@ void View_Map() {
 
 void Playing_Mode() {
 	int i = 0;
-    while (i < characters.GetNumberCharacters()) {
-    	Character& character = characters.GetCharacter(i);
-    	if (character.GetCharacterType() == Player) {
-    		std::pair<int, int> position = character.GetPosition();
+    while (i < characters->GetNumberCharacters()) {
+    	Character* character = characters->GetCharacter(i);
+    	if (character->GetCharacterType() == Player) {
+    		std::pair<int, int> position = character->GetPosition();
     		LCD_WriteStringCentered(10, "Please place token for", FONT, LCD_BLACK, LCD_WHITE);
-    		std::string name = character.GetName();
+    		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
     		int start_tick = HAL_GetTick();
@@ -293,7 +284,7 @@ void Playing_Mode() {
 							    if (key == '#' && no_character != 0) {
 							        key = '\0';
 							        initiative[no_character] = '\0';
-							        character.SetInitiative(atoi(initiative));
+							        character->SetInitiative(atoi(initiative));
 							        break;
 							    }
 							    else if (key == '*') {
@@ -341,7 +332,7 @@ void Playing_Mode() {
     	}
     	else {
     		LCD_WriteStringCentered(10, "Insert initiative roll for", FONT, LCD_WHITE, LCD_BLACK);
-    		std::string name = character.GetName();
+    		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 			key = '\0';
@@ -356,7 +347,7 @@ void Playing_Mode() {
 				if (key == '#' && no_character != 0) {
 					key = '\0';
 					initiative[no_character] = '\0';
-					character.SetInitiative(atoi(initiative));
+					character->SetInitiative(atoi(initiative));
 					break;
 				}
 				else if (key == '*') {
@@ -420,6 +411,5 @@ void Game_Start() {
 		}
 	}
 
-	//THIS DOES NOT WORK
-	characters.SortCharacters();
+	characters->SortCharacters();
 }
