@@ -62,6 +62,8 @@ char key = '\0';
 GameState game_state;
 /* ---------------------------------------------------------------------------*/
 
+
+
 /* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
@@ -79,6 +81,7 @@ DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 /* USB COM GLOBAL VARIABLES --------------------------------------------------*/
 GameMap *map;
+
 
 /* ---------------------------------------------------------------------------*/
 
@@ -238,26 +241,28 @@ int main(void)
 //	  for(int i = 0; i < numExpanders; i++){
 //		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
 //	  }
-	  switch (game_state) {
-	  		case WELCOME_STATE:
-	  			Welcome();
-	  			break;
-	  		case MENU_STATE:
-	  			Menu();
-	  			break;
-	  		case DM_MODE_STATE:
-	  			DM_Mode();
-	  			break;
-	  		case PLAYING_MODE_STATE:
-	  			break;
-	  		case UPLOAD_MAP_STATE:
-	  			Upload_Map();
-	  			break;
-	  		case VIEW_MAP_STATE:
-	  			display_map(map);
-	  			game_state = MENU_STATE;
-	  			break;
-	  	}
+//	  switch (game_state) {
+//	  		case WELCOME_STATE:
+//	  			Welcome();
+//	  			break;
+//	  		case MENU_STATE:
+//	  			Menu();
+//	  			break;
+//	  		case DM_MODE_STATE:
+//	  			DM_Mode();
+//	  			break;
+//	  		case PLAYING_MODE_STATE:
+//	  			break;
+//	  		case UPLOAD_MAP_STATE:
+//	  			Upload_Map();
+//	  			break;
+//	  		case VIEW_MAP_STATE:
+//	  			display_map(map);
+//	  			game_state = MENU_STATE;
+//	  			break;
+//	  	}
+
+	  Upload_Map();
 	 // Keypad_Test();
 
 
