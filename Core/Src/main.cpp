@@ -119,32 +119,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-	//Checks for gamemap
-	//Set the gamemap to a 16 by 16 grid
-//	GameMap map = GameMap(16, 16);
-//	int numRows = map.GetRows();
-//	int numCols = map.GetColumns();
-//
-//	//Check that the one of the hexes is set to BaseHex
-//	 Hexagon* hex = map.GetHex(0, 0);
-//	 int typeCheck = 0;
-//	 if(hex->GetType() == BaseHex){
-//		 typeCheck = 1;
-//	 }
-//
-//	 //Find and check the distance between two hexes
-//	 int dist = map.HexDistance(map.GetHex(0, 0), map.GetHex(0, 3));
-//
-//	 if(dist == 3){
-//		 dist =1;
-//	 }
-//
-//	 //Find the shortest path between two hexes
-//	 std::vector<Hexagon*> path = map.PathFind(map.GetHex(0, 0), map.GetHex(0, 3));
-
-
-
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -172,51 +146,6 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-//  MCP23017_HandleTypeDef hmcps[1];
-//
-//  mcp23017_init(&hmcps[0], &hi2c1, MCP23017_ADDRESS_20);
-//  mcp23017_iodir(&hmcps[0], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
-//  mcp23017_iodir(&hmcps[0], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
-  //int numExpanders = 1;
-  //MCP23017_HandleTypeDef hmcps[1];
- //mcp23017_init_array(&hmcps,numExpanders,hi2c1); //number of expanders,i2c system used
-
-//  int numExpanders = 3;
-//  unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21,MCP23017_ADDRESS_22,MCP23017_ADDRESS_23,MCP23017_ADDRESS_24,MCP23017_ADDRESS_25,MCP23017_ADDRESS_26,MCP23017_ADDRESS_27};
-//  int channels[] = {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4};
-//  MCP23017_HandleTypeDef hmcps[numExpanders];
-//  for(int i = 0; i < numExpanders; i++){
-//	  mcp23017_init(&hmcps[i], &hi2c1, mcpAddress[i]);
-//	  mcp23017_iodir(&hmcps[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
-//	  mcp23017_iodir(&hmcps[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
-//  }
-//
-//
-//
-//	Set_LED(0,255,0,0);
-//	Set_LED(1,0,255,0);
-//	Set_LED(2,0,0,255);
-//	Set_LED(3,255,0,0);
-//	Set_LED(4,0,255,0);
-//	Set_LED(5,0,0,255);
-//	Set_LED(6,255,0,0);
-//	Set_LED(7,0,255,0);
-//	Set_LED(8,0,0,255);
-//	Set_LED(9,255,0,0);
-//	Set_LED(10,0,255,0);
-//	Set_LED(11,0,0,255);
-//	Set_LED(12,255,0,0);
-//	Set_LED(13,0,255,0);
-//	Set_LED(14,0,0,255);
-//	Set_LED(15,255,0,0);
-//	Set_LED(16,0,255,0);
-//
-//
-//  Set_Brightness(20);
-//  WS2812_Send(&htim1,1);
-//  WS2812_Send(&htim1,2);
-//  WS2812_Send(&htim1,3);
-
 
   game_state = WELCOME_STATE;
 
