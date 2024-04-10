@@ -9,11 +9,8 @@ char gs[256];
 int headPos = 0;
 int startTick;
 int curTick;
-int readchars = 0;
-std::vector<std::string> character_str;
 
 extern GameMap *map;
-extern GameCharacters *characters;
 
 int load_map(void) {
 
