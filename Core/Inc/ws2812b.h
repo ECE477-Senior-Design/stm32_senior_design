@@ -23,7 +23,7 @@
 extern uint8_t LED_Data[MAX_LED][4];
 extern uint8_t LED_Mod[MAX_LED][4]; //for brightness
 extern int datasentflag;
-extern uint16_t pwmData[(24*MAX_LED)]; //50 added for reset code
+extern uint16_t pwmData[(24*MAX_LED)+100]; //50 added for reset code
 
 //functions
 void Set_LED(int LEDnum, int Red, int Green, int Blue);

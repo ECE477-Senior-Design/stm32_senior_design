@@ -174,7 +174,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 				  int row = possibleMoves[hex]->GetHexRow();
 				  int col = possibleMoves[hex]->GetHexColumn();
 
-				  bool hallTrig = checkHallSensor(row, column, hmcps1, hmcps2);
+				  bool hallTrig = checkHallSensor(row, col, hmcps1, hmcps2);
 
 				  if(hallTrig){
 					  //update buffer or map
