@@ -52,3 +52,13 @@ int load_map(void) {
 
 	return 0;
 }
+
+int check_usb_connection(void) {
+	GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9);
+	if(state) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
+}

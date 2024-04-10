@@ -2,3 +2,4 @@
 #include "usb_device.h"
 
 int load_map(void);
+int check_usb_connection(void);

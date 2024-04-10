@@ -152,6 +152,12 @@ void Upload_Map(void)
 	int y_pos = 50;
 	//int err = 0;
 	key = '\0';
+	int usb_status = check_usb_connection();
+	if(usb_status) {
+		LCD_WriteStringCentered(100, "Waiting for Connection...", FONT, LCD_BLACK, LCD_WHITE);
+
+	}
+	while(check_usb_connection());
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
 	//need to add checks for no response
