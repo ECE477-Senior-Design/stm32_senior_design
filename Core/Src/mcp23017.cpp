@@ -77,7 +77,7 @@ HAL_StatusTypeDef mcp23017_write(MCP23017_HandleTypeDef *hdev, uint16_t reg, uin
  }
 
 
- bool checkHallSensor(int row, int column, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8]){
+ bool checkHallSensor(int row, int col, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8]){
 	 int half = row / 8; //top or bottom half of board
 	 int hcmpInd = row % 8; // index of expander in each group of 8
 

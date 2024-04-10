@@ -33,6 +33,7 @@
 #include "GameMap.h"
 #include "states.h"
 #include "usb.h"
+#include "boardLighting.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -233,6 +234,33 @@ int main(void)
  	  //mapHexes(mapBuffer, mapBufferPrev, possibleMoves, 4);
  	  //displayMap(htim1, htim3, htim4, htim5, mapBuffer, sizeof(mapBuffer)/sizeof(mapBuffer[0]));
 
+
+  uint8_t mapBuffer[] = {0,2,0,1,0,0,0,0,0,0,0,0,1,0,4,1,
+    	  	  	  	  	 0,0,0,1,0,3,0,1,0,0,0,0,1,0,0,1,
+    	  	  	  	  	 2,0,0,1,0,0,0,1,0,3,0,0,1,3,0,1,
+    	  	  	  	  	 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,
+  						 0,0,0,0,0,0,0,0,0,0,0,0,1,0,4,1,
+  						 0,0,0,1,0,3,0,1,0,0,0,0,1,0,0,1,
+  						 0,0,0,1,0,0,0,1,0,3,0,0,1,3,0,1,
+  						 0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,
+						 0,2,0,1,0,0,0,0,0,0,0,0,1,0,4,1,
+						 0,0,0,1,0,3,0,1,0,0,0,0,1,0,0,1,
+						 2,0,0,1,0,0,0,1,0,3,0,0,1,3,0,1,
+						 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,
+						 0,0,0,0,0,0,0,0,0,0,0,0,1,0,4,1,
+						 0,0,0,1,0,3,0,1,0,0,0,0,1,0,0,1,
+						 0,0,0,1,0,0,0,1,0,3,0,0,1,3,0,1,
+						 0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1};
+
+  map = new GameMap(16, 16);
+
+  bufferToMap(map,mapBuffer);
+  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+
+  movementMode(htim1,htim3,hmcps1,hmcps2, map, map->GetHex(0,1));
+
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -261,27 +289,26 @@ int main(void)
 
 
 
-
-	  switch (game_state) {
-	  		case WELCOME_STATE:
-	  			Welcome();
-	  			break;
-	  		case MENU_STATE:
-	  			Menu();
-	  			break;
-	  		case DM_MODE_STATE:
-	  			DM_Mode();
-	  			break;
-	  		case PLAYING_MODE_STATE:
-	  			break;
-	  		case UPLOAD_MAP_STATE:
-	  			Upload_Map();
-	  			break;
-	  		case VIEW_MAP_STATE:
-	  			display_map(map);
-	  			game_state = MENU_STATE;
-	  			break;
-	  	}
+//	  switch (game_state) {
+//	  		case WELCOME_STATE:
+//	  			Welcome();
+//	  			break;
+//	  		case MENU_STATE:
+//	  			Menu();
+//	  			break;
+//	  		case DM_MODE_STATE:
+//	  			DM_Mode();
+//	  			break;
+//	  		case PLAYING_MODE_STATE:
+//	  			break;
+//	  		case UPLOAD_MAP_STATE:
+//	  			Upload_Map();
+//	  			break;
+//	  		case VIEW_MAP_STATE:
+//	  			display_map(map);
+//	  			game_state = MENU_STATE;
+//	  			break;
+//	  	}
 	 // Keypad_Test();
 
 
