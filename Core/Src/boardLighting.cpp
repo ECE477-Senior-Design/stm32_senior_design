@@ -260,6 +260,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 }
 
 
+
 void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 
 	for(int i= 0; i < 32; i++){

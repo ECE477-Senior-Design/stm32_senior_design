@@ -282,7 +282,7 @@ int main(void)
     //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
     //clearMap(htim1,htim3);
 
-    //map = movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(8, 3));
+    map = movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(8, 3));
     //movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(0, 1));
 
 
@@ -298,33 +298,33 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  for(int i = 0; i < numExpanders; i++){
-		  //ledHallPCBSystemCheck(hmcps1[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
-		  ledHallPCBSystemCheck(hmcps2[i],&htim3, channels[i], i+1);
-	  }
-//	  switch (game_state) {
-//	  		case WELCOME_STATE:
-//	  			Welcome();
-//	  			break;
-//	  		case MENU_STATE:
-//	  			Menu();
-//	  			break;
-//	  		case DM_MODE_STATE:
-//	  			DM_Mode();
-//	  			break;
-//	  		case PLAYING_MODE_STATE:
-//	  			Playing_Mode();
-//	  			break;
-//	  		case UPLOAD_MAP_STATE:
-//	  			Upload_Map();
-//	  			break;
-//	  		case VIEW_MAP_STATE:
-//	  			View_Map();
-//	  			break;
-//	  		case GAME_START_STATE:
-//	  			Game_Start();
-//	  			break;
-//	  	}
+//	  for(int i = 0; i < numExpanders; i++){
+//		  //ledHallPCBSystemCheck(hmcps1[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
+//		  ledHallPCBSystemCheck(hmcps2[i],&htim3, channels[i], i+1);
+//	  }
+	  switch (game_state) {
+	  		case WELCOME_STATE:
+	  			Welcome();
+	  			break;
+	  		case MENU_STATE:
+	  			Menu();
+	  			break;
+	  		case DM_MODE_STATE:
+	  			DM_Mode();
+	  			break;
+	  		case PLAYING_MODE_STATE:
+	  			Playing_Mode();
+	  			break;
+	  		case UPLOAD_MAP_STATE:
+	  			Upload_Map();
+	  			break;
+	  		case VIEW_MAP_STATE:
+	  			View_Map();
+	  			break;
+	  		case GAME_START_STATE:
+	  			Game_Start();
+	  			break;
+	  	}
 	 // Keypad_Test();
 
 
