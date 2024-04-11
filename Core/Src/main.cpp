@@ -19,21 +19,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "states.h"
-#include "usb.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "fonts.h"
 #include "lcd.h"
 #include "keypad.h"
-
+#include "states.h"
+#include "usb.h"
 #include "math.h"
 #include "stdio.h"
 #include "mcp23017.h"
 #include "ws2812b.h"
 #include "GameMap.h"
 #include "GameCharacters.h"
+#include "boardlighting.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,6 +66,9 @@ GameState game_state;
 
 /* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
+SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
@@ -86,8 +89,23 @@ GameCharacters * characters;
 
 /* ---------------------------------------------------------------------------*/
 
-/* USER CODE BEGIN PV */
 
+/* USER CODE BEGIN PV */
+MCP23017_HandleTypeDef hmcps1[8];
+MCP23017_HandleTypeDef hmcps2[8];
+
+GPIO_InitTypeDef GPIO_init_struct_private = {0};
+
+uint32_t current_mill = 0;
+uint32_t previous_mill = 0;
+
+char key = '\0';
+
+GameCharacters* characters;
+GameMap *map;
+
+GameState game_state;
+/* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,8 +116,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
-
-
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -110,6 +127,17 @@ static void MX_TIM3_Init(void);
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
 	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_4);
+
+	htim1.Instance->CCR1 = 0;
+	htim3.Instance->CCR1 = 0;
+
 	datasentflag = 1;
 }
 
@@ -149,24 +177,65 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI1_Init();
   MX_TIM3_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
+	game_state = WELCOME_STATE;
 
-  game_state = WELCOME_STATE;
+	int numExpanders = 8;
+	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
+	for (int i = 0; i < numExpanders; i++) {
+	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
+	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
+	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
+	}
 
-  LCD_Unselect();
-  LCD_Init();
+	for (int i = 0; i < numExpanders; i++) {
+	  mcp23017_init(&hmcps2[i], &hi2c2, mcpAddress[i]);
+	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
+	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
+	 }
 
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
+	LCD_Unselect();
+	LCD_Init();
 
-    /* USER CODE END 2 */
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
+
+	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+
+    map = new GameMap(16, 16);
+    bufferToMap(map, mapBuffer);
+    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+
+    characters = new GameCharacters(charInput);
+
+
+    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+  /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
 	  switch (game_state) {
 	  		case WELCOME_STATE:
@@ -191,13 +260,6 @@ int main(void)
 	  			Game_Start();
 	  			break;
 	  	}
-	 // Keypad_Test();
-
-
-//	  ledHallPCBSystemCheck(hmcps[0],&htim1,channels[0]); //array of MCP23017s,tim1, channel_1
-//	  ledHallPCBSystemCheck(hmcps[2],&htim1,channels[2]); //array of MCP23017s,tim1, channel_1
-
-	 // HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -247,40 +309,6 @@ void SystemClock_Config(void)
   }
 }
 
-
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
-
-}
-
 /**
   * @brief I2C1 Initialization Function
   * @param None
@@ -316,6 +344,78 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -337,7 +437,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 105-1;
+  htim1.Init.Period = 60-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -392,6 +492,11 @@ static void MX_TIM1_Init(void)
 
 }
 
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_TIM3_Init(void)
 {
 
@@ -447,6 +552,7 @@ static void MX_TIM3_Init(void)
   HAL_TIM_MspPostInit(&htim3);
 
 }
+
 /**
   * Enable DMA controller clock
   */
@@ -498,10 +604,10 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
