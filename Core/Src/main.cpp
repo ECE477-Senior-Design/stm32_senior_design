@@ -189,7 +189,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   	int numExpanders = 8;
 	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21,MCP23017_ADDRESS_22,MCP23017_ADDRESS_23,MCP23017_ADDRESS_24,MCP23017_ADDRESS_25,MCP23017_ADDRESS_26,MCP23017_ADDRESS_27};
-	int channels[] = {4, 3, 2, 1};
+	int channels[] = {4,4,3, 3, 2,2, 1,1};
 	for(int i = 0; i < numExpanders; i++){
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
@@ -261,7 +261,7 @@ int main(void)
   						0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
   						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
   						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+  						0,0,0,2,0,1,0,0,0,0,1,0,0,0,0,0,
   						0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
   						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
   						0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
@@ -282,7 +282,7 @@ int main(void)
     //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
     //clearMap(htim1,htim3);
 
-    //map = movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(13, 2));
+    //map = movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(8, 3));
     //movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(0, 1));
 
 
@@ -298,32 +298,33 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  for(int i = 0; i < numExpanders; i++){
-//		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
-//	  }
-	  switch (game_state) {
-	  		case WELCOME_STATE:
-	  			Welcome();
-	  			break;
-	  		case MENU_STATE:
-	  			Menu();
-	  			break;
-	  		case DM_MODE_STATE:
-	  			DM_Mode();
-	  			break;
-	  		case PLAYING_MODE_STATE:
-	  			Playing_Mode();
-	  			break;
-	  		case UPLOAD_MAP_STATE:
-	  			Upload_Map();
-	  			break;
-	  		case VIEW_MAP_STATE:
-	  			View_Map();
-	  			break;
-	  		case GAME_START_STATE:
-	  			Game_Start();
-	  			break;
-	  	}
+	  for(int i = 0; i < numExpanders; i++){
+		  //ledHallPCBSystemCheck(hmcps1[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
+		  ledHallPCBSystemCheck(hmcps2[i],&htim3, channels[i], i+1);
+	  }
+//	  switch (game_state) {
+//	  		case WELCOME_STATE:
+//	  			Welcome();
+//	  			break;
+//	  		case MENU_STATE:
+//	  			Menu();
+//	  			break;
+//	  		case DM_MODE_STATE:
+//	  			DM_Mode();
+//	  			break;
+//	  		case PLAYING_MODE_STATE:
+//	  			Playing_Mode();
+//	  			break;
+//	  		case UPLOAD_MAP_STATE:
+//	  			Upload_Map();
+//	  			break;
+//	  		case VIEW_MAP_STATE:
+//	  			View_Map();
+//	  			break;
+//	  		case GAME_START_STATE:
+//	  			Game_Start();
+//	  			break;
+//	  	}
 	 // Keypad_Test();
 
 

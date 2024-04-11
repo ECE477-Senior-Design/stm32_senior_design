@@ -260,7 +260,9 @@ void Playing_Mode() {
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 
-    		mapCharBuffer[position.second + 16*position.first] = PlayerHex;
+    		//These three lines color the Hex a lighter color to indicate where token should be placed.
+    		//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
+    		mapCharBuffer[position.second + 16*position.first] = MoveHex;
     		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
     		mapCharBuffer[position.second + 16*position.first] = BaseHex;
 
@@ -273,6 +275,12 @@ void Playing_Mode() {
     			bool hallTrig = checkHallSensor(position.first,position.second, hmcps1, hmcps2);
 
     			if(hallTrig){
+    				//These three lines color the Hex a darker color than the MoveHex to indicate that the piece has been placed successfully.
+    				//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
+    				mapCharBuffer[position.second + 16*position.first] = PlayerHexTurn;
+    				displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
+    				mapCharBuffer[position.second + 16*position.first] = BaseHex;
+
     				mapBuffer[position.second + 16*position.first] = PlayerHex;
     				break;
     			}

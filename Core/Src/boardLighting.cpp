@@ -51,7 +51,12 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				  break;
 
 			 case MoveHex:
-				 Set_LED(led,81, 142, 240); //possible moves
+				 Set_LED(led,73, 252, 82); //possible moves
+				 test[led + (pcb*32)] = 5;
+				 break;
+
+			 case PlayerHexTurn:
+				 Set_LED(led,0, 255, 0); //hex of player when its their turn
 				 test[led + (pcb*32)] = 5;
 				 break;
 
@@ -122,6 +127,12 @@ void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
 			case MoveHex:
 				mapBuffer[col + (row*16)] = 5;
 				break;
+
+			case PlayerHexTurn:
+				mapBuffer[col + (row*16)] = 6;
+				break;
+
+
 			}
 		}
 	}
@@ -156,6 +167,10 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 
 			case 5:
 				map->ChangeHex(row, col, MoveHex);
+				break;
+
+			case 6:
+				map->ChangeHex(row, col, PlayerHexTurn);
 				break;
 
 
