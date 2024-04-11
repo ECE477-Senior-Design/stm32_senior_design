@@ -27,7 +27,6 @@
 #include "keypad.h"
 #include "states.h"
 #include "usb.h"
-
 #include "math.h"
 #include "stdio.h"
 #include "mcp23017.h"
@@ -70,27 +69,20 @@ DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 /* USER CODE BEGIN PV */
-
 MCP23017_HandleTypeDef hmcps1[8];
 MCP23017_HandleTypeDef hmcps2[8];
 
 GPIO_InitTypeDef GPIO_init_struct_private = {0};
+
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
+
 char key = '\0';
-GameState game_state;
-/* ---------------------------------------------------------------------------*/
 
-/*Gameplay Global Variables --------------------------------------------------*/
 GameCharacters* characters;
-
-/*----------------------------------------------------------------------------*/
-
-/* ---------------------------------------------------------------------------*/
-
-/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
 GameMap *map;
 
+GameState game_state;
 /* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
@@ -136,29 +128,6 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
-	//Checks for gamemap
-	//Set the gamemap to a 16 by 16 grid
-//	GameMap map = GameMap(16, 16);
-//	int numRows = map.GetRows();
-//	int numCols = map.GetColumns();
-//
-//	//Check that the one of the hexes is set to BaseHex
-//	 Hexagon* hex = map.GetHex(0, 0);
-//	 int typeCheck = 0;
-//	 if(hex->GetType() == BaseHex){
-//		 typeCheck = 1;
-//	 }
-//
-//	 //Find and check the distance between two hexes
-//	 int dist = map.HexDistance(map.GetHex(0, 0), map.GetHex(0, 3));
-//
-//	 if(dist == 3){
-//		 dist =1;
-//	 }
-//
-//	 //Find the shortest path between two hexes
-//	 std::vector<Hexagon*> path = map.PathFind(map.GetHex(0, 0), map.GetHex(0, 3));
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -187,121 +156,55 @@ int main(void)
   MX_TIM3_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  	int numExpanders = 8;
-	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21,MCP23017_ADDRESS_22,MCP23017_ADDRESS_23,MCP23017_ADDRESS_24,MCP23017_ADDRESS_25,MCP23017_ADDRESS_26,MCP23017_ADDRESS_27};
-	int channels[] = {4, 3, 2, 1};
-	for(int i = 0; i < numExpanders; i++){
+	game_state = WELCOME_STATE;
+
+	int numExpanders = 8;
+	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
+	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	}
 
-	for(int i = 0; i < numExpanders; i++){
+	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps2[i], &hi2c2, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	 }
-//
-//
-//
-//	Set_LED(0,255,0,0);
-//	Set_LED(1,0,255,0);
-//	Set_LED(2,0,0,255);
-//	Set_LED(3,255,0,0);
-//	Set_LED(4,0,255,0);
-//	Set_LED(5,0,0,255);
-//	Set_LED(6,255,0,0);
-//	Set_LED(7,0,255,0);
-//	Set_LED(8,0,0,255);
-//	Set_LED(9,255,0,0);
-//	Set_LED(10,0,255,0);
-//	Set_LED(11,0,0,255);
-//	Set_LED(12,255,0,0);
-//	Set_LED(13,0,255,0);
-//	Set_LED(14,0,0,255);
-//	Set_LED(15,255,0,0);
-//	Set_LED(16,0,255,0);
-//
-//
-//  Set_Brightness(20);
-//  WS2812_Send(&htim1,1);
-//  WS2812_Send(&htim1,2);
-//  WS2812_Send(&htim1,3);
 
-//	clearMap(htim1,htim3);
-//
-//	for(int i= 0; i < 32; i++){
-//		Set_LED(i,255,0,0);
-//	}
-//	for(int ch = 1; ch < 5; ch++){
-//	  Set_Brightness(20);
-//	  WS2812_Send(&htim1,ch);
-//	}
-//	for(int ch = 1; ch < 5; ch++){
-//	  Set_Brightness(20);
-//	  WS2812_Send(&htim3,ch);
-//	}
+	LCD_Unselect();
+	LCD_Init();
 
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
+	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
+							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
 
-  game_state = WELCOME_STATE;
-
-  LCD_Unselect();
-  LCD_Init();
-
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
-
-
-  uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-  		  	  	  	  	0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
-  						0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
-  						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-  						0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
-  						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
-
-//  memset(mapBuffer, 0, 256);
-//
-//  for(int i = 0; i < 128; i++)
-//  {
-//	  mapBuffer[i] = 3;
-//  }
-
-  //memset(mapBuffer, 3, 256);
-
-
-    map = new GameMap(16,16);
-    bufferToMap(map,mapBuffer);
-
-    //"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0"
-    std::vector<std::string> charInput = {"Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+    map = new GameMap(16, 16);
+    bufferToMap(map, mapBuffer);
+    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
 
     characters = new GameCharacters(charInput);
 
 
-    displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
-    //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
-    //clearMap(htim1,htim3);
-
-    //map = movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(13, 2));
-    //movementMode(htim1, htim3,hmcps1,hmcps2, map, map->GetHex(0, 1));
-
-
-
-
-
+    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -311,9 +214,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  for(int i = 0; i < numExpanders; i++){
-//		  ledHallPCBSystemCheck(hmcps[i],&htim1,channels[i]); //array of MCP23017s,tim1, channel_1
-//	  }
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();
@@ -337,16 +237,6 @@ int main(void)
 	  			Game_Start();
 	  			break;
 	  	}
-
-	  //clearMap(htim1,htim3);
-	  //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
-	 // Keypad_Test();
-
-
-//	  ledHallPCBSystemCheck(hmcps[0],&htim1,channels[0]); //array of MCP23017s,tim1, channel_1
-//	  ledHallPCBSystemCheck(hmcps[2],&htim1,channels[2]); //array of MCP23017s,tim1, channel_1
-
-	 // HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }

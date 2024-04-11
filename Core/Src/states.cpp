@@ -156,7 +156,6 @@ void Upload_Map(void)
 	key = '\0';
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
-	//need to add checks for no response
 	if (load_map() != 0){
 		LCD_FillScreen(LCD_WHITE);
 		LCD_WriteStringCentered(100, "Map Send Timeout", FONT, LCD_BLACK, LCD_WHITE);
@@ -166,8 +165,8 @@ void Upload_Map(void)
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
 		game_state = MENU_STATE;
-		return;
 
+		return;
 	}
 
 	LCD_FillScreen(LCD_WHITE);
@@ -218,7 +217,6 @@ void View_Map() {
 				case BaseHex:
 					mapBuffer[col + (row * 16)] = 0;
 					break;
-
 				case WallHex:
 					mapBuffer[col + (row * 16)] = 1;
 					break;
@@ -228,15 +226,12 @@ void View_Map() {
 				case MonsterHex:
 					mapBuffer[col + (row * 16)] = 3;
 					break;
-
 				case ChestHex:
 					mapBuffer[col + (row * 16)] = 4;
 					break;
-
 				case MoveHex:
 					mapBuffer[col + (row * 16)] = 5;
 					break;
-
 			}
 		}
 	}
@@ -245,13 +240,11 @@ void View_Map() {
 }
 
 void Playing_Mode() {
-	int i = 0;
 	uint8_t mapCharBuffer[256];
 	uint8_t mapBuffer[256];
 	memset(mapCharBuffer, 0, sizeof(mapCharBuffer));
 	mapToBuffer(map, mapBuffer);
-
-    while (i < characters->GetNumberCharacters()) {
+    for (int i = 0; i < characters->GetNumberCharacters(); i++) {
     	Character* character = characters->GetCharacter(i);
     	if (character->GetCharacterType() == Player) {
     		std::pair<int, int> position = character->GetPosition();
@@ -260,9 +253,9 @@ void Playing_Mode() {
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 
-    		mapCharBuffer[position.second + 16*position.first] = PlayerHex;
-    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
-    		mapCharBuffer[position.second + 16*position.first] = BaseHex;
+    		mapCharBuffer[position.second + 16 * position.first] = PlayerHex;
+    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer) / sizeof(uint8_t));
+    		mapCharBuffer[position.second + 16 * position.first] = BaseHex;
 
     		int start_tick = HAL_GetTick();
     		while (1) {
@@ -270,13 +263,12 @@ void Playing_Mode() {
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
 				}
-    			bool hallTrig = checkHallSensor(position.first,position.second, hmcps1, hmcps2);
+    			bool hallTrig = checkHallSensor(position.first, position.second, hmcps1, hmcps2);
 
-    			if(hallTrig){
-    				mapBuffer[position.second + 16*position.first] = PlayerHex;
+    			if (hallTrig) {
+    				mapBuffer[position.second + 16  *position.first] = PlayerHex;
     				break;
     			}
-
     		}
 
     		int selection = 1;
@@ -296,7 +288,8 @@ void Playing_Mode() {
 							LCD_WriteStringCentered(50, "Do not remove token", FONT, LCD_BLACK, LCD_WHITE);
 							HAL_Delay(1000);
 							LCD_FillScreen(LCD_WHITE);
-							LCD_WriteStringCentered(10, "Insert initiative roll", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(10, "Insert initiative", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(30, "roll", FONT, LCD_BLACK, LCD_WHITE);
 							key = '\0';
 							char* initiative = new char[3];
 							int no_character = 0;
@@ -330,10 +323,10 @@ void Playing_Mode() {
 							        key = '\0';
 							    }
 							}
-							i++;
 							break;
 						}
 						case (2):
+							i--;
 							break;
 					}
 					LCD_FillScreen(LCD_WHITE);
@@ -397,7 +390,8 @@ void Playing_Mode() {
 			i++;
     	}
     }
-    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+
+    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
     game_state = GAME_START_STATE;
 }
 
@@ -417,6 +411,9 @@ void Game_Start() {
 					break;
 				case (2):
 					game_state = MENU_STATE;
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+
 					return;
 			}
 			LCD_FillScreen(LCD_WHITE);
