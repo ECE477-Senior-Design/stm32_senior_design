@@ -54,13 +54,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
-SPI_HandleTypeDef hspi1;
 
-GPIO_InitTypeDef GPIO_init_struct_private = {0};
-uint32_t current_mill = 0;
-uint32_t previous_mill = 0;
-char key = '\0';
-GameState game_state;
 /* ---------------------------------------------------------------------------*/
 
 
@@ -93,18 +87,12 @@ GameCharacters * characters;
 /* USER CODE BEGIN PV */
 MCP23017_HandleTypeDef hmcps1[8];
 MCP23017_HandleTypeDef hmcps2[8];
-
 GPIO_InitTypeDef GPIO_init_struct_private = {0};
-
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
-
 char key = '\0';
-
-GameCharacters* characters;
-GameMap *map;
-
 GameState game_state;
+
 /* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
@@ -222,44 +210,47 @@ int main(void)
 
     map = new GameMap(16, 16);
     bufferToMap(map, mapBuffer);
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
 
     characters = new GameCharacters(charInput);
-
-
     displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+
+
+    View_Character_Info(characters->GetCharacter(0));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  switch (game_state) {
-	  		case WELCOME_STATE:
-	  			Welcome();
-	  			break;
-	  		case MENU_STATE:
-	  			Menu();
-	  			break;
-	  		case DM_MODE_STATE:
-	  			DM_Mode();
-	  			break;
-	  		case PLAYING_MODE_STATE:
-	  			Playing_Mode();
-	  			break;
-	  		case UPLOAD_MAP_STATE:
-	  			Upload_Map();
-	  			break;
-	  		case VIEW_MAP_STATE:
-	  			View_Map();
-	  			break;
-	  		case GAME_START_STATE:
-	  			Game_Start();
-	  			break;
-	  	}
+
+//	  switch (game_state) {
+//	  		case WELCOME_STATE:
+//	  			Welcome();
+//	  			break;
+//	  		case MENU_STATE:
+//	  			Menu();
+//	  			break;
+//	  		case DM_MODE_STATE:
+//	  			DM_Mode();
+//	  			break;
+//	  		case PLAYING_MODE_STATE:
+//	  			Playing_Mode();
+//	  			break;
+//	  		case UPLOAD_MAP_STATE:
+//	  			Upload_Map();
+//	  			break;
+//	  		case VIEW_MAP_STATE:
+//	  			View_Map();
+//	  			break;
+//	  		case GAME_START_STATE:
+//	  			Game_Start();
+//	  			break;
+//	  	}
   }
   /* USER CODE END 3 */
 }

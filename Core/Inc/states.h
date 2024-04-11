@@ -29,5 +29,6 @@ void Upload_Map(void);
 void View_Map(void);
 void Playing_Mode(void);
 void Game_Start(void);
+void View_Character_Info(Character *c);
 
 #endif /* INC_STATES_H_ */

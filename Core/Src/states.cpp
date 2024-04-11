@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
 extern GameMap* map;
-extern GameCharacters characters;
+extern GameCharacters * characters;
 extern MCP23017_HandleTypeDef hmcps1[8];
 extern MCP23017_HandleTypeDef hmcps2[8];
 
@@ -402,8 +402,13 @@ void Playing_Mode() {
 
 void View_Character_Info(Character * c){
 	LCD_FillScreen(LCD_WHITE);
-	LCD_WriteStringCentered(50, c->GetName(), FONT, LCD_WHITE, LCD_BLACK);
-	LCD_WriteString(30, 65, "Str: " + c->GetStrength(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, c->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+
+	//strncat("Strength")
+	std::string concat = "Speed: " + std::to_string(c->GetSpeed());
+	LCD_WriteString(30, 80, concat.c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteString(30, 150, "He's just speedy.", FONT, LCD_BLACK, LCD_WHITE);
+	//LCD_WriteString(40, 65, std::to_string(c->GetStrength()).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
 //    _strength = strength;
 //    _dexterity = dexterity;
