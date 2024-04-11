@@ -220,8 +220,8 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 
 				  if(hallTrig){
 					  //update buffer or map
-					  mapBuffer[col + 16*row] = 2;
-					  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = 0;
+					  mapBuffer[col + 16*row] = currHex->GetType();
+					  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = BaseHex;
 					  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
 					  currHex = map->GetHex(row,col);
 
@@ -230,14 +230,10 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 					  if(movement > 0){
 						  possibleMoves = map->PossibleMovements(currHex, movement);
 						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
-						  //clearMap(htim1,htim3);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-						  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-						  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 					  }
 					  else{
-						  //clearMap(htim1,htim3);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  break;
 					  }
@@ -250,9 +246,12 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 			  }
 
 		  }
-	  }
+		  if(key == '*'){
+			  key = '\0';
+			  break;
+		  }
 
-	  //change state here
+	  }
 
 	  bufferToMap(map,mapBuffer);
 
