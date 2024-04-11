@@ -228,6 +228,8 @@ int main(void)
 //  WS2812_Send(&htim1,2);
 //  WS2812_Send(&htim1,3);
 
+//	clearMap(htim1,htim3);
+//
 //	for(int i= 0; i < 32; i++){
 //		Set_LED(i,255,0,0);
 //	}
@@ -270,15 +272,26 @@ int main(void)
   						0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
   						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
 
+//  memset(mapBuffer, 0, 256);
+//
+//  for(int i = 0; i < 128; i++)
+//  {
+//	  mapBuffer[i] = 3;
+//  }
+
+  //memset(mapBuffer, 3, 256);
+
 
     map = new GameMap(16,16);
     bufferToMap(map,mapBuffer);
 
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0","Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+    //"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0"
+    std::vector<std::string> charInput = {"Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
 
     characters = new GameCharacters(charInput);
 
 
+    displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
     //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
     //clearMap(htim1,htim3);
 
@@ -324,6 +337,9 @@ int main(void)
 	  			Game_Start();
 	  			break;
 	  	}
+
+	  //clearMap(htim1,htim3);
+	  //displayMap(htim1, htim3,mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t) );
 	 // Keypad_Test();
 
 
