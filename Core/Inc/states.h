@@ -10,6 +10,13 @@
 
 #include "GameMap.h"
 #include "GameCharacters.h"
+#include "main.h"
+#include "lcd.h"
+#include "keypad.h"
+#include "usb.h"
+#include "boardLighting.h"
+#include "ws2812b.h"
+#include "displayFuncs.h"
 
 typedef enum {
 	WELCOME_STATE,
@@ -29,6 +36,5 @@ void Upload_Map(void);
 void View_Map(void);
 void Playing_Mode(void);
 void Game_Start(void);
-void View_Character_Info(Character *c);
 
 #endif /* INC_STATES_H_ */

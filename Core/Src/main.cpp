@@ -34,6 +34,17 @@
 #include "GameMap.h"
 #include "GameCharacters.h"
 #include "boardlighting.h"
+
+
+
+
+
+
+
+
+
+
+#include "displayFuncs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -171,6 +182,7 @@ int main(void)
 
 	int numExpanders = 8;
 	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
@@ -183,6 +195,14 @@ int main(void)
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	 }
 
+//	for(int i = 0; i < 32; i++){
+//		Set_LED(i, 255, 0, 0);
+//	}
+//	for(int ch = 1; ch < 5; ch++){
+//		Set_Brightness(20);
+//		WS2812_Send(&htim3, ch);
+//	}
+
 	LCD_Unselect();
 	LCD_Init();
 
@@ -191,32 +211,35 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
-	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+	clearMap(htim1,htim3);
+	map = NULL;
 
-    map = new GameMap(16, 16);
-    bufferToMap(map, mapBuffer);
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+//	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+//
+//    map = new GameMap(16, 16);
+//    bufferToMap(map, mapBuffer);
+//    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+//
+//    characters = new GameCharacters(charInput);
+//
+//    //displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
-    characters = new GameCharacters(charInput);
-    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-
-
-    View_Character_Info(characters->GetCharacter(0));
+//    View_Character_Info(characters->GetCharacter(0), MENU_STATE); // <-- CHANGE THE MENU_STATE! WE WANT TO RETURN INSTEAD!
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -224,33 +247,41 @@ int main(void)
   while (1)
   {
 
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-//	  switch (game_state) {
-//	  		case WELCOME_STATE:
-//	  			Welcome();
-//	  			break;
-//	  		case MENU_STATE:
-//	  			Menu();
-//	  			break;
-//	  		case DM_MODE_STATE:
-//	  			DM_Mode();
-//	  			break;
-//	  		case PLAYING_MODE_STATE:
-//	  			Playing_Mode();
-//	  			break;
-//	  		case UPLOAD_MAP_STATE:
-//	  			Upload_Map();
-//	  			break;
-//	  		case VIEW_MAP_STATE:
-//	  			View_Map();
-//	  			break;
-//	  		case GAME_START_STATE:
-//	  			Game_Start();
-//	  			break;
-//	  	}
+//	  for(int i = 0; i < 8; i++)
+//	  {
+//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
+//	  }
+
+
+	  switch (game_state) {
+	  		case WELCOME_STATE:
+	  			Welcome();
+	  			break;
+	  		case MENU_STATE:
+	  			Menu();
+	  			break;
+	  		case DM_MODE_STATE:
+	  			DM_Mode();
+	  			break;
+	  		case PLAYING_MODE_STATE:
+	  			Playing_Mode();
+	  			break;
+	  		case UPLOAD_MAP_STATE:
+	  			Upload_Map();
+	  			break;
+	  		case VIEW_MAP_STATE:
+	  			View_Map();
+	  			break;
+	  		case GAME_START_STATE:
+	  			Game_Start();
+	  			break;
+	  	}
   }
   /* USER CODE END 3 */
 }

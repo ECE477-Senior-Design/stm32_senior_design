@@ -15,7 +15,7 @@
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
-	clearMap(htim1,htim3);
+	//clearMap(htim1,htim3);
 	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
 	int test[256] = {};
 	uint32_t color;

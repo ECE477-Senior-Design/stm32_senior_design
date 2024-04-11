@@ -43,7 +43,7 @@ HAL_StatusTypeDef mcp23017_write(MCP23017_HandleTypeDef *hdev, uint16_t reg, uin
  	mcp23017_read_gpio(&hmcp, MCP23017_PORTA);
  	mcp23017_read_gpio(&hmcp, MCP23017_PORTB);
  	int addOn = 0;
- 	if(boardNum % 2 == 0){
+ 	if(boardNum % 2 == 1){
  		addOn = 16;
  	}
 
@@ -51,7 +51,7 @@ HAL_StatusTypeDef mcp23017_write(MCP23017_HandleTypeDef *hdev, uint16_t reg, uin
  		for (int i=0; i<8; i++){
  			int mask = 1 << i;
  			if((hmcp.gpio[port] & mask) != 0){
- 				Set_LED(i + addOn + (8*port),0,0,0);
+ 				Set_LED(i + addOn + (8*port),255,0,0);
  			}
  			else{
  				Set_LED(i + addOn + (8*port),0,250,0);

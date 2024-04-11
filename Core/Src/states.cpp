@@ -5,13 +5,9 @@
  *      Author: neilt
  */
 
-#include "ws2812b.h"
+
 #include "states.h"
-#include "main.h"
-#include "lcd.h"
-#include "keypad.h"
-#include "usb.h"
-#include "boardLighting.h"
+
 
 extern GameState game_state;
 extern char key;
@@ -217,6 +213,14 @@ void Upload_Map(void)
 
 void View_Map() {
 	uint8_t mapBuffer[256];
+	if(map == NULL)
+	{
+		game_state = DM_MODE_STATE;
+		LCD_WriteStringCentered(100, "Map Not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		HAL_Delay(500);
+		LCD_FillScreen(LCD_WHITE);
+		return;
+	}
 	for (int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
@@ -328,6 +332,45 @@ void Playing_Mode() {
 							        key = '\0';
 							    }
 							}
+
+				    		selection = 1;
+				    		prev_selection = 0;
+				    		y_pos = 50;
+				    		key = '\0';
+				    		LCD_FillScreen(LCD_WHITE);
+							LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+							while (1) {
+								if (key == '#') {
+									key = '\0';
+									switch (selection) {
+										case (1):
+											View_Character_Info(character);
+										case (2):
+											key = '\0';
+											break;
+									}
+									LCD_FillScreen(LCD_WHITE);
+									HAL_Delay(500);
+									break;
+								}
+								if (key == 'A') {
+									key = '\0';
+								    selection = (selection > 1) ? selection - 1 : 1;
+								}
+								if (key == 'D') {
+									key = '\0';
+								    selection = (selection < 2) ? selection + 1 : 2;
+								}
+
+								if (selection != prev_selection) {
+									LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+									LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+									prev_selection = selection;
+								}
+							}
+
 							break;
 						}
 						case (2):
@@ -378,49 +421,63 @@ void Playing_Mode() {
 				else if (key == '*') {
 					key = '\0';
 					if (no_character > 0) {
-						LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+						LCD_WriteStringCentered(70, initiative, FONT, LCD_WHITE, LCD_WHITE);
 						no_character--;
 						initiative[no_character] = '\0';
-						LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+						LCD_WriteStringCentered(70, initiative, FONT, LCD_BLACK, LCD_WHITE);
 					}
 				}
 				else if (no_character < 2 && Key_Is_Number(key)) {
-					LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+					LCD_WriteStringCentered(70, initiative, FONT, LCD_WHITE, LCD_WHITE);
 					initiative[no_character] = key;
 					no_character++;
 					initiative[no_character] = '\0';
-					LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+					LCD_WriteStringCentered(70, initiative, FONT, LCD_BLACK, LCD_WHITE);
 				}
 			}
-			i++;
+
+    		int selection = 1;
+    		int prev_selection = 0;
+    		int y_pos = 50;
+    		key = '\0';
+    		LCD_FillScreen(LCD_WHITE);
+			LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1):
+							View_Character_Info(character);
+						case (2):
+							key = '\0';
+							break;
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+				    selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+				    selection = (selection < 2) ? selection + 1 : 2;
+				}
+
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
     	}
     }
 
     displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
     game_state = GAME_START_STATE;
-}
-
-void View_Character_Info(Character * c){
-	LCD_FillScreen(LCD_WHITE);
-	LCD_WriteStringCentered(50, c->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
-
-	//strncat("Strength")
-	std::string concat = "Speed: " + std::to_string(c->GetSpeed());
-	LCD_WriteString(30, 80, concat.c_str(), FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteString(30, 150, "He's just speedy.", FONT, LCD_BLACK, LCD_WHITE);
-	//LCD_WriteString(40, 65, std::to_string(c->GetStrength()).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-
-//    _strength = strength;
-//    _dexterity = dexterity;
-//    _constitution = constitution;
-//    _intelligence = intelligence;
-//    _wisdom = wisdom;
-//    _charisma = charisma;
-//    _max_health_points = max_health_points;
-//    _current_health_points = current_health_points;
-//    _armor_class = armor_class;
-//    _initiative = initiative;
-//    _speed = speed;
 }
 
 void Game_Start() {
