@@ -63,11 +63,6 @@ char key = '\0';
 GameState game_state;
 /* ---------------------------------------------------------------------------*/
 
-/*Gameplay Global Variables --------------------------------------------------*/
-GameCharacters* characters;
-
-/*----------------------------------------------------------------------------*/
-
 
 /* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;

@@ -431,3 +431,21 @@ void Game_Start() {
 	characters.SortCharacters();
 }
 
+void View_Character_Info(Character * c){
+	LCD_FillScreen(LCD_WHITE);
+	LCD_WriteStringCentered(50, c->GetName(), FONT, LCD_WHITE, LCD_BLACK);
+	LCD_WriteString(30, 65, "Str: " + c->GetStrength(), FONT, LCD_BLACK, LCD_WHITE);
+
+//    _strength = strength;
+//    _dexterity = dexterity;
+//    _constitution = constitution;
+//    _intelligence = intelligence;
+//    _wisdom = wisdom;
+//    _charisma = charisma;
+//    _max_health_points = max_health_points;
+//    _current_health_points = current_health_points;
+//    _armor_class = armor_class;
+//    _initiative = initiative;
+//    _speed = speed;
+}
+
