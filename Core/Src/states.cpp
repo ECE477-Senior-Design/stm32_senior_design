@@ -240,6 +240,15 @@ void View_Map() {
 }
 
 void Playing_Mode() {
+
+	if(characters == NULL || map == NULL) {
+		game_state = MENU_STATE;
+		LCD_WriteStringCentered(100, "Characters and/or Map", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(90, "not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+
+		HAL_Delay(500);
+		return;
+	}
 	uint8_t mapCharBuffer[256];
 	uint8_t mapBuffer[256];
 	memset(mapCharBuffer, 0, sizeof(mapCharBuffer));
@@ -398,6 +407,7 @@ void Playing_Mode() {
 			int no_character = 0;
 			int start_tick = HAL_GetTick();
 			while (1) {
+				HAL_Delay(100);
 				int cur_tick = HAL_GetTick();
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
@@ -472,8 +482,8 @@ void Playing_Mode() {
 	int prev_selection = 0;
 	int y_pos = 50;
 	key = '\0';
-	LCD_WriteStringCentered(50, "Start Game", FONT, LCD_WHITE, LCD_BLACK);
-	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_WHITE, LCD_BLACK);
+	LCD_WriteStringCentered(50, "Start Game", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
@@ -514,8 +524,9 @@ void Game_Loop(void) {
 	key = '\0';
 	if(characters == NULL) {
 		game_state = MENU_STATE;
-		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(500);
+		LCD_FillScreen(LCD_WHITE);
 		return;
 	}
 	while(characters->GetNumberCharacters() > 1) {
@@ -523,20 +534,21 @@ void Game_Loop(void) {
 			//check conditions for continuing game
 			if(map == NULL) {
 				game_state = MENU_STATE;
-				LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+				LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_BLACK, LCD_WHITE);
 				HAL_Delay(500);
+				LCD_FillScreen(LCD_WHITE);
 				return;
 			}
 
 			//Display character name ex: it is neils turn
 
-			LCD_WriteStringCentered(110, "It is", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(100, characters->GetCharacter(i)->GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(90, "Turn", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(60, (characters->GetCharacter(i)->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(80, "Turn", FONT, LCD_BLACK, LCD_WHITE);
 
-			LCD_WriteStringCentered(50, "Click to Continue", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(25, "Click to Return to Menu", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			LCD_WriteStringCentered(200, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(225, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_FillRectangle(10, 175+ selection * y_pos, 10, 18, LCD_BLACK);
 
 			while (1) {
 				if (key == '#') {
@@ -561,18 +573,19 @@ void Game_Loop(void) {
 					selection = (selection < 2) ? selection + 1 : 2;
 				}
 				if (selection != prev_selection) {
-					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
-					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					LCD_FillRectangle(10, 175 +prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, 175 + selection * y_pos, 10, 18, LCD_BLACK);
 					prev_selection = selection;
 				}
 			}
 
+			y_pos = 20;
 
 			//Give option for info, action, move
-			LCD_WriteStringCentered(120, "How will you proceed?", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(100, "Move Player", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(90, "Character Info", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(80, "Enter Combat", FONT, LCD_WHITE, LCD_BLACK); //maybe add conditional here for if combat is possible
+			LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
 			//branch based on selection
 
 			while (1) {
@@ -581,9 +594,11 @@ void Game_Loop(void) {
 					switch (selection) {
 						case (1):
 							//move function here
+							//GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+
 							break;
 						case (2):
-							//character info function
+							View_Character_Info(characters->GetCharacter(i));
 							break;
 						case (3):
 							//combat function here
@@ -603,8 +618,8 @@ void Game_Loop(void) {
 					selection = (selection < 3) ? selection + 1 : 3;
 				}
 				if (selection != prev_selection) {
-					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
-					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					LCD_FillRectangle(10, 80 +prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
 					prev_selection = selection;
 				}
 			}
@@ -613,11 +628,11 @@ void Game_Loop(void) {
 		}
 	}
 	if(characters->GetNumberCharacters() == 1) {
-		LCD_WriteStringCentered(110, "Congrats", FONT, LCD_WHITE, LCD_BLACK);
-		LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
-		LCD_WriteStringCentered(90, "You win!", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
 
-		LCD_WriteStringCentered(50, "Enter to Continue", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
 
 	}
 	game_state = MENU_STATE;

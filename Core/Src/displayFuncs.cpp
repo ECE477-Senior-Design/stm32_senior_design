@@ -13,6 +13,7 @@ extern MCP23017_HandleTypeDef hmcps2[8];
 
 void Display_Stats(Character* character, int select){
 	LCD_FillScreen(LCD_WHITE);
+	HAL_Delay(500);
 	if (select == 0) {
 		LCD_WriteStringCentered(50, character->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
@@ -43,10 +44,8 @@ void View_Character_Info(Character* character){
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 20;
-	int page = 0;
+	int page = 1;
 	key = '\0';
-	Display_Stats(character, page);
-	LCD_FillRectangle(10, selection * y_pos + 220, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
 			key = '\0';
