@@ -30,8 +30,8 @@ class GameCharacters {
 
         //THIS DOES NOT WORK
         void SortCharacters(void) {
-        	std::sort(characters.begin(), characters.end(), [](const Character& character1, const Character& character2) {
-        		return character1.GetInitiative() > character2.GetInitiative();
+        	std::sort(charactersVec.begin(), charactersVec.end(), [](Character * character1, Character * character2) {
+        		return character1->GetInitiative() > character2->GetInitiative();
         	});
         }
 };

@@ -74,10 +74,6 @@ GameCharacters::~GameCharacters() {
     }
 }
 
-void GameCharacters::setNumChar(int number_characters){
-	_number_characters = number_characters;
-}
-
 std::vector<Character*> GameCharacters::GetCharactersVec(){
 	return charactersVec;
 }

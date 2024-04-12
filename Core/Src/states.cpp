@@ -493,7 +493,7 @@ void Game_Loop(void) {
 			//Display character name ex: it is neils turn
 
 			LCD_WriteStringCentered(110, "It is", FONT, LCD_WHITE, LCD_BLACK);
-			LCD_WriteStringCentered(100, characters->GetCharacter(i).GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(100, characters->GetCharacter(i)->GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
 			LCD_WriteStringCentered(90, "Turn", FONT, LCD_WHITE, LCD_BLACK);
 
 			LCD_WriteStringCentered(50, "Click to Continue", FONT, LCD_WHITE, LCD_BLACK);
@@ -576,7 +576,7 @@ void Game_Loop(void) {
 	}
 	if(characters->GetNumberCharacters() == 1) {
 		LCD_WriteStringCentered(110, "Congrats", FONT, LCD_WHITE, LCD_BLACK);
-		LCD_WriteStringCentered(100, characters->GetCharacter(0).GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
 		LCD_WriteStringCentered(90, "You win!", FONT, LCD_WHITE, LCD_BLACK);
 
 		LCD_WriteStringCentered(50, "Enter to Continue", FONT, LCD_WHITE, LCD_BLACK);
