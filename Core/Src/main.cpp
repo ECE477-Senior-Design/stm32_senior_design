@@ -34,16 +34,6 @@
 #include "GameMap.h"
 #include "GameCharacters.h"
 #include "boardlighting.h"
-
-
-
-
-
-
-
-
-
-
 #include "displayFuncs.h"
 /* USER CODE END Includes */
 
@@ -63,13 +53,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
-/*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
-
-/* ---------------------------------------------------------------------------*/
-
-
-/* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
@@ -85,25 +68,21 @@ DMA_HandleTypeDef hdma_tim3_ch1_trig;
 DMA_HandleTypeDef hdma_tim3_ch2;
 DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
-/* ---------------------------------------------------------------------------*/
-
-/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
-GameMap *map;
-GameCharacters * characters;
-
-
-/* ---------------------------------------------------------------------------*/
-
 
 /* USER CODE BEGIN PV */
 MCP23017_HandleTypeDef hmcps1[8];
 MCP23017_HandleTypeDef hmcps2[8];
+
 GPIO_InitTypeDef GPIO_init_struct_private = {0};
+
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
-char key = '\0';
-GameState game_state;
 
+char key = '\0';
+
+GameState game_state;
+GameMap *map;
+GameCharacters * characters;
 /* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
@@ -122,9 +101,7 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_3);
@@ -182,7 +159,6 @@ int main(void)
 
 	int numExpanders = 8;
 	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
-//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
@@ -195,25 +171,19 @@ int main(void)
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	 }
 
-//	for(int i = 0; i < 32; i++){
-//		Set_LED(i, 255, 0, 0);
-//	}
-//	for(int ch = 1; ch < 5; ch++){
-//		Set_Brightness(20);
-//		WS2812_Send(&htim3, ch);
-//	}
-
 	LCD_Unselect();
 	LCD_Init();
+	LCD_FillScreen(LCD_WHITE);
 
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
-	clearMap(htim1,htim3);
+	clearMap(htim1, htim3);
 	map = NULL;
 
+	//TESTING CODE
 //	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 //							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 //							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
@@ -237,28 +207,24 @@ int main(void)
 //
 //    characters = new GameCharacters(charInput);
 //
-//    //displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+//    displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
-//    View_Character_Info(characters->GetCharacter(0), MENU_STATE); // <-- CHANGE THE MENU_STATE! WE WANT TO RETURN INSTEAD!
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
+//	while (1) {
+//		for(int i = 0; i < 8; i++)
+//		{
+//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
+//		}
+//	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-//	  for(int i = 0; i < 8; i++)
-//	  {
-//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
-//	  }
-
-
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();
@@ -279,7 +245,6 @@ int main(void)
 	  			View_Map();
 	  			break;
 	  		case GAME_START_STATE:
-	  			Game_Start();
 	  			break;
 	  	}
   }
