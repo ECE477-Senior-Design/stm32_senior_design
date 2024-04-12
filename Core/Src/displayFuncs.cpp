@@ -8,10 +8,10 @@ extern TIM_HandleTypeDef htim3;
 
 extern GameMap* map;
 extern GameCharacters * characters;
-
 extern MCP23017_HandleTypeDef hmcps1[8];
 extern MCP23017_HandleTypeDef hmcps2[8];
 
+//helper function for View_Character_Info
 void Display_Stats(Character *c, int select){
 
 	LCD_FillScreen(LCD_WHITE);

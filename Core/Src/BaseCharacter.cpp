@@ -90,7 +90,7 @@ int Character::GetArmorClass(void) {
 }
 
 //Returns initiative of character
-int Character::GetInitiative(void) {
+int Character::GetInitiative(void) const {
     return _initiative;
 }
 

@@ -8,9 +8,9 @@ DATE: 10/27/2023
 
 
 //Constructor of characters vector
-GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
-
-}
+//GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
+//
+//}
 
 //Constructor of characters vector from string
 GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
