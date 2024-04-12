@@ -1,17 +1,5 @@
-/*
- * states.c
- *
- *  Created on: Apr 4, 2024
- *      Author: neilt
- */
-
-#include "ws2812b.h"
 #include "states.h"
-#include "main.h"
-#include "lcd.h"
-#include "keypad.h"
-#include "usb.h"
-#include "boardLighting.h"
+
 
 extern GameState game_state;
 extern char key;
@@ -19,24 +7,11 @@ extern char key;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
+extern GameMap* map;
+extern GameCharacters * characters;
+
 extern MCP23017_HandleTypeDef hmcps1[8];
 extern MCP23017_HandleTypeDef hmcps2[8];
-
-extern GameMap* map;
-extern GameCharacters* characters;
-
-void LED_Test(void) {
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_4);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_6);
-	HAL_Delay(500);
-}
 
 void Welcome(void) {
 	int counter = 0;
@@ -47,6 +22,9 @@ void Welcome(void) {
 	while (1) {
 		if (key == '#') {
 			key = '\0';
+			game_state = MENU_STATE;
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
 			break;
 		}
 		if (counter % 2 == 0) {
@@ -59,9 +37,6 @@ void Welcome(void) {
 		HAL_Delay(500);
 		counter++;
 	}
-	game_state = MENU_STATE;
-	LCD_FillScreen(LCD_WHITE);
-	HAL_Delay(500);
 }
 
 void Menu(void) {
@@ -69,15 +44,15 @@ void Menu(void) {
 	int prev_selection = 0;
 	int y_pos = 50;
 	key = '\0';
-	LCD_WriteString(81, 50, "DM Mode", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteString(54, 100, "Playing Mode", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, "DM Mode", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Playing Mode", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
 			key = '\0';
 			switch (selection) {
 				case (1):
-					game_state =DM_MODE_STATE;
+					game_state = DM_MODE_STATE;
 					break;
 				case (2):
 					game_state = PLAYING_MODE_STATE;
@@ -109,9 +84,9 @@ void DM_Mode(void) {
 	int prev_selection = 0;
 	int y_pos = 50;
 	key = '\0';
-	LCD_WriteString(65, 50, "Upload Map", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteString(76, 100, "View Map", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteString(48, 150, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, "Upload Map", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "View Map", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(150, "Return To Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
@@ -148,24 +123,19 @@ void DM_Mode(void) {
 	}
 }
 
-void Upload_Map(void)
-{
-	int selection = 1;
-	int prev_selection = 0;
-	int y_pos = 50;
-	key = '\0';
+void Upload_Map(void) {
 	int usb_status = check_usb_connection();
 	if(usb_status) {
 		LCD_WriteStringCentered(100, "Waiting for USB", FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(90, "Connection...", FONT, LCD_BLACK, LCD_WHITE);
 
 	}
-	while(check_usb_connection());
+
+	while (check_usb_connection());
 	LCD_FillScreen(LCD_WHITE);
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
-	//need to add checks for no response
-	if (load_map() != 0){
+	if (load_map() != 0) {
 		LCD_FillScreen(LCD_WHITE);
 		LCD_WriteStringCentered(100, "Map Send Timeout", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(1000);
@@ -174,17 +144,21 @@ void Upload_Map(void)
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
 		game_state = MENU_STATE;
-		return;
 
+		return;
 	}
 
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 50;
+	key = '\0';
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
 	HAL_Delay(500);
 	LCD_FillScreen(LCD_WHITE);
 	LCD_WriteStringCentered(50, "View Map", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Return To Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
@@ -219,6 +193,14 @@ void Upload_Map(void)
 }
 
 void View_Map() {
+	if (map == NULL) {
+		game_state = DM_MODE_STATE;
+		LCD_WriteStringCentered(100, "Map Not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_FillScreen(LCD_WHITE);
+		HAL_Delay(500);
+
+		return;
+	}
 	uint8_t mapBuffer[256];
 
 	if(map == NULL) {
@@ -235,7 +217,6 @@ void View_Map() {
 				case BaseHex:
 					mapBuffer[col + (row * 16)] = 0;
 					break;
-
 				case WallHex:
 					mapBuffer[col + (row * 16)] = 1;
 					break;
@@ -245,15 +226,12 @@ void View_Map() {
 				case MonsterHex:
 					mapBuffer[col + (row * 16)] = 3;
 					break;
-
 				case ChestHex:
 					mapBuffer[col + (row * 16)] = 4;
 					break;
-
 				case MoveHex:
 					mapBuffer[col + (row * 16)] = 5;
 					break;
-
 			}
 		}
 	}
@@ -262,26 +240,22 @@ void View_Map() {
 }
 
 void Playing_Mode() {
-	int i = 0;
 	uint8_t mapCharBuffer[256];
 	uint8_t mapBuffer[256];
 	memset(mapCharBuffer, 0, sizeof(mapCharBuffer));
 	mapToBuffer(map, mapBuffer);
-
-    while (i < characters->GetNumberCharacters()) {
+    for (int i = 0; i < characters->GetNumberCharacters(); i++) {
     	Character* character = characters->GetCharacter(i);
     	if (character->GetCharacterType() == Player) {
     		std::pair<int, int> position = character->GetPosition();
-    		LCD_WriteStringCentered(10, "Place token for", FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(10, "Place Token For", FONT, LCD_BLACK, LCD_WHITE);
     		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 
-    		//These three lines color the Hex a lighter color to indicate where token should be placed.
-    		//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
-    		mapCharBuffer[position.second + 16*position.first] = MoveHex;
-    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
-    		mapCharBuffer[position.second + 16*position.first] = BaseHex;
+    		mapCharBuffer[position.second + 16 * position.first] = PlayerHex;
+    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer) / sizeof(uint8_t));
+    		mapCharBuffer[position.second + 16 * position.first] = BaseHex;
 
     		int start_tick = HAL_GetTick();
     		while (1) {
@@ -289,19 +263,13 @@ void Playing_Mode() {
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
 				}
-    			bool hallTrig = checkHallSensor(position.first,position.second, hmcps1, hmcps2);
-
-    			if(hallTrig){
-    				//These three lines color the Hex a darker color than the MoveHex to indicate that the piece has been placed successfully.
-    				//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
-    				mapCharBuffer[position.second + 16*position.first] = PlayerHexTurn;
-    				displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
-    				mapCharBuffer[position.second + 16*position.first] = BaseHex;
-
-    				mapBuffer[position.second + 16*position.first] = PlayerHex;
+    			bool hallTrig = checkHallSensor(position.first, position.second, hmcps1, hmcps2);
+    			if (hallTrig) {
+    				mapBuffer[position.second + 16  *position.first] = PlayerHex;
+    				LCD_FillScreen(LCD_WHITE);
+    				HAL_Delay(500);
     				break;
     			}
-
     		}
 
     		int selection = 1;
@@ -315,14 +283,14 @@ void Playing_Mode() {
 			while (1) {
 				if (key == '#') {
 					key = '\0';
+					LCD_FillScreen(LCD_WHITE);
 					switch (selection) {
 						case (1): {
-							LCD_FillScreen(LCD_WHITE);
 							LCD_WriteStringCentered(50, "Do not remove token", FONT, LCD_BLACK, LCD_WHITE);
 							HAL_Delay(1000);
 							LCD_FillScreen(LCD_WHITE);
-							LCD_WriteStringCentered(10, "Insert initiative roll", FONT, LCD_BLACK, LCD_WHITE);
-							key = '\0';
+							LCD_WriteStringCentered(10, "Insert initiative", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(30, "roll", FONT, LCD_BLACK, LCD_WHITE);
 							char* initiative = new char[3];
 							int no_character = 0;
 							int start_tick = HAL_GetTick();
@@ -331,34 +299,72 @@ void Playing_Mode() {
 								if ((cur_tick - start_tick) >= 60000) {
 									return;
 								}
+
 							    if (key == '#' && no_character != 0) {
 							        key = '\0';
 							        initiative[no_character] = '\0';
 							        character->SetInitiative(atoi(initiative));
+							        LCD_FillScreen(LCD_WHITE);
+							        HAL_Delay(500);
 							        break;
 							    }
 							    else if (key == '*') {
 							        key = '\0';
 							        if (no_character > 0) {
-							        	LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+							        	LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
 							            no_character--;
 							            initiative[no_character] = '\0';
-							            LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+							            LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
 							        }
 							    }
 							    else if (no_character < 2 && Key_Is_Number(key)) {
-							    	LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+							    	LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
 							        initiative[no_character] = key;
 							        no_character++;
 							        initiative[no_character] = '\0';
-							        LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+							        LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
 							        key = '\0';
 							    }
 							}
-							i++;
+
+				    		selection = 1;
+				    		prev_selection = 0;
+				    		y_pos = 50;
+				    		key = '\0';
+							LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+							while (1) {
+								if (key == '#') {
+									key = '\0';
+									switch (selection) {
+										case (1):
+											LCD_FillScreen(LCD_WHITE);
+											View_Character_Info(character);
+										case (2):
+											break;
+									}
+									break;
+								}
+								if (key == 'A') {
+									key = '\0';
+								    selection = (selection > 1) ? selection - 1 : 1;
+								}
+								if (key == 'D') {
+									key = '\0';
+								    selection = (selection < 2) ? selection + 1 : 2;
+								}
+
+								if (selection != prev_selection) {
+									LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+									LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+									prev_selection = selection;
+								}
+							}
 							break;
 						}
 						case (2):
+							i--;
 							break;
 					}
 					LCD_FillScreen(LCD_WHITE);
@@ -400,33 +406,68 @@ void Playing_Mode() {
 					key = '\0';
 					initiative[no_character] = '\0';
 					character->SetInitiative(atoi(initiative));
+			        LCD_FillScreen(LCD_WHITE);
+			        HAL_Delay(500);
 					break;
 				}
 				else if (key == '*') {
 					key = '\0';
 					if (no_character > 0) {
-						LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+						LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
 						no_character--;
 						initiative[no_character] = '\0';
-						LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+						LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
 					}
 				}
 				else if (no_character < 2 && Key_Is_Number(key)) {
-					LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
+					LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
 					initiative[no_character] = key;
 					no_character++;
 					initiative[no_character] = '\0';
-					LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+					LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
 				}
 			}
-			i++;
+
+    		int selection = 1;
+    		int prev_selection = 0;
+    		int y_pos = 50;
+    		key = '\0';
+			LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1):
+							View_Character_Info(character);
+						case (2):
+							break;
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+				    selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+				    selection = (selection < 2) ? selection + 1 : 2;
+				}
+
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
     	}
     }
-    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-    game_state = GAME_START_STATE;
-}
+    characters->SortCharacters();
 
-void Game_Start() {
+
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
@@ -439,10 +480,11 @@ void Game_Start() {
 			key = '\0';
 			switch (selection) {
 				case (1):
+					game_state = GAME_START_STATE;
 					break;
 				case (2):
 					game_state = MENU_STATE;
-					return;
+					break;
 			}
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
@@ -463,10 +505,6 @@ void Game_Start() {
 			prev_selection = selection;
 		}
 	}
-
-	characters->SortCharacters();
-
-	game_state = GAME_LOOP_STATE;
 }
 
 void Game_Loop(void) {

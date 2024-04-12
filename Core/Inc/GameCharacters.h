@@ -17,7 +17,7 @@ class GameCharacters {
         std::vector<Character*> charactersVec; //Characters vector
 
     public:
-        //GameCharacters(int number_characters); //Constructor of characters vector
+        GameCharacters(int number_characters); //Constructor of characters vector
         GameCharacters(std::vector<std::string> input_strlist); //Constructor of characters vector from string
 
         int GetNumberCharacters(void); //Returns number of characters
@@ -28,12 +28,15 @@ class GameCharacters {
         Character* GetCharacter(int index); //Returns character at index
         ~GameCharacters(); //Destructor for characters vector
 
-        //THIS DOES NOT WORK
+
         void SortCharacters(void) {
-        	std::sort(charactersVec.begin(), charactersVec.end(), [](Character * character1, Character * character2) {
+        	std::sort(charactersVec.begin(), charactersVec.end(), [](Character* character1, Character* character2) { //removed const from bother characters
         		return character1->GetInitiative() > character2->GetInitiative();
         	});
         }
+
+        void setNumChar(int number_characters);
+
 };
 
 #endif

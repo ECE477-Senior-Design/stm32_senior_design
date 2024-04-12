@@ -43,7 +43,7 @@ HAL_StatusTypeDef mcp23017_write(MCP23017_HandleTypeDef *hdev, uint16_t reg, uin
  	mcp23017_read_gpio(&hmcp, MCP23017_PORTA);
  	mcp23017_read_gpio(&hmcp, MCP23017_PORTB);
  	int addOn = 0;
- 	if(boardNum % 2 == 0){
+ 	if(boardNum % 2 == 1){
  		addOn = 16;
  	}
 
@@ -96,5 +96,3 @@ HAL_StatusTypeDef mcp23017_write(MCP23017_HandleTypeDef *hdev, uint16_t reg, uin
 	 int mask = 1 << (col % 8);
 	 return ((hmcp.gpio[col/8] & mask) == 0); //returns true if hall is triggered by magnet
  }
-
-
