@@ -6,6 +6,7 @@ DATE: 10/27/2023
 
 #include "GameCharacters.h"
 
+
 //Constructor of characters vector
 //GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
 //
@@ -28,15 +29,15 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
         }
         character_info.push_back(input);
 
-        Character character = Character(character_info[0], std::stoi(character_info[1]), std::stoi(character_info[2]),
+        Character* character = new Character(character_info[0], std::stoi(character_info[1]), std::stoi(character_info[2]),
             std::stoi(character_info[3]), std::stoi(character_info[4]), std::stoi(character_info[5]), std::stoi(character_info[6]),
             std::stoi(character_info[7]), std::stoi(character_info[8]), std::stoi(character_info[9]), std::stoi(character_info[10]),
             std::stoi(character_info[11]), std::stoi(character_info[12]), std::stoi(character_info[13]));
 
-        character.SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[14])));
-        character.SetClass(static_cast<Class> (std::stoi(character_info[15])));
+        character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[14])));
+        character->SetClass(static_cast<Class> (std::stoi(character_info[15])));
 
-        characters.push_back(character);
+        charactersVec.push_back(character);
     }
 
 }
@@ -46,29 +47,38 @@ int GameCharacters::GetNumberCharacters(void) {
     return _number_characters;
 }
 
-//Adds character to character vector
-void GameCharacters::AddCharacter(int index, std::string name, int column, int row,
-        int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, CharacterType character_type, Class class_) {
-    Character character = Character(name, column, row,
-        strength, dexterity, constitution, intelligence, wisdom, charisma,
-        max_health_points, current_health_points, armor_class, initiative, speed);
-    character.SetClass(class_); //Sets class of character
-    character.SetCharacterType(character_type); //Sets character type
-    characters[index] = character; //Adds character to characters vector
-}
+////Adds character to character vector
+//void GameCharacters::AddCharacter(int index, std::string name, int column, int row,
+//        int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
+//        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, CharacterType character_type, Class class_) {
+//    Character character = Character(name, column, row,
+//        strength, dexterity, constitution, intelligence, wisdom, charisma,
+//        max_health_points, current_health_points, armor_class, initiative, speed);
+//    character.SetClass(class_); //Sets class of character
+//    character.SetCharacterType(character_type); //Sets character type
+//    characters.push_back(character); //Adds character to characters vector
+//}
 
 //Returns character at index
-Character& GameCharacters::GetCharacter(int index) {
-    return characters.at(index);
+Character* GameCharacters::GetCharacter(int index) {
+    return charactersVec[index];
 }
 
 //Destructor for characters vector
 GameCharacters::~GameCharacters() {
     //Deletes each character in characters vector
     for (int i = 0; i < _number_characters; i++) {
-        if (&characters[i] != nullptr) {
-            delete &characters[i];
+        if (&charactersVec[i] != nullptr) {
+            delete &charactersVec[i];
         }
     }
 }
+
+void GameCharacters::setNumChar(int number_characters){
+	_number_characters = number_characters;
+}
+
+std::vector<Character*> GameCharacters::GetCharactersVec(){
+	return charactersVec;
+}
+

@@ -17,13 +17,13 @@
 
 //defines and initializations
 #define MAX_LED 32
-#define USE_BRIGHTNESS 0
+#define USE_BRIGHTNESS 1
 #define PI 3.14159265
 
 extern uint8_t LED_Data[MAX_LED][4];
 extern uint8_t LED_Mod[MAX_LED][4]; //for brightness
 extern int datasentflag;
-extern uint16_t pwmData[(24*MAX_LED)]; //50 added for reset code
+extern uint16_t pwmData[(24*MAX_LED)+50]; //50 added for reset code
 
 //functions
 void Set_LED(int LEDnum, int Red, int Green, int Blue);

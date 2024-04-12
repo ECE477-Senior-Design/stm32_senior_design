@@ -19,8 +19,11 @@ extern char key;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
+extern MCP23017_HandleTypeDef hmcps1[8];
+extern MCP23017_HandleTypeDef hmcps2[8];
+
 extern GameMap* map;
-extern GameCharacters *characters;
+extern GameCharacters* characters;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -150,7 +153,6 @@ void Upload_Map(void)
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	//int err = 0;
 	key = '\0';
 	int usb_status = check_usb_connection();
 	if(usb_status) {
@@ -163,7 +165,7 @@ void Upload_Map(void)
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
 	//need to add checks for no response
-	if(load_map() != 0){
+	if (load_map() != 0){
 		LCD_FillScreen(LCD_WHITE);
 		LCD_WriteStringCentered(100, "Map Send Timeout", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(1000);
@@ -176,17 +178,13 @@ void Upload_Map(void)
 
 	}
 
-
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
 	HAL_Delay(500);
-
 	LCD_FillScreen(LCD_WHITE);
-
 	LCD_WriteStringCentered(50, "View Map", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
-
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	while (1) {
 		if (key == '#') {
@@ -234,21 +232,28 @@ void View_Map() {
 	for(int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
-			case WallHex:
-				mapBuffer[col + (row * 16)] = 1;
-				break;
+				case BaseHex:
+					mapBuffer[col + (row * 16)] = 0;
+					break;
 
-			case PlayerHex:
-				mapBuffer[col + (row * 16)] = 2;
-				break;
+				case WallHex:
+					mapBuffer[col + (row * 16)] = 1;
+					break;
+				case PlayerHex:
+					mapBuffer[col + (row * 16)] = 2;
+					break;
+				case MonsterHex:
+					mapBuffer[col + (row * 16)] = 3;
+					break;
 
-			case MonsterHex:
-				mapBuffer[col + (row * 16)] = 3;
-				break;
+				case ChestHex:
+					mapBuffer[col + (row * 16)] = 4;
+					break;
 
-			case BaseHex:
-				mapBuffer[col + (row * 16)] = 0;
-				break;
+				case MoveHex:
+					mapBuffer[col + (row * 16)] = 5;
+					break;
+
 			}
 		}
 	}
@@ -258,32 +263,52 @@ void View_Map() {
 
 void Playing_Mode() {
 	int i = 0;
+	uint8_t mapCharBuffer[256];
+	uint8_t mapBuffer[256];
+	memset(mapCharBuffer, 0, sizeof(mapCharBuffer));
+	mapToBuffer(map, mapBuffer);
+
     while (i < characters->GetNumberCharacters()) {
-    	Character& character = characters->GetCharacter(i);
-    	if (character.GetCharacterType() == Player) {
-    	//	std::pair<int, int> position = character.GetPosition();
-    		LCD_WriteStringCentered(10, "Please place token for", FONT, LCD_BLACK, LCD_WHITE);
-    		std::string name = character.GetName();
+    	Character* character = characters->GetCharacter(i);
+    	if (character->GetCharacterType() == Player) {
+    		std::pair<int, int> position = character->GetPosition();
+    		LCD_WriteStringCentered(10, "Place token for", FONT, LCD_BLACK, LCD_WHITE);
+    		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
+
+    		//These three lines color the Hex a lighter color to indicate where token should be placed.
+    		//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
+    		mapCharBuffer[position.second + 16*position.first] = MoveHex;
+    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
+    		mapCharBuffer[position.second + 16*position.first] = BaseHex;
+
     		int start_tick = HAL_GetTick();
     		while (1) {
-        		//Clear pixel at position
-        		//Set pixel at position
-    			//The pixel should flash to mark where the token should be placed
-    			//Read HE at position
-    			//If engaged, set pixel to blue, break
     			int cur_tick = HAL_GetTick();
-    			if ((cur_tick - start_tick) >= 60000) {
-    				return;
+				if ((cur_tick - start_tick) >= 60000) {
+					return;
+				}
+    			bool hallTrig = checkHallSensor(position.first,position.second, hmcps1, hmcps2);
+
+    			if(hallTrig){
+    				//These three lines color the Hex a darker color than the MoveHex to indicate that the piece has been placed successfully.
+    				//The mapCharBuffer is set back to BaseHex so that integrity of buffer is always preserved
+    				mapCharBuffer[position.second + 16*position.first] = PlayerHexTurn;
+    				displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer)/sizeof(uint8_t));
+    				mapCharBuffer[position.second + 16*position.first] = BaseHex;
+
+    				mapBuffer[position.second + 16*position.first] = PlayerHex;
+    				break;
     			}
-    			//INSERT CODE HERE
+
     		}
 
     		int selection = 1;
     		int prev_selection = 0;
     		int y_pos = 50;
     		key = '\0';
+    		LCD_FillScreen(LCD_WHITE);
     		LCD_WriteStringCentered(50, "Confirm", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(100, "Retry", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
@@ -293,10 +318,10 @@ void Playing_Mode() {
 					switch (selection) {
 						case (1): {
 							LCD_FillScreen(LCD_WHITE);
-							LCD_WriteStringCentered(50, "Please do not remove token", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(50, "Do not remove token", FONT, LCD_BLACK, LCD_WHITE);
 							HAL_Delay(1000);
 							LCD_FillScreen(LCD_WHITE);
-							LCD_WriteStringCentered(10, "Insert initiative roll", FONT, LCD_WHITE, LCD_BLACK);
+							LCD_WriteStringCentered(10, "Insert initiative roll", FONT, LCD_BLACK, LCD_WHITE);
 							key = '\0';
 							char* initiative = new char[3];
 							int no_character = 0;
@@ -309,7 +334,7 @@ void Playing_Mode() {
 							    if (key == '#' && no_character != 0) {
 							        key = '\0';
 							        initiative[no_character] = '\0';
-							        character.SetInitiative(atoi(initiative));
+							        character->SetInitiative(atoi(initiative));
 							        break;
 							    }
 							    else if (key == '*') {
@@ -327,6 +352,7 @@ void Playing_Mode() {
 							        no_character++;
 							        initiative[no_character] = '\0';
 							        LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
+							        key = '\0';
 							    }
 							}
 							i++;
@@ -356,8 +382,9 @@ void Playing_Mode() {
 			}
     	}
     	else {
-    		LCD_WriteStringCentered(10, "Insert initiative roll for", FONT, LCD_WHITE, LCD_BLACK);
-    		std::string name = character.GetName();
+    		LCD_WriteStringCentered(10, "Insert initiative", FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(30, "roll for", FONT, LCD_BLACK, LCD_WHITE);
+    		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 			key = '\0';
@@ -372,7 +399,7 @@ void Playing_Mode() {
 				if (key == '#' && no_character != 0) {
 					key = '\0';
 					initiative[no_character] = '\0';
-					character.SetInitiative(atoi(initiative));
+					character->SetInitiative(atoi(initiative));
 					break;
 				}
 				else if (key == '*') {
@@ -395,6 +422,7 @@ void Playing_Mode() {
 			i++;
     	}
     }
+    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
     game_state = GAME_START_STATE;
 }
 
