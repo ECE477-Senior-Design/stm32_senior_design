@@ -34,6 +34,10 @@
 #include "GameMap.h"
 #include "GameCharacters.h"
 #include "boardlighting.h"
+<<<<<<< Updated upstream
+=======
+#include "displayFuncs.h"
+>>>>>>> Stashed changes
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +56,12 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+<<<<<<< Updated upstream
+=======
+
+
+/* USER CODE BEGIN PV */
+>>>>>>> Stashed changes
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
@@ -59,6 +69,7 @@ SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
+
 DMA_HandleTypeDef hdma_tim1_ch1;
 DMA_HandleTypeDef hdma_tim1_ch2;
 DMA_HandleTypeDef hdma_tim1_ch3;
@@ -68,7 +79,10 @@ DMA_HandleTypeDef hdma_tim3_ch2;
 DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
 
+<<<<<<< Updated upstream
 /* USER CODE BEGIN PV */
+=======
+>>>>>>> Stashed changes
 MCP23017_HandleTypeDef hmcps1[8];
 MCP23017_HandleTypeDef hmcps2[8];
 
@@ -76,6 +90,14 @@ GPIO_InitTypeDef GPIO_init_struct_private = {0};
 
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
+<<<<<<< Updated upstream
+=======
+char key = '\0';
+
+GameState game_state;
+GameMap* map;
+GameCharacters* characters;
+>>>>>>> Stashed changes
 
 char key = '\0';
 
@@ -160,6 +182,10 @@ int main(void)
 
 	int numExpanders = 8;
 	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
@@ -174,6 +200,7 @@ int main(void)
 
 	LCD_Unselect();
 	LCD_Init();
+	LCD_FillScreen(LCD_WHITE);
 
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
@@ -197,6 +224,7 @@ int main(void)
 							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
 							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
 
+<<<<<<< Updated upstream
     map = new GameMap(16, 16);
     bufferToMap(map, mapBuffer);
     std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
@@ -205,6 +233,40 @@ int main(void)
 
 
     displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+=======
+//	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
+//							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
+//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+//
+//    map = new GameMap(16, 16);
+//    bufferToMap(map, mapBuffer);
+//    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
+//
+//    characters = new GameCharacters(charInput);
+//
+//    //displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+//
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
+//	while (1) {
+//		for (int i = 0; i < 8; i++) {
+//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
+//		}
+//	}
+
+>>>>>>> Stashed changes
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -234,7 +296,6 @@ int main(void)
 	  			View_Map();
 	  			break;
 	  		case GAME_START_STATE:
-	  			Game_Start();
 	  			break;
 	  	}
   }

@@ -28,6 +28,5 @@ void DM_Mode(void);
 void Upload_Map(void);
 void View_Map(void);
 void Playing_Mode(void);
-void Game_Start(void);
 
 #endif /* INC_STATES_H_ */
