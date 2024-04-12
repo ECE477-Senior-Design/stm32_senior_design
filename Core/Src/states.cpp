@@ -22,7 +22,6 @@ extern TIM_HandleTypeDef htim3;
 extern MCP23017_HandleTypeDef hmcps1[8];
 extern MCP23017_HandleTypeDef hmcps2[8];
 
-<<<<<<< Updated upstream
 extern GameMap* map;
 extern GameCharacters* characters;
 
@@ -39,8 +38,6 @@ void LED_Test(void) {
 	HAL_Delay(500);
 }
 
-=======
->>>>>>> Stashed changes
 void Welcome(void) {
 	int counter = 0;
 	key = '\0';
@@ -152,12 +149,6 @@ void DM_Mode(void) {
 
 void Upload_Map(void)
 {
-	int selection = 1;
-	int prev_selection = 0;
-	int y_pos = 50;
-	key = '\0';
-<<<<<<< Updated upstream
-=======
 	int usb_status = check_usb_connection();
 	if (usb_status) {
 		LCD_WriteStringCentered(100, "Waiting For Connection...", FONT, LCD_BLACK, LCD_WHITE);
@@ -165,7 +156,6 @@ void Upload_Map(void)
 	while (check_usb_connection());
 
 	LCD_FillScreen(LCD_WHITE);
->>>>>>> Stashed changes
 	LCD_WriteStringCentered(100, "Send Map Now", FONT, LCD_BLACK, LCD_WHITE);
 
 	if (load_map() != 0) {
@@ -181,6 +171,10 @@ void Upload_Map(void)
 		return;
 	}
 
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 50;
+	key = '\0';
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
@@ -222,8 +216,6 @@ void Upload_Map(void)
 }
 
 void View_Map() {
-<<<<<<< Updated upstream
-=======
 	if (map == NULL) {
 		game_state = DM_MODE_STATE;
 		LCD_WriteStringCentered(100, "Map Not Initialized", FONT, LCD_WHITE, LCD_BLACK);
@@ -233,7 +225,6 @@ void View_Map() {
 		return;
 	}
 
->>>>>>> Stashed changes
 	uint8_t mapBuffer[256];
 	for (int row = 0; row < map->GetRows(); row++){
 		for (int col = 0; col < map->GetColumns(); col++){
@@ -260,7 +251,6 @@ void View_Map() {
 		}
 	}
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-
 
 	int selection = 1;
 	int y_pos = 50;
@@ -364,8 +354,6 @@ void Playing_Mode() {
 							        key = '\0';
 							    }
 							}
-<<<<<<< Updated upstream
-=======
 
 				    		selection = 1;
 				    		prev_selection = 0;
@@ -401,7 +389,6 @@ void Playing_Mode() {
 									prev_selection = selection;
 								}
 							}
->>>>>>> Stashed changes
 							break;
 						}
 						case (2):
@@ -453,7 +440,6 @@ void Playing_Mode() {
 				else if (key == '*') {
 					key = '\0';
 					if (no_character > 0) {
-<<<<<<< Updated upstream
 						LCD_WriteStringCentered(50, initiative, FONT, LCD_WHITE, LCD_WHITE);
 						no_character--;
 						initiative[no_character] = '\0';
@@ -466,11 +452,10 @@ void Playing_Mode() {
 					no_character++;
 					initiative[no_character] = '\0';
 					LCD_WriteStringCentered(50, initiative, FONT, LCD_BLACK, LCD_WHITE);
-=======
-						LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
-						no_character--;
-						initiative[no_character] = '\0';
-						LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
+					LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
+					no_character--;
+					initiative[no_character] = '\0';
+					LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
 					}
 				}
 				else if (no_character < 2 && Key_Is_Number(key)) {
@@ -515,10 +500,8 @@ void Playing_Mode() {
 					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
 					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 					prev_selection = selection;
->>>>>>> Stashed changes
 				}
 			}
-			i++;
     	}
     }
     characters->SortCharacters();

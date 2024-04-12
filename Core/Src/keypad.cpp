@@ -93,7 +93,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = '2';
 		}
 		else if(GPIO_pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_5)) {
-			key = '3';
+			key = '5';
 		}
 		else if(GPIO_pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_6)) {
 			key = '8';

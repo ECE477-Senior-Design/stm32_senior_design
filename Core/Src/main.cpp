@@ -34,10 +34,17 @@
 #include "GameMap.h"
 #include "GameCharacters.h"
 #include "boardlighting.h"
-<<<<<<< Updated upstream
-=======
+
+
+
+
+
+
+
+
+
+
 #include "displayFuncs.h"
->>>>>>> Stashed changes
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,12 +63,13 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-<<<<<<< Updated upstream
-=======
+
+/*LCD & KEYPAD GLOBAL VARIABLES ----------------------------------------------*/
+
+/* ---------------------------------------------------------------------------*/
 
 
-/* USER CODE BEGIN PV */
->>>>>>> Stashed changes
+/* LED & HALL EFFECT SENSOR GLOBAL VARIABLES ---------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
@@ -69,7 +77,6 @@ SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
-
 DMA_HandleTypeDef hdma_tim1_ch1;
 DMA_HandleTypeDef hdma_tim1_ch2;
 DMA_HandleTypeDef hdma_tim1_ch3;
@@ -78,33 +85,25 @@ DMA_HandleTypeDef hdma_tim3_ch1_trig;
 DMA_HandleTypeDef hdma_tim3_ch2;
 DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
+/* ---------------------------------------------------------------------------*/
 
-<<<<<<< Updated upstream
+/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
+GameMap *map;
+GameCharacters * characters;
+
+
+/* ---------------------------------------------------------------------------*/
+
+
 /* USER CODE BEGIN PV */
-=======
->>>>>>> Stashed changes
 MCP23017_HandleTypeDef hmcps1[8];
 MCP23017_HandleTypeDef hmcps2[8];
-
 GPIO_InitTypeDef GPIO_init_struct_private = {0};
-
 uint32_t current_mill = 0;
 uint32_t previous_mill = 0;
-<<<<<<< Updated upstream
-=======
 char key = '\0';
-
 GameState game_state;
-GameMap* map;
-GameCharacters* characters;
->>>>>>> Stashed changes
 
-char key = '\0';
-
-GameCharacters* characters;
-GameMap *map;
-
-GameState game_state;
 /* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
@@ -150,6 +149,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -182,10 +182,7 @@ int main(void)
 
 	int numExpanders = 8;
 	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 	for (int i = 0; i < numExpanders; i++) {
 	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
@@ -198,42 +195,25 @@ int main(void)
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	 }
 
+//	for(int i = 0; i < 32; i++){
+//		Set_LED(i, 255, 0, 0);
+//	}
+//	for(int ch = 1; ch < 5; ch++){
+//		Set_Brightness(20);
+//		WS2812_Send(&htim3, ch);
+//	}
+
 	LCD_Unselect();
 	LCD_Init();
-	LCD_FillScreen(LCD_WHITE);
 
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
-	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+	clearMap(htim1,htim3);
+	map = NULL;
 
-<<<<<<< Updated upstream
-    map = new GameMap(16, 16);
-    bufferToMap(map, mapBuffer);
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,13,0,0", "Jimmy,15,11,100,100,100,100,100,100,100,100,100,100,100,0,0"};
-
-    characters = new GameCharacters(charInput);
-
-
-    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-=======
 //	uint8_t mapBuffer[256] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 //							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 //							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
@@ -258,24 +238,27 @@ int main(void)
 //    characters = new GameCharacters(charInput);
 //
 //    //displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-//
-//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
-//	while (1) {
-//		for (int i = 0; i < 8; i++) {
-//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
-//		}
-//	}
 
->>>>>>> Stashed changes
+//    View_Character_Info(characters->GetCharacter(0), MENU_STATE); // <-- CHANGE THE MENU_STATE! WE WANT TO RETURN INSTEAD!
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+//	  for(int i = 0; i < 8; i++)
+//	  {
+//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
+//	  }
+
+
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();
@@ -296,6 +279,7 @@ int main(void)
 	  			View_Map();
 	  			break;
 	  		case GAME_START_STATE:
+	  			Game_Start();
 	  			break;
 	  	}
   }
@@ -655,6 +639,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4|GPIO_PIN_8, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PA9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;

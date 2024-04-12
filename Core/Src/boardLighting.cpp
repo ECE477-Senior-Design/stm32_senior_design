@@ -1,7 +1,3 @@
-//MOST RECENT AUTHOR: Landon
-//DATE: 4/3/2024
-
-
 #include <ws2812b.h>
 #include "boardLighting.h"
 #include <cstddef>
@@ -15,7 +11,7 @@
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
-	clearMap(htim1,htim3);
+	//clearMap(htim1,htim3);
 	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
 	int test[256] = {};
 	uint32_t color;
@@ -259,12 +255,3 @@ void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 	  WS2812_Send(&htim3,ch);
 	}
 }
-
-
-
-
-
-
-
-
-
