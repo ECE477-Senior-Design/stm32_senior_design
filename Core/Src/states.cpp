@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 
 extern GameMap* map;
-extern GameCharacters characters;
+extern GameCharacters *characters;
 
 void LED_Test(void) {
 	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -154,7 +154,8 @@ void Upload_Map(void)
 	key = '\0';
 	int usb_status = check_usb_connection();
 	if(usb_status) {
-		LCD_WriteStringCentered(100, "Waiting for Connection...", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(100, "Waiting for USB", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(90, "Connection...", FONT, LCD_BLACK, LCD_WHITE);
 
 	}
 	while(check_usb_connection());
@@ -222,6 +223,14 @@ void Upload_Map(void)
 void View_Map() {
 	uint8_t mapBuffer[256];
 
+	if(map == NULL) {
+		game_state = DM_MODE_STATE;
+		LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		HAL_Delay(500);
+		LCD_FillScreen(LCD_WHITE);
+		return;
+	}
+
 	for(int row = 0; row < map->GetRows(); row++){
 		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
@@ -249,10 +258,10 @@ void View_Map() {
 
 void Playing_Mode() {
 	int i = 0;
-    while (i < characters.GetNumberCharacters()) {
-    	Character& character = characters.GetCharacter(i);
+    while (i < characters->GetNumberCharacters()) {
+    	Character& character = characters->GetCharacter(i);
     	if (character.GetCharacterType() == Player) {
-    		std::pair<int, int> position = character.GetPosition();
+    	//	std::pair<int, int> position = character.GetPosition();
     		LCD_WriteStringCentered(10, "Please place token for", FONT, LCD_BLACK, LCD_WHITE);
     		std::string name = character.GetName();
     		const char* char_name = name.c_str();
@@ -427,21 +436,124 @@ void Game_Start() {
 		}
 	}
 
-	//THIS DOES NOT WORK
-	characters.SortCharacters();
+	characters->SortCharacters();
 
 	game_state = GAME_LOOP_STATE;
 }
 
 void Game_Loop(void) {
-	while(characters.GetNumberCharacters() > 1) {
-		for(int i = 0; i < characters.GetNumberCharacters(); i++) {
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 25;
+	key = '\0';
+	if(characters == NULL) {
+		game_state = MENU_STATE;
+		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		HAL_Delay(500);
+		return;
+	}
+	while(characters->GetNumberCharacters() > 1) {
+		for(int i = 0; i < characters->GetNumberCharacters(); i++) {
 			//check conditions for continuing game
+			if(map == NULL) {
+				game_state = MENU_STATE;
+				LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+				HAL_Delay(500);
+				return;
+			}
+
 			//Display character name ex: it is neils turn
+
+			LCD_WriteStringCentered(110, "It is", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(100, characters->GetCharacter(i).GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(90, "Turn", FONT, LCD_WHITE, LCD_BLACK);
+
+			LCD_WriteStringCentered(50, "Click to Continue", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(25, "Click to Return to Menu", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1):
+							break;
+						case (2):
+							game_state = MENU_STATE;
+							return;
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+					selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+					selection = (selection < 2) ? selection + 1 : 2;
+				}
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
+
+
 			//Give option for info, action, move
+			LCD_WriteStringCentered(120, "How will you proceed?", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(100, "Move Player", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(90, "Character Info", FONT, LCD_WHITE, LCD_BLACK);
+			LCD_WriteStringCentered(80, "Enter Combat", FONT, LCD_WHITE, LCD_BLACK); //maybe add conditional here for if combat is possible
 			//branch based on selection
+
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1):
+							//move function here
+							break;
+						case (2):
+							//character info function
+							break;
+						case (3):
+							//combat function here
+							break;
+
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+					selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+					selection = (selection < 3) ? selection + 1 : 3;
+				}
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
+
 
 		}
 	}
+	if(characters->GetNumberCharacters() == 1) {
+		LCD_WriteStringCentered(110, "Congrats", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(100, characters->GetCharacter(0).GetName().c_str(), FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(90, "You win!", FONT, LCD_WHITE, LCD_BLACK);
+
+		LCD_WriteStringCentered(50, "Enter to Continue", FONT, LCD_WHITE, LCD_BLACK);
+
+	}
+	game_state = MENU_STATE;
 }
 
