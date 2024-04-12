@@ -26,7 +26,7 @@ void Display_Stats(Character* character, int select){
 		LCD_WriteStringCentered(240, "View Attributes", FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(260, "Return", FONT, LCD_BLACK, LCD_WHITE);
 	}
-	else if (select == 1) {
+	else {
 		LCD_WriteStringCentered(50, character->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteString(30, 80, ("Str: " + std::to_string(character->GetStrength())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteString(30, 100, ("Dex: " + std::to_string(character->GetDexterity())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
@@ -44,7 +44,8 @@ void View_Character_Info(Character* character){
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 20;
-	int page = 1;
+	int page = 0;
+	Display_Stats(character, page);
 	key = '\0';
 	while (1) {
 		if (key == '#') {
@@ -55,11 +56,13 @@ void View_Character_Info(Character* character){
 						page = 1;
 
 					}
-					else if (page == 1) {
+					else {
 						page = 0;
 					}
 					Display_Stats(character, page);
 					LCD_FillRectangle(10, selection * y_pos + 220, 10, 18, LCD_BLACK);
+					HAL_Delay(500);
+					key = '\0';
 					break;
 				case (2):
 					LCD_FillScreen(LCD_WHITE);

@@ -348,7 +348,6 @@ void Playing_Mode() {
 									key = '\0';
 									switch (selection) {
 										case (1):
-											LCD_FillScreen(LCD_WHITE);
 											View_Character_Info(character);
 										case (2):
 											break;
@@ -541,7 +540,7 @@ void Game_Loop(void) {
 			}
 
 			//Display character name ex: it is neils turn
-
+			y_pos = 25;
 			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(60, (characters->GetCharacter(i)->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(80, "Turn", FONT, LCD_BLACK, LCD_WHITE);
@@ -580,14 +579,19 @@ void Game_Loop(void) {
 			}
 
 			y_pos = 20;
+			selection = 1;
+			HAL_Delay(500);
+
 
 			//Give option for info, action, move
 			LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
-			//branch based on selection
+			LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
 
+			//branch based on selection
+			key = '\0';
 			while (1) {
 				if (key == '#') {
 					key = '\0';
@@ -607,7 +611,7 @@ void Game_Loop(void) {
 					}
 					LCD_FillScreen(LCD_WHITE);
 					HAL_Delay(500);
-					break;
+
 				}
 				if (key == 'A') {
 					key = '\0';
@@ -633,6 +637,11 @@ void Game_Loop(void) {
 		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
 
 		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
+		while(1) {
+			if(key == '#') {
+				break;
+			}
+		}
 
 	}
 	game_state = MENU_STATE;
