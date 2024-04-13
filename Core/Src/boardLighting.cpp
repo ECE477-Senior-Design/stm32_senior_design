@@ -1,3 +1,7 @@
+//MOST RECENT AUTHOR: Landon
+//DATE: 4/3/2024
+
+
 #include <ws2812b.h>
 #include "boardLighting.h"
 #include <cstddef>
@@ -11,7 +15,7 @@
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
-	//clearMap(htim1,htim3);
+	clearMap(htim1,htim3);
 	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
 	int test[256] = {};
 	uint32_t color;
@@ -51,10 +55,10 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				 test[led + (pcb*32)] = 5;
 				 break;
 
-//			 case PlayerHexTurn:
-//				 Set_LED(led,0, 255, 0); //hex of player when its their turn
-//				 test[led + (pcb*32)] = 5;
-//				 break;
+			 case PlayerHexTurn:
+				 Set_LED(led,0, 255, 0); //hex of player when its their turn
+				 test[led + (pcb*32)] = 5;
+				 break;
 
 			 default:
 				 Set_LED(led,0,0,0); //default off
@@ -124,9 +128,9 @@ void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
 				mapBuffer[col + (row*16)] = 5;
 				break;
 
-//			case PlayerHexTurn:
-//				mapBuffer[col + (row*16)] = 6;
-//				break;
+			case PlayerHexTurn:
+				mapBuffer[col + (row*16)] = 6;
+				break;
 
 
 			}
@@ -165,9 +169,9 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 				map->ChangeHex(row, col, MoveHex);
 				break;
 
-//			case 6:
-//				map->ChangeHex(row, col, PlayerHexTurn);
-//				break;
+			case 6:
+				map->ChangeHex(row, col, PlayerHexTurn);
+				break;
 
 
 			}
@@ -270,3 +274,15 @@ void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 	  WS2812_Send(&htim3,ch);
 	}
 }
+
+
+GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+	return map;
+}
+
+
+
+
+
+
+
