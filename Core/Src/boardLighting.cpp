@@ -11,6 +11,10 @@
 #include "keypad.h"
 #include "lcd.h"
 
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
+extern GameCharacters * characters;
+
 
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
@@ -51,14 +55,14 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				  break;
 
 			 case MoveHex:
-				 Set_LED(led,73, 252, 82); //possible moves
+				 Set_LED(led,0, 255, 0); //possible moves
 				 test[led + (pcb*32)] = 5;
 				 break;
 
-			 case PlayerHexTurn:
-				 Set_LED(led,0, 255, 0); //hex of player when its their turn
-				 test[led + (pcb*32)] = 5;
-				 break;
+//			 case PlayerHexTurn:
+//				 Set_LED(led,0, 255, 0); //hex of player when its their turn
+//				 test[led + (pcb*32)] = 5;
+//				 break;
 
 			 default:
 				 Set_LED(led,0,0,0); //default off
@@ -128,9 +132,9 @@ void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
 				mapBuffer[col + (row*16)] = 5;
 				break;
 
-			case PlayerHexTurn:
-				mapBuffer[col + (row*16)] = 6;
-				break;
+//			case PlayerHexTurn:
+//				mapBuffer[col + (row*16)] = 6;
+//				break;
 
 
 			}
@@ -169,9 +173,9 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 				map->ChangeHex(row, col, MoveHex);
 				break;
 
-			case 6:
-				map->ChangeHex(row, col, PlayerHexTurn);
-				break;
+//			case 6:
+//				map->ChangeHex(row, col, PlayerHexTurn);
+//				break;
 
 
 			}
@@ -184,14 +188,14 @@ void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
 
 
 
-GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex, Character* _character, int* _movement){
 	  TIM_HandleTypeDef timers[] = {htim1, htim3};
 	  uint8_t mapBuffer[256];
 	  mapToBuffer(map, mapBuffer);
 	  uint8_t prevMapBuffer[256];
 	  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
 
-	  int movement = 3;
+	  int movement = *_movement;
 	  //Hexagon* currHex = map->GetHex(0,1);
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
 	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
@@ -221,9 +225,15 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 				  if(hallTrig){
 					  //update buffer or map
 					  mapBuffer[col + 16*row] = currHex->GetType();
+					  _character->SetColumn(col);
+					  _character->SetRow(row);
 					  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = BaseHex;
 					  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
+					  map->GetHex(row,col)->SetType(currHex->GetType());
+					  currHex->SetType(BaseHex);
+					  currHex->SetPassable(true);
 					  currHex = map->GetHex(row,col);
+					  currHex->SetPassable(false);
 
 
 					  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
@@ -242,18 +252,21 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 			  }
 
 			  if(movement <= 0){
+				  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 				  break;
 			  }
 
 		  }
 		  if(key == '*'){
 			  key = '\0';
+			  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 			  break;
 		  }
 
 	  }
 
 	  bufferToMap(map,mapBuffer);
+	  *_movement = movement;
 
 	  return map;
 }
@@ -281,6 +294,15 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_Ha
 }
 
 
+void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type){
+	displayMap(htim1, htim3, mapCharBuffer, 256);
+	HAL_Delay(500);
+	mapCharBuffer[col + 16 * row] = type;
+	displayMap(htim1, htim3, mapCharBuffer, 256);
+	mapCharBuffer[col + 16 * row] = BaseHex;
+	HAL_Delay(500);
+
+}
 
 
 

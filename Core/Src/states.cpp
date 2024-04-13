@@ -262,9 +262,7 @@ void Playing_Mode() {
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 
-    		mapCharBuffer[position.second + 16 * position.first] = PlayerHex;
-    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer) / sizeof(uint8_t));
-    		mapCharBuffer[position.second + 16 * position.first] = BaseHex;
+
 
     		int start_tick = HAL_GetTick();
     		while (1) {
@@ -272,6 +270,11 @@ void Playing_Mode() {
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
 				}
+
+
+				blinkLED(mapCharBuffer , position.first, position.second, PlayerHex);
+
+
     			bool hallTrig = checkHallSensor(position.first, position.second, hmcps1, hmcps2);
     			if (hallTrig) {
     				mapBuffer[position.second + 16  *position.first] = PlayerHex;
@@ -514,6 +517,8 @@ void Playing_Mode() {
 			prev_selection = selection;
 		}
 	}
+
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 }
 
 void Game_Loop(void) {
@@ -582,52 +587,66 @@ void Game_Loop(void) {
 			selection = 1;
 			HAL_Delay(500);
 
+			int movement = 3;
+			int action = 0;
 
-			//Give option for info, action, move
-			LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
-			LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
+			while(movement > 0 || action == 1){
 
-			//branch based on selection
-			key = '\0';
-			while (1) {
-				if (key == '#') {
-					key = '\0';
-					switch (selection) {
-						case (1):
-							//move function here
-							//GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+				//Give option for info, action, move
+				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				LCD_WriteStringCentered(160, "End Turn", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
 
-							break;
-						case (2):
-							View_Character_Info(characters->GetCharacter(i));
-							break;
-						case (3):
-							//combat function here
-							break;
+				//branch based on selection
+				key = '\0';
+				while (1) {
+					if (key == '#') {
+						key = '\0';
+						switch (selection) {
+							case (1):
+								//move function here
+								//map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), &movement);
+								map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()),characters->GetCharacter(i), &movement);
+
+								break;
+							case (2):
+								View_Character_Info(characters->GetCharacter(i));
+								break;
+							case (3):
+								//combat function here
+								action = 0;
+								break;
+
+							case (4):
+								//end turn
+								movement = 0;
+								action = 0;
+								break;
+
+						}
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
+						break;
 
 					}
-					LCD_FillScreen(LCD_WHITE);
-					HAL_Delay(500);
-
-				}
-				if (key == 'A') {
-					key = '\0';
-					selection = (selection > 1) ? selection - 1 : 1;
-				}
-				if (key == 'D') {
-					key = '\0';
-					selection = (selection < 3) ? selection + 1 : 3;
-				}
-				if (selection != prev_selection) {
-					LCD_FillRectangle(10, 80 +prev_selection * y_pos, 10, 18, LCD_WHITE);
-					LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
-					prev_selection = selection;
+					if (key == 'A') {
+						key = '\0';
+						selection = (selection > 1) ? selection - 1 : 1;
+					}
+					if (key == 'D') {
+						key = '\0';
+						selection = (selection < 4) ? selection + 1 : 4;
+					}
+					if (selection != prev_selection) {
+						LCD_FillRectangle(10, 80 +prev_selection * y_pos, 10, 18, LCD_WHITE);
+						LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
+						prev_selection = selection;
+					}
 				}
 			}
-
 
 		}
 	}

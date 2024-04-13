@@ -187,8 +187,8 @@ std::vector<Hexagon*> GameMap::GetNeighbors(Hexagon* hexagon) {
 std::vector<Hexagon*> GameMap::PossibleMovements(Hexagon* start, int movement) {
     std::queue<std::pair<Hexagon*, int>> queue;
     std::vector<Hexagon*> visited;
-    //queue.push({start, 0});
-    visited.push_back(start);
+    queue.push({start, 0});
+    //visited.push_back(start);
 
     while (!queue.empty()) {
         Hexagon* current = queue.front().first;
