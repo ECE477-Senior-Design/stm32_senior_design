@@ -15,6 +15,7 @@ DATE: 10/31/2023
 #include <iostream>
 #include <limits>
 #include <unordered_map>
+#include <set>
 
 //Defines the type of hexes (eventually add chest)
 enum HexagonType {

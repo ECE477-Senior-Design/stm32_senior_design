@@ -554,6 +554,15 @@ void Game_Loop(void) {
 			LCD_WriteStringCentered(225, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, 175+ selection * y_pos, 10, 18, LCD_BLACK);
 
+			key = '\0';
+
+			std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), 5);
+			uint8_t fovbuf[256]= {0};
+			FOVToBuffer(fovbuf, view);
+			displayMap(htim1, htim3, fovbuf, 256 );
+
+
+
 			while (1) {
 				if (key == '#') {
 					key = '\0';

@@ -20,7 +20,7 @@
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, uint8_t* mapBuffer, size_t bufferSize );
 
 
-void mapHexesToBuffer(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> hexes, int colorMod);
+void mapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int colorMod);
 
 void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type);
 
@@ -35,5 +35,8 @@ void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3);
 GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex);
 
 void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type);
+
+void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes);
+
 
 #endif /* INC_WS2812B_H_ */

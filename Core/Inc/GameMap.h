@@ -39,11 +39,12 @@ class GameMap {
         std::vector<Hexagon*> GetNeighbors(Hexagon* hexagon);
         std::vector<Hexagon*> PossibleMovements(Hexagon* start, int movement);
         int HexDistance(Hexagon* start, Hexagon* end);
-        double Lerp(int a, int b, double t);
-        Hexagon* HexLerp(Hexagon* a, Hexagon* b, double t);
-        std::vector<Hexagon*> HexLineDraw(Hexagon* start, Hexagon* end, bool& check);
-
-        std::vector<Hexagon*> FieldOfView(Hexagon* start, int range);
+		double Lerp(double a, double b, double t);
+		std::pair<double, double> HexLerp(Hexagon* a, Hexagon* b, double t);
+		std::vector<double> AxialCube(std::pair<double, double> coordinates);
+		Hexagon* HexRound(std::vector<double> coordinates);
+		std::vector<Hexagon*> HexLineDraw(Hexagon* start, Hexagon* end);
+		std::vector<Hexagon*> FieldOfView(Hexagon* start, int range);
         std::vector<Hexagon*> FindClosestPlayer(Hexagon* monster_hexagon, std::vector<Hexagon*> characters_hexagons);
         std::vector<Hexagon*> PathFind(Hexagon* start, Hexagon* end);
 

@@ -79,8 +79,8 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 
 
 
-void mapHexesToBuffer(uint8_t* mapBuffer, uint8_t* mapBufferPrev, std::vector<Hexagon*> hexes, int colorMod){
-	std::memcpy(mapBufferPrev, mapBuffer, sizeof(uint8_t) * 256);
+void mapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int colorMod){
+	//std::memcpy(mapBufferPrev, mapBuffer, sizeof(uint8_t) * 256);
 	int sizeHexes = hexes.size();
 	int colN;
 	int rowN;
@@ -192,18 +192,18 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 	  TIM_HandleTypeDef timers[] = {htim1, htim3};
 	  uint8_t mapBuffer[256];
 	  mapToBuffer(map, mapBuffer);
-	  uint8_t prevMapBuffer[256];
-	  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+//	  uint8_t prevMapBuffer[256];
+//	  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
 
 	  int movement = *_movement;
 	  //Hexagon* currHex = map->GetHex(0,1);
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
-	  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
+	  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 
 	  //clearMap(htim1,htim3);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 	  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-	  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
+	//  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 
 	  key = '\0';
 
@@ -236,12 +236,12 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 					  currHex->SetPassable(false);
 
 
-					  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+					  //std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
 					  if(movement > 0){
 						  possibleMoves = map->PossibleMovements(currHex, movement);
-						  mapHexesToBuffer(mapBuffer, prevMapBuffer, possibleMoves, MoveHex);
+						  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-						  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
+						 // std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 					  }
 					  else{
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
@@ -304,6 +304,18 @@ void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type){
 
 }
 
+
+void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
+	int sizeHexes = hexes.size();
+	int colN;
+	int rowN;
+	for(int i = 0; i < sizeHexes; i++){
+		 colN = hexes[i]->GetHexColumn();
+		 rowN = hexes[i]->GetHexRow();
+		 mapBuffer[colN + 16*rowN] = hexes[i]->GetType();
+		// mapBuffer[colN + 16*rowN] = 1;
+	}
+}
 
 
 
