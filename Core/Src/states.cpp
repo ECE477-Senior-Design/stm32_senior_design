@@ -588,7 +588,7 @@ void Game_Loop(void) {
 			HAL_Delay(500);
 
 			int movement = 3;
-			int action = 0;
+			int action = 1;
 
 			while(movement > 0 || action == 1){
 
@@ -608,8 +608,9 @@ void Game_Loop(void) {
 						switch (selection) {
 							case (1):
 								//move function here
-								//map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), &movement);
-								map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()),characters->GetCharacter(i), &movement);
+								if(movement > 0){
+									map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()),characters->GetCharacter(i), &movement);
+								}
 
 								break;
 							case (2):
@@ -617,6 +618,9 @@ void Game_Loop(void) {
 								break;
 							case (3):
 								//combat function here
+								if(action == 1){
+									map = combatMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()),characters->GetCharacter(i));
+								}
 								action = 0;
 								break;
 

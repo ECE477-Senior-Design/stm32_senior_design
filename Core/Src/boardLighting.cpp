@@ -14,12 +14,12 @@
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 extern GameCharacters * characters;
-
+//extern GameCharacters * monsters;
 
 
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
-	clearMap(htim1,htim3);
+	//clearMap(htim1,htim3);
 	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
 	int test[256] = {};
 	uint32_t color;
@@ -59,10 +59,15 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				 test[led + (pcb*32)] = 5;
 				 break;
 
-//			 case PlayerHexTurn:
-//				 Set_LED(led,0, 255, 0); //hex of player when its their turn
-//				 test[led + (pcb*32)] = 5;
-//				 break;
+			 case 6:  ///PlayerHit
+				 Set_LED(led,100, 100, 0); //hex of player when its their turn
+				 test[led + (pcb*32)] = 6;
+				 break;
+
+			 case 7:  ///MonsterHit
+				 Set_LED(led,252, 148, 3); //hex of player when its their turn
+				 test[led + (pcb*32)] = 7;
+				 break;
 
 			 default:
 				 Set_LED(led,0,0,0); //default off
@@ -289,22 +294,236 @@ void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 }
 
 
-GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex){
+GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex, Character* _character){
+	int targetType;
+	if(_character->GetCharacterType() == Player){
+		targetType = MonsterHex;
+	}
+	else{
+		targetType = PlayerHex;
+	}
+
+
+	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
+	std::vector<Hexagon*> targetHex;
+	for(int hex = 0; hex < neighbors.size(); hex++){
+		if(neighbors[hex]->GetType() == targetType ){
+			targetHex.push_back(neighbors[hex]);
+		}
+	}
+
+	if(targetHex.size() == 0){
+		LCD_WriteStringCentered(50, "No enemies in range", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(1000);
+		return map;
+	}
+
+	uint8_t mapBuffer[256];
+	mapToBuffer(map, mapBuffer);
+	uint8_t charMapBuffer[256];
+	std::memcpy(charMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+
+	int selection = 0;
+
+
+
+	Character* targetSelection = NULL;
+	int finalTargetIndex = 0;
+	for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
+		if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
+			if(targetSelection->GetCharacterType() != DEAD){
+				targetSelection = characters->GetCharacter(targetSelect);
+				finalTargetIndex = targetSelect;
+				break;
+			}
+		}
+	}
+
+	LCD_FillScreen(LCD_WHITE);
+	HAL_Delay(500);
+	LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
+	LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(70, ("Armor Class: " + std::to_string(targetSelection->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+
+
+	key = '\0';
+	while (1) {
+
+		blinkLED(charMapBuffer , targetHex[selection]->GetHexRow(), targetHex[selection]->GetHexColumn(), targetType);
+
+		if (key == '#') {
+			key = '\0';
+			int attackRoll = getRoll("attack");
+			if(attackRoll >= targetSelection->GetArmorClass() ){
+				LCD_WriteStringCentered(50, "ATTACK HIT", FONT, LCD_BLACK, LCD_WHITE);
+				HAL_Delay(500);
+				int damageRoll = getRoll("damage");
+				targetSelection->SetCurrentHealthPoints(targetSelection->GetCurrentHealthPoints() - damageRoll);
+
+				attackHit(charMapBuffer , targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
+				//if attack kills target
+				if((targetSelection->GetCurrentHealthPoints() - damageRoll) <= 0){
+					targetHex[selection]->SetType(BaseHex);
+					targetHex[selection]->SetPassable(true);
+					targetSelection->SetCharacterType(DEAD);
+
+					mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
+					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+
+					LCD_WriteStringCentered(30, (targetSelection->GetName() + " killed").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+					HAL_Delay(1000);
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+
+				}
+				else{
+					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+				}
+
+				break;
+
+			}
+			else{
+				LCD_WriteStringCentered(50, "ATTACK MISSED", FONT, LCD_BLACK, LCD_WHITE);
+				HAL_Delay(2000);
+				break;
+			}
+
+		}
+		if (key == 'A') {
+			key = '\0';
+			int prevSelection = selection;
+			selection = (selection > 0) ? selection - 1 : 0;
+			//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+			for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
+				if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
+					targetSelection = characters->GetCharacter(targetSelect);
+				}
+			}
+			if(selection != prevSelection){
+				LCD_FillScreen(LCD_WHITE);
+				HAL_Delay(500);
+				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
+				LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(70, ("Armor Class: " + std::to_string(targetSelection->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+			}
+		}
+		if (key == 'D') {
+			key = '\0';
+			int prevSelection = selection;
+			selection = (selection < (targetHex.size()-1)) ? selection + 1 : (targetHex.size()-1);
+			//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+			for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
+				if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
+					targetSelection = characters->GetCharacter(targetSelect);
+				}
+			}
+
+
+			if(selection != prevSelection){
+				LCD_FillScreen(LCD_WHITE);
+				HAL_Delay(500);
+				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
+				LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(70, ("Armor Class: " + std::to_string(targetSelection->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+			}
+
+
+		}
+		if(key == '*'){
+		  key = '\0';
+		  break;
+		}
+	}
+
+	LCD_FillScreen(LCD_WHITE);
+	HAL_Delay(500);
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+	bufferToMap(map,mapBuffer);
+
+
 	return map;
 }
 
 
 void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type){
-	displayMap(htim1, htim3, mapCharBuffer, 256);
 	HAL_Delay(500);
-	mapCharBuffer[col + 16 * row] = type;
-	displayMap(htim1, htim3, mapCharBuffer, 256);
 	mapCharBuffer[col + 16 * row] = BaseHex;
+	displayMap(htim1, htim3, mapCharBuffer, 256);
+	mapCharBuffer[col + 16 * row] = type;
 	HAL_Delay(500);
+	displayMap(htim1, htim3, mapCharBuffer, 256);
 
 }
 
 
+
+int getRoll(const std::string& inputStr) {
+	LCD_FillScreen(LCD_WHITE);
+	LCD_WriteStringCentered(10, ("Insert " + inputStr).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(30, "roll", FONT, LCD_BLACK, LCD_WHITE);
+	char* initiative = new char[3];
+	int no_character = 0;
+	int start_tick = HAL_GetTick();
+	while (1) {
+		int cur_tick = HAL_GetTick();
+		if ((cur_tick - start_tick) >= 60000) {
+			return 0;
+		}
+
+		if (key == '#' && no_character != 0) {
+			key = '\0';
+			initiative[no_character] = '\0';
+			//character->SetInitiative(atoi(initiative));
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+			break;
+		}
+		else if (key == '*') {
+			key = '\0';
+			if (no_character > 0) {
+				LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
+				no_character--;
+				initiative[no_character] = '\0';
+				LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
+			}
+		}
+		else if (no_character < 2 && Key_Is_Number(key)) {
+			LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
+			initiative[no_character] = key;
+			no_character++;
+			initiative[no_character] = '\0';
+			LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
+			key = '\0';
+		}
+	}
+
+	return atoi(initiative);
+}
+
+
+void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
+	for(int i = 0; i < 3; i++){
+		if(type == Player){
+			mapCharBuffer[col + 16 * row] = 6;
+		}
+		else{
+			mapCharBuffer[col + 16 * row] = 7;
+		}
+		displayMap(htim1, htim3, mapCharBuffer, 256);
+		HAL_Delay(50);
+		mapCharBuffer[col + 16 * row] = type;
+		displayMap(htim1, htim3, mapCharBuffer, 256);
+		HAL_Delay(100);
+	}
+
+}
 
 
 
