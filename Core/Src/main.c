@@ -22,19 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "fonts.h"
-#include "lcd.h"
-#include "keypad.h"
-#include "states.h"
-#include "usb.h"
-#include "math.h"
-#include "stdio.h"
-#include "mcp23017.h"
-#include "ws2812b.h"
-#include "GameMap.h"
-#include "GameCharacters.h"
-#include "boardlighting.h"
-#include "displayFuncs.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,31 +58,7 @@ DMA_HandleTypeDef hdma_tim3_ch3;
 DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 /* USER CODE BEGIN PV */
-MCP23017_HandleTypeDef hmcps1[8];
-MCP23017_HandleTypeDef hmcps2[8];
 
-GPIO_InitTypeDef GPIO_init_struct_private = {0};
-
-uint32_t current_mill = 0;
-uint32_t previous_mill = 0;
-
-char key = '\0';
-
-GameState game_state;
-/* ---------------------------------------------------------------------------*/
-
-/*Gameplay Global Variables --------------------------------------------------*/
-
-/*----------------------------------------------------------------------------*/
-
-/* ---------------------------------------------------------------------------*/
-
-/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
-GameMap *map = NULL;
-GameCharacters * characters = NULL;
-
-
-/* ---------------------------------------------------------------------------*/
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,21 +76,6 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
-	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_4);
-	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_4);
-
-	htim1.Instance->CCR1 = 0;
-	htim3.Instance->CCR1 = 0;
-
-	datasentflag = 1;
-}
 
 /* USER CODE END 0 */
 
@@ -166,69 +115,7 @@ int main(void)
   MX_TIM3_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-	game_state = WELCOME_STATE;
 
-	int numExpanders = 8;
-	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
-	for (int i = 0; i < numExpanders; i++) {
-	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
-	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
-	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
-	}
-
-	for (int i = 0; i < numExpanders; i++) {
-	  mcp23017_init(&hmcps2[i], &hi2c2, mcpAddress[i]);
-	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
-	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
-	 }
-
-  game_state = WELCOME_STATE;
-
-	LCD_Unselect();
-	LCD_Init();
-	LCD_FillScreen(LCD_WHITE);
-
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
-
-	clearMap(htim1, htim3);
-	map = NULL;
-
-	//TESTING CODE
-	uint8_t mapBuffer[256] = {2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,0,0,3,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,2,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,3,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,3,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
-
-    map = new GameMap(16, 16);
-    bufferToMap(map, mapBuffer);
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,100,0,0"};
-
-    characters = new GameCharacters(charInput);
-//
-//    displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-
-//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
-//	while (1) {
-//		for(int i = 0; i < 8; i++)
-//		{
-//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
-//		}
-//	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -238,32 +125,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  switch (game_state) {
-	  		case WELCOME_STATE:
-	  			Welcome();
-	  			break;
-	  		case MENU_STATE:
-	  			Menu();
-	  			break;
-	  		case DM_MODE_STATE:
-	  			DM_Mode();
-	  			break;
-	  		case PLAYING_MODE_STATE:
-	  			Playing_Mode();
-	  			break;
-	  		case UPLOAD_MAP_STATE:
-	  			Upload_Map();
-	  			break;
-	  		case VIEW_MAP_STATE:
-	  			View_Map();
-	  			break;
-	  		case GAME_START_STATE:
-	  			Game_Loop();
-	  			break;
-	  		case GAME_LOOP_STATE:
-	  			Game_Loop();
-	  			break;
-	  	}
   }
   /* USER CODE END 3 */
 }

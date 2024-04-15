@@ -125,8 +125,10 @@ void DM_Mode(void) {
 
 void Upload_Map(void) {
 	int usb_status = check_usb_connection();
-	if (usb_status) {
-		LCD_WriteStringCentered(100, "Waiting For Connection...", FONT, LCD_BLACK, LCD_WHITE);
+	if(usb_status) {
+		LCD_WriteStringCentered(100, "Waiting for USB", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(90, "Connection...", FONT, LCD_BLACK, LCD_WHITE);
+
 	}
 
 	while (check_usb_connection());
@@ -200,8 +202,17 @@ void View_Map() {
 		return;
 	}
 	uint8_t mapBuffer[256];
-	for (int row = 0; row < map->GetRows(); row++) {
-		for (int col = 0; col < map->GetColumns(); col++) {
+
+	if(map == NULL) {
+		game_state = DM_MODE_STATE;
+		LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		HAL_Delay(500);
+		LCD_FillScreen(LCD_WHITE);
+		return;
+	}
+
+	for(int row = 0; row < map->GetRows(); row++){
+		for(int col = 0; col < map->GetColumns(); col++){
 			switch(map->GetHex(row, col)->GetType()){
 				case BaseHex:
 					mapBuffer[col + (row * 16)] = 0;
@@ -229,6 +240,15 @@ void View_Map() {
 }
 
 void Playing_Mode() {
+
+	if(characters == NULL || map == NULL) {
+		game_state = MENU_STATE;
+		LCD_WriteStringCentered(100, "Characters and/or Map", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(90, "not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+
+		HAL_Delay(500);
+		return;
+	}
 	uint8_t mapCharBuffer[256];
 	uint8_t mapBuffer[256];
 	memset(mapCharBuffer, 0, sizeof(mapCharBuffer));
@@ -242,9 +262,7 @@ void Playing_Mode() {
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
 
-    		mapCharBuffer[position.second + 16 * position.first] = PlayerHex;
-    		displayMap(htim1, htim3, mapCharBuffer, sizeof(mapCharBuffer) / sizeof(uint8_t));
-    		mapCharBuffer[position.second + 16 * position.first] = BaseHex;
+
 
     		int start_tick = HAL_GetTick();
     		while (1) {
@@ -252,6 +270,11 @@ void Playing_Mode() {
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
 				}
+
+
+				blinkLED(mapCharBuffer , position.first, position.second, PlayerHex);
+
+
     			bool hallTrig = checkHallSensor(position.first, position.second, hmcps1, hmcps2);
     			if (hallTrig) {
     				mapBuffer[position.second + 16  *position.first] = PlayerHex;
@@ -328,7 +351,6 @@ void Playing_Mode() {
 									key = '\0';
 									switch (selection) {
 										case (1):
-											LCD_FillScreen(LCD_WHITE);
 											View_Character_Info(character);
 										case (2):
 											break;
@@ -387,6 +409,7 @@ void Playing_Mode() {
 			int no_character = 0;
 			int start_tick = HAL_GetTick();
 			while (1) {
+				HAL_Delay(100);
 				int cur_tick = HAL_GetTick();
 				if ((cur_tick - start_tick) >= 60000) {
 					return;
@@ -494,4 +517,161 @@ void Playing_Mode() {
 			prev_selection = selection;
 		}
 	}
+
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 }
+
+void Game_Loop(void) {
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 25;
+	key = '\0';
+	if(characters == NULL) {
+		game_state = MENU_STATE;
+		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(500);
+		LCD_FillScreen(LCD_WHITE);
+		return;
+	}
+	while(characters->GetNumberCharacters() > 1) {
+		for(int i = 0; i < characters->GetNumberCharacters(); i++) {
+			//check conditions for continuing game
+			if(map == NULL) {
+				game_state = MENU_STATE;
+				LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+				HAL_Delay(500);
+				LCD_FillScreen(LCD_WHITE);
+				return;
+			}
+
+			//Display character name ex: it is neils turn
+			y_pos = 25;
+			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(60, (characters->GetCharacter(i)->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(80, "Turn", FONT, LCD_BLACK, LCD_WHITE);
+
+			LCD_WriteStringCentered(200, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(225, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_FillRectangle(10, 175+ selection * y_pos, 10, 18, LCD_BLACK);
+
+			key = '\0';
+
+			std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), 5);
+			uint8_t fovbuf[256]= {0};
+			FOVToBuffer(fovbuf, view);
+			displayMap(htim1, htim3, fovbuf, 256 );
+
+
+
+			while (1) {
+				if (key == '#') {
+					key = '\0';
+					switch (selection) {
+						case (1):
+							break;
+						case (2):
+							game_state = MENU_STATE;
+							return;
+					}
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+					break;
+				}
+				if (key == 'A') {
+					key = '\0';
+					selection = (selection > 1) ? selection - 1 : 1;
+				}
+				if (key == 'D') {
+					key = '\0';
+					selection = (selection < 2) ? selection + 1 : 2;
+				}
+				if (selection != prev_selection) {
+					LCD_FillRectangle(10, 175 +prev_selection * y_pos, 10, 18, LCD_WHITE);
+					LCD_FillRectangle(10, 175 + selection * y_pos, 10, 18, LCD_BLACK);
+					prev_selection = selection;
+				}
+			}
+
+			y_pos = 20;
+			selection = 1;
+			HAL_Delay(500);
+
+			int movement = 3;
+			int action = 0;
+
+			while(movement > 0 || action == 1){
+
+				//Give option for info, action, move
+				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				LCD_WriteStringCentered(160, "End Turn", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
+
+				//branch based on selection
+				key = '\0';
+				while (1) {
+					if (key == '#') {
+						key = '\0';
+						switch (selection) {
+							case (1):
+								//move function here
+								//map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), &movement);
+								map = movementMode(htim1, htim3,hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()),characters->GetCharacter(i), &movement);
+
+								break;
+							case (2):
+								View_Character_Info(characters->GetCharacter(i));
+								break;
+							case (3):
+								//combat function here
+								action = 0;
+								break;
+
+							case (4):
+								//end turn
+								movement = 0;
+								action = 0;
+								break;
+
+						}
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
+						break;
+
+					}
+					if (key == 'A') {
+						key = '\0';
+						selection = (selection > 1) ? selection - 1 : 1;
+					}
+					if (key == 'D') {
+						key = '\0';
+						selection = (selection < 4) ? selection + 1 : 4;
+					}
+					if (selection != prev_selection) {
+						LCD_FillRectangle(10, 80 +prev_selection * y_pos, 10, 18, LCD_WHITE);
+						LCD_FillRectangle(10, 80 +selection * y_pos, 10, 18, LCD_BLACK);
+						prev_selection = selection;
+					}
+				}
+			}
+
+		}
+	}
+	if(characters->GetNumberCharacters() == 1) {
+		LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
+
+		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
+		while(1) {
+			if(key == '#') {
+				break;
+			}
+		}
+
+	}
+	game_state = MENU_STATE;
+}
+

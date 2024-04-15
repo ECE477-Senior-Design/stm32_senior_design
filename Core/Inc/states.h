@@ -18,7 +18,8 @@ typedef enum {
 	PLAYING_MODE_STATE,
 	UPLOAD_MAP_STATE,
 	VIEW_MAP_STATE,
-	GAME_START_STATE
+	GAME_START_STATE,
+	GAME_LOOP_STATE
 } GameState;
 
 void Welcome(void);
@@ -27,5 +28,6 @@ void DM_Mode(void);
 void Upload_Map(void);
 void View_Map(void);
 void Playing_Mode(void);
+void Game_Loop(void);
 
 #endif /* INC_STATES_H_ */
