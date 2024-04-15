@@ -26,7 +26,7 @@ void Welcome(void) {
 			break;
 		}
 		if (counter % 2 == 0) {
-			LCD_WriteString(26, 200, "Enter The Dungeon", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(200, "Enter The Dungeon", FONT, LCD_BLACK, LCD_WHITE);
 		}
 		else {
 			LCD_FillRectangle(0, 200, 240, 18, LCD_WHITE);
