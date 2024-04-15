@@ -78,7 +78,7 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 		}
 		int timer = pcb / 4;
 		Set_Brightness(20);
-		WS2812_Send(&(timers[timer]),channels[pcb]);
+		WS2812_Send(&(timers[timer]), channels[pcb]);
 	}
 }
 
@@ -180,10 +180,10 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 	  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 	//  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 
-	  key = '\0';
 	  //LCD_FillScreen(LCD_WHITE);
 	  LCD_WriteString(15, 50, "MOVE PIECE", FONT, LCD_BLACK, LCD_WHITE);
 	  HAL_Delay(2000);
+	  key = '\0';
 	  while (1) {
 		  if (key == '#') {
 			  key = '\0';
@@ -191,7 +191,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 				  int row = possibleMoves[hex]->GetHexRow();
 				  int col = possibleMoves[hex]->GetHexColumn();
 				  bool hallTrig = checkHallSensor(row, col, hmcps1, hmcps2);
-				  if (hallTrig){
+				  if (hallTrig) {
 					  //update buffer or map
 					  mapBuffer[col + 16*row] = currHex->GetType();
 					  _character->SetColumn(col);
@@ -235,10 +235,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 	  return map;
 }
 
-
-
 void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
-
 	for (int i= 0; i < 32; i++) {
 		Set_LED(i, 0, 0, 0);
 	}
@@ -431,6 +428,7 @@ int getRoll(const std::string& inputStr) {
 	char* roll_string = new char[3];
 	int no_character = 0;
 	int start_tick = HAL_GetTick();
+	key = '\0';
 	while (1) {
 		int cur_tick = HAL_GetTick();
 		if ((cur_tick - start_tick) >= 60000) {
@@ -465,7 +463,6 @@ int getRoll(const std::string& inputStr) {
 
 	return atoi(roll_string);
 }
-
 
 void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
 	for (int i = 0; i < 3; i++) {

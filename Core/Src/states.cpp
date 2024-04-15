@@ -14,10 +14,9 @@ extern MCP23017_HandleTypeDef hmcps2[8];
 
 void Welcome(void) {
 	int counter = 0;
-	key = '\0';
-	LCD_FillScreen(LCD_WHITE);
-	LCD_WriteString(15, 50, "The Dungeon Crawler", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, "The Dungeon Crawler", FONT, LCD_BLACK, LCD_WHITE);
 	HAL_Delay(2000);
+	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
@@ -42,10 +41,10 @@ void Menu(void) {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	key = '\0';
 	LCD_WriteStringCentered(50, "DM Mode", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "Playing Mode", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
@@ -82,11 +81,11 @@ void DM_Mode(void) {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	key = '\0';
 	LCD_WriteStringCentered(50, "Upload Map", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "View Map", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(150, "Return To Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
@@ -151,7 +150,6 @@ void Upload_Map(void) {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	key = '\0';
 //	LCD_FillScreen(LCD_WHITE);
 //	HAL_Delay(500);
 	LCD_WriteStringCentered(100, "Map Uploaded", FONT, LCD_BLACK, LCD_WHITE);
@@ -161,6 +159,7 @@ void Upload_Map(void) {
 	LCD_WriteStringCentered(50, "View Map", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "Return To Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
@@ -287,11 +286,11 @@ void Playing_Mode() {
     		int selection = 1;
     		int prev_selection = 0;
     		int y_pos = 50;
-    		key = '\0';
     		LCD_FillScreen(LCD_WHITE);
     		LCD_WriteStringCentered(50, "Confirm", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(100, "Retry", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			key = '\0';
 			while (1) {
 				if (key == '#') {
 					key = '\0';
@@ -307,10 +306,10 @@ void Playing_Mode() {
 				    		selection = 1;
 				    		prev_selection = 0;
 				    		y_pos = 50;
-				    		key = '\0';
 							LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
 							LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
 							LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+							key = '\0';
 							while (1) {
 								if (key == '#') {
 									key = '\0';
@@ -369,10 +368,10 @@ void Playing_Mode() {
     		int selection = 1;
     		int prev_selection = 0;
     		int y_pos = 50;
-    		key = '\0';
 			LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			key = '\0';
 			while (1) {
 				if (key == '#') {
 					key = '\0';
@@ -408,10 +407,10 @@ void Playing_Mode() {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 50;
-	key = '\0';
 	LCD_WriteStringCentered(50, "Start Game", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(100, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
@@ -448,7 +447,6 @@ void Game_Loop(void) {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 25;
-	key = '\0';
 //	if (characters == NULL) {
 //		game_state = MENU_STATE;
 //		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_BLACK, LCD_WHITE);
@@ -457,7 +455,7 @@ void Game_Loop(void) {
 //
 //		return;
 //	}
-
+	key = '\0';
 	while (characters->GetNumberCharacters() > 1) {
 		for (int i = 0; i < characters->GetNumberCharacters(); i++) {
 			//check conditions for continuing game
@@ -483,7 +481,7 @@ void Game_Loop(void) {
 			std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), 5);
 			uint8_t fovbuf[256]= {0};
 			FOVToBuffer(fovbuf, view);
-			displayMap(htim1, htim3, fovbuf, 256 );
+			displayMap(htim1, htim3, fovbuf, sizeof(mapBuffer) / sizeof(uint8_t));
 
 			key = '\0';
 			while (1) {
