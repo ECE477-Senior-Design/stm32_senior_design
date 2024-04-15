@@ -1,10 +1,4 @@
-/*
-MOST RECENT AUTHOR: JACKSON
-DATE: 11/01/2023
-*/
-
 #include "GameMap.h"
-
 
 GameMap::GameMap(int rows, int columns) : _rows(rows), _columns(columns) {
     map.resize(rows, std::vector<Hexagon*>(columns, nullptr));
@@ -18,7 +12,6 @@ GameMap::GameMap(int rows, int columns) : _rows(rows), _columns(columns) {
 }
 
 GameMap::GameMap(std::string mapstring) {
-
     _rows = _columns = int(sqrt(mapstring.length()) + 0.5);
 
     map.resize(_rows, std::vector<Hexagon*>(_columns, nullptr));
@@ -34,7 +27,6 @@ GameMap::GameMap(std::string mapstring) {
             ChangeHex(i, j, static_cast<HexagonType> ((int) mapstring[_rows*i + j] - 48));
         }
     }
-
 }
 
 //Returns the number of rows
@@ -67,92 +59,6 @@ void GameMap::ChangeHex(int row, int column, HexagonType type) {
         hex->SetPassable(false); //Sets to impassable is desired type is not base
     }
 }
-
-// //Returns the array of distances for a starting point
-// std::vector<std::vector<int>> GameMap::ShortestPath(int start_column, int start_row) {
-//     std::vector<std::vector<int>> distances(_columns, std::vector<int>(_rows, INT_MAX)); //Initialize a 2D vector for storing the distances
-//     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq; //Create a priority queue for Dijkstra's Algorithm
-//     distances[start_column][start_row] = 0; //Set the distance to the starting hexagon to 0
-//     pq.push(Node(start_column, start_row, 0)); //Start queue with initial position (since it's already traveled)
-//     int dx[] = {1, 0, -1, -1, 0, 1}; //Direction for each neighboring hex for x-coordinate (I am not entirely sure how it is oriented)
-//     int dy[] = {0, 1, 1, 0, -1, -1}; //Direction for each neighboring hex for y-coordinate (I am not entirely sure how it is oriented)
-
-//     //Checks if queue is empty
-//     while (!pq.empty()) {
-//         Node current = pq.top(); //Current node starts at the top
-//         pq.pop(); //Pop the first node
-
-//         //Checks each possible neighboring hex
-//         for (int i = 0; i < 6; i++) {
-//             int new_column = current.column + dx[i]; //Travels in x-direction
-//             int new_row = current.row + dy[i]; //Travels in y-direction
-
-//             //Checks if it is within the bounds of the map
-//             if (new_column >= 0 && new_column < _columns && new_row >= 0 && new_row < _rows) {
-//                 int weight = GetHex(new_column, new_row)->GetWeight(); //Weight is retrieved from hex at the new column and row position
-
-//                 //Checks if the new distance is greater than the current distance
-//                 if (distances[current.column][current.row] + weight < distances[new_column][new_row]) {
-//                     distances[new_column][new_row] = distances[current.column][current.row] + weight; //Adds weight of newly traveled hex
-//                     pq.push(Node(new_column, new_row, distances[new_column][new_row])); //Pushes the node onto the stack
-//                 }
-//             }
-//         }
-//     }
-
-//     return distances;
-// }
-
-// //Prints out the path from a starting point to an ending point (function calls ShortestPath)
-// void GameMap::PrintShortestPath(int start_column, int start_row, int end_column, int end_row) {
-//     std::vector<std::vector<int>> distances = ShortestPath(start_column, start_row); //Calls ShortestPath and uses matrix of distances from starting point
-
-//     //Checks if it is within the bounds of the map
-//     if (end_column >= 0 && end_column < _columns && end_row >= 0 && end_row < _rows) {
-//         std::stack<std::pair<int, int>> path; //Create a stack to store the path
-//         int column = end_column; //Sets column to the desired column
-//         int row = end_row; //Sets row to the desired row
-
-//         //Backtrack from the destination to the source using distances
-//         while (column != start_column || row != start_row) {
-//             path.push(std::make_pair(column, row)); //Pushes column and row onto the stack
-//             int dx[] = {1, 0, -1, -1, 0, 1}; //Direction for each neighboring hex for x-coordinate (I am not entirely sure how it is oriented)
-//             int dy[] = {0, 1, 1, 0, -1, -1}; //Direction for each neighboring hex for y-coordinate (I am not entirely sure how it is oriented)
-
-//             //Checks each possible neighboring hex
-//             for (int i = 0; i < 6; i++) {
-//                 int new_column = column + dx[i]; //Travels in x-direction
-//                 int new_row = row + dy[i]; //Travels in y-direction
-
-//                 //Checks if it is within the bounds of the map
-//                 if (new_column >= 0 && new_column < _columns && new_row >= 0 && new_row < _rows) {
-//                     int weight = GetHex(new_column, new_row)->GetWeight(); //Weight is retrieved from hex at the new column and row position
-
-//                     //Checks if the new distance is equal to the current distance
-//                     if (distances[column][row] == distances[new_column][new_row] + weight) {
-//                         column = new_column; //Sets the column to the new column
-//                         row = new_row; //Sets the row to the new row
-//                         break;
-//                     }
-//                 }
-//             }
-//         }
-//         path.push(std::make_pair(start_column, start_row)); //Pushes the starting column and row to the stack
-
-//         std::cout << "Shortest path from (" << start_column << ", " << start_row << ") to (" << end_column << ", " << end_row << "): "; //Prints starting and ending locations
-//         //Print the path in reverse order of the stack
-//         while (!path.empty()) {
-//             std::pair<int, int> hex = path.top(); //New hex is at the top of the stack
-//             std::cout << "(" << hex.first << ", " << hex.second << ") "; //Prints the column and row of the traveled hex
-//             path.pop(); //Pops the hex out of the stack
-//         }
-//         std::cout << std::endl;
-//         }
-//         else {
-//         std::cout << "Destination is out of bounds." << std::endl; //If stack is empty, then destination is not reachable
-//     }
-// }
-
 
 //utility function to retrieve the neighbors of a hexagon using q and r coordinates
 std::vector<Hexagon*> GameMap::GetNeighbors(Hexagon* hexagon) {
@@ -211,7 +117,6 @@ std::vector<Hexagon*> GameMap::PossibleMovements(Hexagon* start, int movement) {
     return visited;
 }
 
-
 //reconstructs the path from the end node to the start node by visiting the parent of each node
 //utility function for the A* algorithm
 std::vector<Hexagon*> ReconstructPath(AStarNode* end_node) {
@@ -224,7 +129,6 @@ std::vector<Hexagon*> ReconstructPath(AStarNode* end_node) {
     std::reverse(path.begin(), path.end());
     return path;
 }
-
 
 //utility function to calculate the distance between two hexagons
 //used as the heuristic calculation for the A* algorithm
@@ -315,18 +219,6 @@ std::vector<Hexagon*> GameMap::FieldOfView(Hexagon* start, int range) {
     return visible_hexes;
 }
 
-//ALTERNATE SOLUTION:
-//Do Field of View algorithm (required)
-//Find closest neighboring player hex for each player using simple distance calculation
-//Do A* (or maybe other pathfinding) to find shortest path to selected hex
-//Move monster hex to as many spaces it can move along the path
-
-//Field of View
-//Draw line to hex at sight distance
-//Do this for all hexes at sight distance
-//Do not include hexes positioned after either walls or all non passable hexes (probably just walls)
-
-
 std::vector<Hexagon*> GameMap::PathFind(Hexagon* start, Hexagon* end) {
 
     //creates a lambda expression to compare the f cost of two nodes
@@ -408,8 +300,8 @@ std::vector<Hexagon*> GameMap::PathFind(Hexagon* start, Hexagon* end) {
             delete pair.second;
         }
     }
-    return {};
 
+    return {};
 }
 
 void GameMap::PrintMap(void) {
