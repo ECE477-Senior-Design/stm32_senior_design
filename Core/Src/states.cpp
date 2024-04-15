@@ -195,7 +195,8 @@ void Upload_Map(void) {
 void View_Map() {
 	if (map == NULL) {
 		game_state = DM_MODE_STATE;
-		LCD_WriteStringCentered(100, "Map Not Initialized", FONT, LCD_WHITE, LCD_BLACK);
+		LCD_WriteStringCentered(100, "Map Not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(2000);
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
 
@@ -203,21 +204,11 @@ void View_Map() {
 	}
 	uint8_t mapBuffer[256];
 
-	if (map == NULL) {
-		game_state = DM_MODE_STATE;
-		LCD_WriteStringCentered(100, "Map not Initialized", FONT, LCD_WHITE, LCD_BLACK);
-		HAL_Delay(2000);
-		LCD_FillScreen(LCD_WHITE);
-		HAL_Delay(500);
-
-		return;
-	}
-
 	for (int row = 0; row < map->GetRows(); row++){
 		for (int col = 0; col < map->GetColumns(); col++){
 			switch (map->GetHex(row, col)->GetType()){
 				case BaseHex:
-					mapBuffer[col + (row * 16)] = 0;
+					mapBuffer[col + (row * 16)] = 8;
 					break;
 				case WallHex:
 					mapBuffer[col + (row * 16)] = 1;
@@ -244,8 +235,8 @@ void View_Map() {
 void Playing_Mode() {
 	if (characters == NULL || map == NULL) {
 		game_state = MENU_STATE;
-		LCD_WriteStringCentered(100, "Characters and/or Map", FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(90, "Not Initialized", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(80, "Characters and/or Map", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(100, "Not Initialized", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(2000);
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
@@ -261,7 +252,7 @@ void Playing_Mode() {
     	Character* character = characters->GetCharacter(i);
     	if (character->GetCharacterType() == Player) {
     		std::pair<int, int> position = character->GetPosition();
-    		LCD_WriteStringCentered(10, "Place Token For", FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(10, "Place token for", FONT, LCD_BLACK, LCD_WHITE);
     		std::string name = character->GetName();
     		const char* char_name = name.c_str();
     		LCD_WriteStringCentered(50, char_name, FONT, LCD_BLACK, LCD_WHITE);
@@ -363,6 +354,11 @@ void Playing_Mode() {
 			}
     	}
     	else {
+    		LCD_WriteStringCentered(10, "Do NOT place token",FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(30, ("for " + character->GetName()).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+    		HAL_Delay(2000);
+    		LCD_FillScreen(LCD_WHITE);
+    		HAL_Delay(500);
     		character->SetInitiative(getRoll("Initiative"));
 
     		int selection = 1;
@@ -447,14 +443,7 @@ void Game_Loop(void) {
 	int selection = 1;
 	int prev_selection = 0;
 	int y_pos = 25;
-//	if (characters == NULL) {
-//		game_state = MENU_STATE;
-//		LCD_WriteStringCentered(100, "Characters not Initialized", FONT, LCD_BLACK, LCD_WHITE);
-//		LCD_FillScreen(LCD_WHITE);
-//		HAL_Delay(500);
-//
-//		return;
-//	}
+
 	while (characters->GetNumberCharacters() > 1) {
 		for (int i = 0; i < characters->GetNumberCharacters(); i++) {
 			//check conditions for continuing game
@@ -475,7 +464,6 @@ void Game_Loop(void) {
 			LCD_WriteStringCentered(80, "Turn", FONT, LCD_BLACK, LCD_WHITE);
 
 			LCD_WriteStringCentered(200, "Continue", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(225, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, 175 + selection * y_pos, 10, 18, LCD_BLACK);
 
 			uint8_t mapBuffer[256];
@@ -488,43 +476,20 @@ void Game_Loop(void) {
 			while (1) {
 				if (key == '#') {
 					key = '\0';
-					switch (selection) {
-						case (1):
-							LCD_FillScreen(LCD_WHITE);
-							HAL_Delay(500);
-							break;
-						case (2):
-							game_state = MENU_STATE;
-							LCD_FillScreen(LCD_WHITE);
-							HAL_Delay(500);
-
-							return;
-					}
-					break;
-				}
-				if (key == 'A') {
-					key = '\0';
-					selection = (selection > 1) ? selection - 1 : 1;
-				}
-				if (key == 'D') {
-					key = '\0';
-					selection = (selection < 2) ? selection + 1 : 2;
-				}
-
-				if (selection != prev_selection) {
-					LCD_FillRectangle(10, 175 + prev_selection * y_pos, 10, 18, LCD_WHITE);
-					LCD_FillRectangle(10, 175 + selection * y_pos, 10, 18, LCD_BLACK);
-					prev_selection = selection;
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
+						break;
 				}
 			}
 
-			y_pos = 20;
-			selection = 1;
+
 			//HAL_Delay(500);
 			int movement = 3;
 			int action = 1;
 
 			while (movement > 0 || action == 1){
+				y_pos = 20;
+				selection = 1;
 				//Give option for info, action, move
 				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(100, "Move Character", FONT, LCD_BLACK, LCD_WHITE);
@@ -538,6 +503,8 @@ void Game_Loop(void) {
 				while (1) {
 					if (key == '#') {
 						key = '\0';
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
 						switch (selection) {
 							case (1):
 								//move function here
@@ -563,6 +530,8 @@ void Game_Loop(void) {
 										while (1) {
 											if (key == '#') {
 												key = '\0';
+												LCD_FillScreen(LCD_WHITE);
+												HAL_Delay(500);
 												switch (selection) {
 													case (1):
 														map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
@@ -631,6 +600,8 @@ void Game_Loop(void) {
 	//For winning conditions, chests = 0, and monsters = 0
 	//For losing conditions, players = 0
 	if ((characters->GetNumberMonsters() == 0)) {
+		LCD_FillScreen(LCD_WHITE);
+		HAL_Delay(500);
 		LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
 		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
@@ -644,6 +615,8 @@ void Game_Loop(void) {
 		}
 	}
 	else if((characters->GetNumberPlayers() == 0)){
+		LCD_FillScreen(LCD_WHITE);
+		HAL_Delay(500);
 		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(120, "You Lose!", FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
