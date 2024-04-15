@@ -273,7 +273,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 		LCD_WriteStringCentered(50, "No enemies in range", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(2000);
 		LCD_FillScreen(LCD_WHITE);
-		LCD_Delay(500);
+		HAL_Delay(500);
 
 		return map;
 	}
@@ -455,9 +455,9 @@ int getRoll(const std::string& inputStr) {
 		}
 		else if (no_character < 2 && Key_Is_Number(key)) {
 			LCD_WriteStringCentered(100, roll_string, FONT, LCD_WHITE, LCD_WHITE);
-			initiative[no_character] = key;
+			roll_string[no_character] = key;
 			no_character++;
-			initiative[no_character] = '\0';
+			roll_string[no_character] = '\0';
 			LCD_WriteStringCentered(100, roll_string, FONT, LCD_BLACK, LCD_WHITE);
 			key = '\0';
 		}
