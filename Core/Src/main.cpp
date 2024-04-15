@@ -81,20 +81,9 @@ uint32_t previous_mill = 0;
 char key = '\0';
 
 GameState game_state;
-/* ---------------------------------------------------------------------------*/
-
-/*Gameplay Global Variables --------------------------------------------------*/
-
-/*----------------------------------------------------------------------------*/
-
-/* ---------------------------------------------------------------------------*/
-
-/* USB COM GLOBAL VARIABLES --------------------------------------------------*/
-GameMap *map = NULL;
-GameCharacters * characters = NULL;
-GameCharacters * monsters = NULL;
-
-/* ---------------------------------------------------------------------------*/
+GameMap* map = NULL;
+GameCharacters* characters = NULL;
+GameCharacters* monsters = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -192,7 +181,6 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
 	clearMap(htim1, htim3);
-	map = NULL;
 
 	//TESTING CODE
 //	uint8_t mapBuffer[256] = {2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
