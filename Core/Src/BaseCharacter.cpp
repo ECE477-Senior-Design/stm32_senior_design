@@ -8,7 +8,7 @@ DATE: 10/27/2023
 //Constructor for character class that keeps track of hex position, ability score, and some combat values
 Character::Character(std::string name, int column, int row,
         int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-        int max_health_points, int current_health_points, int armor_class, int initiative, int speed) {
+        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, int gold, int visibility) {
     _name = name;
     _column = column;
     _row = row;
@@ -23,6 +23,8 @@ Character::Character(std::string name, int column, int row,
     _armor_class = armor_class;
     _initiative = initiative;
     _speed = speed;
+    _gold = gold;
+    _visibility = visibility;
 }
 
 //Returns name of character
@@ -99,6 +101,14 @@ int Character::GetSpeed(void) {
     return _speed;
 }
 
+int Character::GetGold(void) {
+	return _gold;
+}
+
+int Character::GetVisibility(void) {
+	return _visibility;
+}
+
 //Displays character info
 void Character::DisplayCharacterInfo(void) {
     std::cout << "Name: " << _name << std::endl;
@@ -115,6 +125,8 @@ void Character::DisplayCharacterInfo(void) {
     std::cout << "Armor Class: " << _armor_class << std::endl;
     std::cout << "Initiative: " << _initiative << std::endl;
     std::cout << "Speed: " << _speed << std::endl;
+    std::cout << "Gold: " << _gold << std:: endl;
+    std::cout << "Visibility" << _visibility << std::endl;
 }
 
 //Returns type of character
@@ -190,6 +202,14 @@ void Character::SetInitiative(int initiative) {
 //Sets speed of character
 void Character::SetSpeed(int speed) {
     _speed = speed;
+}
+
+void Character::SetGold(int gold) {
+	_gold = gold;
+}
+
+void Character::SetVisibility(int visibility) {
+	_visibility = visibility;
 }
 
 //Sets type of character

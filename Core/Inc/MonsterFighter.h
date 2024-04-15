@@ -13,7 +13,7 @@ class MonsterFighter : public Character {
     public:
         MonsterFighter(int column, int row,
         int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-        int max_health_points, int current_health_points, int armor_class, int initiative, int speed); //Constructor for fighter class for monster
+        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, int gold, int visibility); //Constructor for fighter class for monster
 };
 
 #endif
