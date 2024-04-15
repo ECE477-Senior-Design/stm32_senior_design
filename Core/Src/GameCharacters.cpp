@@ -48,6 +48,26 @@ int GameCharacters::GetNumberCharacters(void) {
     return _number_characters;
 }
 
+int GameCharacters::GetNumberPlayers(void) {
+	int num = 0;
+	for(int i = 0; i < _number_characters; i++){
+		if(charactersVec[i]->GetCharacterType() == Player){
+			num++;
+		}
+	}
+	return num;
+}
+
+int GameCharacters::GetNumberMonsters(void) {
+	int num = 0;
+	for(int i = 0; i < _number_characters; i++){
+		if(charactersVec[i]->GetCharacterType() == Monster){
+			num++;
+		}
+	}
+	return num;
+}
+
 ////Adds character to character vector
 //void GameCharacters::AddCharacter(int index, std::string name, int column, int row,
 //        int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,

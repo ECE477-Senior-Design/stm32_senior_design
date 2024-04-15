@@ -176,6 +176,8 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 	  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 
 	  //clearMap(htim1,htim3);
+	  std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	  FOVToBuffer(mapBuffer, view);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 	//  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
@@ -408,19 +410,22 @@ void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type) {
 	displayMap(htim1, htim3, mapCharBuffer, 256);
 }
 
-
 void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
-	int sizeHexes = hexes.size();
-	int colN;
-	int rowN;
-	for(int i = 0; i < sizeHexes; i++){
-		 colN = hexes[i]->GetHexColumn();
-		 rowN = hexes[i]->GetHexRow();
-		 mapBuffer[colN + 16*rowN] = hexes[i]->GetType();
+	uint8_t fovBuffer[256] = {0};
+	for(int i = 0; i < hexes.size(); i++){
+		 int colN = hexes[i]->GetHexColumn();
+		 int rowN = hexes[i]->GetHexRow();
+
+		 fovBuffer[colN + 16*rowN] = 1;
+		// hexes[i]->GetType();
 		// mapBuffer[colN + 16*rowN] = 1;
 	}
+	for (int i = 0; i < sizeof(fovBuffer); i++) {
+		if (fovBuffer[i] == 0) {
+			mapBuffer[i] = 0;
+		}
+	}
 }
-
 
 int getRoll(const std::string& inputStr) {
 	LCD_WriteStringCentered(10, ("Insert " + inputStr).c_str(), FONT, LCD_BLACK, LCD_WHITE);

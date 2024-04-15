@@ -455,7 +455,6 @@ void Game_Loop(void) {
 //
 //		return;
 //	}
-	key = '\0';
 	while (characters->GetNumberCharacters() > 1) {
 		for (int i = 0; i < characters->GetNumberCharacters(); i++) {
 			//check conditions for continuing game
@@ -469,19 +468,21 @@ void Game_Loop(void) {
 //			}
 
 			//Display character name ex: it is neils turn
+			Character* character = characters->GetCharacter(i);
 			y_pos = 25;
 			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(60, (characters->GetCharacter(i)->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(60, (character->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(80, "Turn", FONT, LCD_BLACK, LCD_WHITE);
 
 			LCD_WriteStringCentered(200, "Continue", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(225, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, 175 + selection * y_pos, 10, 18, LCD_BLACK);
 
-			std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), 5);
-			uint8_t fovbuf[256]= {0};
-			FOVToBuffer(fovbuf, view);
-			displayMap(htim1, htim3, fovbuf, sizeof(mapBuffer) / sizeof(uint8_t));
+			uint8_t mapBuffer[256];
+			mapToBuffer(map, mapBuffer);
+			std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
+			FOVToBuffer(mapBuffer, view);
+			displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
 			key = '\0';
 			while (1) {
@@ -526,9 +527,9 @@ void Game_Loop(void) {
 			while (movement > 0 || action == 1){
 				//Give option for info, action, move
 				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(120, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(140, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				LCD_WriteStringCentered(100, "Move Character", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(120, "Action", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				LCD_WriteStringCentered(140, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(160, "End Turn", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
 
@@ -541,18 +542,62 @@ void Game_Loop(void) {
 							case (1):
 								//move function here
 								if (movement > 0){
-									map = movementMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), characters->GetCharacter(i), &movement);
+									map = movementMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character, &movement);
 								}
 								break;
 							case (2):
-								View_Character_Info(characters->GetCharacter(i));
-								break;
-							case (3):
 								//combat function here
 								if (action == 1){
-									map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(characters->GetCharacter(i)->GetRow(), characters->GetCharacter(i)->GetColumn()), characters->GetCharacter(i));
+									if(character->GetCharacterType() == Monster){
+										map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
+									}
+									else{ //should change page and give option for combat or chest
+							    		int selection = 1;
+							    		int prev_selection = 0;
+							    		int y_pos = 50;
+										LCD_WriteStringCentered(50, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE);
+										LCD_WriteStringCentered(100, "Loot Chest", FONT, LCD_BLACK, LCD_WHITE);
+										LCD_WriteStringCentered(150, "Return to Options", FONT, LCD_BLACK, LCD_WHITE);
+										LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+										key = '\0';
+										while (1) {
+											if (key == '#') {
+												key = '\0';
+												switch (selection) {
+													case (1):
+														map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
+														break;
+													case (2):
+														//loot chest
+														break;
+													case(3):
+														break;
+												}
+												LCD_FillScreen(LCD_WHITE);
+												HAL_Delay(500);
+												break;
+											}
+											if (key == 'A') {
+												key = '\0';
+											    selection = (selection > 1) ? selection - 1 : 1;
+											}
+											if (key == 'D') {
+												key = '\0';
+											    selection = (selection < 3) ? selection + 1 : 3;
+											}
+
+											if (selection != prev_selection) {
+												LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+												LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+												prev_selection = selection;
+											}
+										}
+									}
 								}
 								action = 0;
+								break;
+							case (3):
+								View_Character_Info(character);
 								break;
 							case (4):
 								//end turn
@@ -583,10 +628,24 @@ void Game_Loop(void) {
 		}
 	}
 
-	if (characters->GetNumberCharacters() == 1) {
+	//For winning conditions, chests = 0, and monsters = 0
+	//For losing conditions, players = 0
+	if ((characters->GetNumberMonsters() == 0)) {
 		LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
+		key = '\0';
+		while (1) {
+			if (key == '#') {
+				key = '\0';
+				break;
+			}
+		}
+	}
+	else if((characters->GetNumberPlayers() == 0)){
+		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(120, "You Lose!", FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
 		key = '\0';
 		while (1) {

@@ -21,6 +21,8 @@ class GameCharacters {
         GameCharacters(std::vector<std::string> input_strlist); //Constructor of characters vector from string
 
         int GetNumberCharacters(void); //Returns number of characters
+        int GetNumberPlayers(void);
+        int GetNumberMonsters(void);
 //        void AddCharacter(int index, std::string name, int column, int row,
 //        int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
 //        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, CharacterType character_type, Class class_); //Adds character to character vector
