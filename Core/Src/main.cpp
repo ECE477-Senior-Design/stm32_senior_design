@@ -259,9 +259,6 @@ int main(void)
 	  		case VIEW_MAP_STATE:
 	  			View_Map();
 	  			break;
-	  		case GAME_START_STATE:
-	  			Game_Loop();
-	  			break;
 	  		case GAME_LOOP_STATE:
 	  			Game_Loop();
 	  			break;

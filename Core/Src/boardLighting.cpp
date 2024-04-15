@@ -89,111 +89,81 @@ void mapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int color
 	int sizeHexes = hexes.size();
 	int colN;
 	int rowN;
-	for(int i = 0; i < sizeHexes; i++){
+	for (int i = 0; i < sizeHexes; i++) {
 		 colN = hexes[i]->GetHexColumn();
 		 rowN = hexes[i]->GetHexRow();
 		 mapBuffer[colN + 16*rowN] = colorMod;
 	}
 }
 
-
-void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type){
+void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type) {
 	int sizeHexes = hexes.size();
-	for(int i = 0; i < sizeHexes; i++){
+	for (int i = 0; i < sizeHexes; i++) {
 		 map->ChangeHex(hexes[i]->GetHexRow(), hexes[i]->GetHexColumn(), type);
 	}
 }
 
-
-
 void mapToBuffer(GameMap *map, uint8_t* mapBuffer) {
-
-	for(int row = 0; row < map->GetRows(); row++){
-		for(int col = 0; col < map->GetColumns(); col++){
-			switch(map->GetHex(row, col)->GetType()){
-			case BaseHex:
-				mapBuffer[col + (row*16)] = 0;
-				break;
-
-			case WallHex:
-				mapBuffer[col + (row*16)] = 1;
-				break;
-
-			case PlayerHex:
-				mapBuffer[col + (row*16)] = 2;
-				break;
-
-			case MonsterHex:
-				mapBuffer[col + (row*16)] = 3;
-				break;
-
-
-			case ChestHex:
-				mapBuffer[col + (row*16)] = 4;
-				break;
-
-
-			case MoveHex:
-				mapBuffer[col + (row*16)] = 5;
-				break;
-
-//			case PlayerHexTurn:
-//				mapBuffer[col + (row*16)] = 6;
-//				break;
-
-
+	for (int row = 0; row < map->GetRows(); row++) {
+		for (int col = 0; col < map->GetColumns(); col++) {
+			switch (map->GetHex(row, col)->GetType()) {
+				case BaseHex:
+					mapBuffer[col + (row*16)] = 0;
+					break;
+				case WallHex:
+					mapBuffer[col + (row*16)] = 1;
+					break;
+				case PlayerHex:
+					mapBuffer[col + (row*16)] = 2;
+					break;
+				case MonsterHex:
+					mapBuffer[col + (row*16)] = 3;
+					break;
+				case ChestHex:
+					mapBuffer[col + (row*16)] = 4;
+					break;
+				case MoveHex:
+					mapBuffer[col + (row*16)] = 5;
+					break;
+	//			case PlayerHexTurn:
+	//				mapBuffer[col + (row*16)] = 6;
+	//				break;
 			}
 		}
 	}
-
 }
 
-
-void bufferToMap(GameMap *map,uint8_t* mapBuffer) {
-
-	for(int row = 0; row < map->GetRows(); row++){
-		for(int col = 0; col < map->GetColumns(); col++){
-			switch(mapBuffer[col + (row*16)]){
+void bufferToMap(GameMap* map, uint8_t* mapBuffer) {
+	for (int row = 0; row < map->GetRows(); row++) {
+		for (int col = 0; col < map->GetColumns(); col++) {
+			switch (mapBuffer[col + (row*16)]) {
 			case 0:
 				map->ChangeHex(row, col, BaseHex);
 				break;
-
 			case 1:
 				map->ChangeHex(row, col, WallHex);
 				break;
-
 			case 2:
 				map->ChangeHex(row, col, PlayerHex);
 				break;
-
 			case 3:
 				map->ChangeHex(row, col, MonsterHex);
 				break;
-
 			case 4:
 				map->ChangeHex(row, col, ChestHex);
 				break;
-
 			case 5:
 				map->ChangeHex(row, col, MoveHex);
 				break;
-
 //			case 6:
 //				map->ChangeHex(row, col, PlayerHexTurn);
 //				break;
-
-
 			}
-
-
-
 		}
 	}
 }
 
-
-
-GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex, Character* _character, int* _movement){
+GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character, int* _movement){
 	  TIM_HandleTypeDef timers[] = {htim1, htim3};
 	  uint8_t mapBuffer[256];
 	  mapToBuffer(map, mapBuffer);
@@ -206,28 +176,22 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 	  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 
 	  //clearMap(htim1,htim3);
-	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	  //displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 	//  std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 
 	  key = '\0';
-
-	  LCD_FillScreen(LCD_WHITE);
+	  //LCD_FillScreen(LCD_WHITE);
 	  LCD_WriteString(15, 50, "MOVE PIECE", FONT, LCD_BLACK, LCD_WHITE);
 	  HAL_Delay(2000);
-
-
 	  while (1) {
 		  if (key == '#') {
 			  key = '\0';
-
-			  for(int hex = 0; hex < (int)possibleMoves.size(); hex++){
+			  for (int hex = 0; hex < (int) possibleMoves.size(); hex++) {
 				  int row = possibleMoves[hex]->GetHexRow();
 				  int col = possibleMoves[hex]->GetHexColumn();
-
 				  bool hallTrig = checkHallSensor(row, col, hmcps1, hmcps2);
-
-				  if(hallTrig){
+				  if (hallTrig){
 					  //update buffer or map
 					  mapBuffer[col + 16*row] = currHex->GetType();
 					  _character->SetColumn(col);
@@ -239,38 +203,33 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 					  currHex->SetPassable(true);
 					  currHex = map->GetHex(row,col);
 					  currHex->SetPassable(false);
-
-
 					  //std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
-					  if(movement > 0){
+					  if (movement > 0) {
 						  possibleMoves = map->PossibleMovements(currHex, movement);
 						  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
-						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 						 // std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
 					  }
-					  else{
+					  else {
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 						  break;
 					  }
 				  }
-
 			  }
 
-			  if(movement <= 0){
-				  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+			  if (movement <= 0) {
+				  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 				  break;
 			  }
-
 		  }
-		  if(key == '*'){
+		  if (key == '*') {
 			  key = '\0';
-			  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+			  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 			  break;
 		  }
-
 	  }
 
-	  bufferToMap(map,mapBuffer);
+	  bufferToMap(map, mapBuffer);
 	  *_movement = movement;
 
 	  return map;
@@ -280,58 +239,56 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_
 
 void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 
-	for(int i= 0; i < 32; i++){
-		Set_LED(i,0,0,0);
+	for (int i= 0; i < 32; i++) {
+		Set_LED(i, 0, 0, 0);
 	}
-	for(int ch = 1; ch < 5; ch++){
+	for (int ch = 1; ch < 5; ch++) {
 	  Set_Brightness(20);
-	  WS2812_Send(&htim1,ch);
+	  WS2812_Send(&htim1, ch);
 	}
-	for(int ch = 1; ch < 5; ch++){
+	for (int ch = 1; ch < 5; ch++) {
 	  Set_Brightness(20);
-	  WS2812_Send(&htim3,ch);
+	  WS2812_Send(&htim3, ch);
 	}
 }
 
-
-GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap *map, Hexagon* currHex, Character* _character){
+GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character) {
 	int targetType;
-	if(_character->GetCharacterType() == Player){
+	if (_character->GetCharacterType() == Player) {
 		targetType = MonsterHex;
 	}
-	else{
+	else {
 		targetType = PlayerHex;
 	}
 
-
 	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
 	std::vector<Hexagon*> targetHex;
-	for(int hex = 0; hex < neighbors.size(); hex++){
-		if(neighbors[hex]->GetType() == targetType ){
+	for (int hex = 0; hex < neighbors.size(); hex++) {
+		if (neighbors[hex]->GetType() == targetType ) {
 			targetHex.push_back(neighbors[hex]);
 		}
 	}
 
-	if(targetHex.size() == 0){
+	if (targetHex.size() == 0) {
 		LCD_WriteStringCentered(50, "No enemies in range", FONT, LCD_BLACK, LCD_WHITE);
-		HAL_Delay(1000);
+		HAL_Delay(2000);
+		LCD_FillScreen(LCD_WHITE);
+		LCD_Delay(500);
+
 		return map;
 	}
 
 	uint8_t mapBuffer[256];
 	mapToBuffer(map, mapBuffer);
 	uint8_t charMapBuffer[256];
-	std::memcpy(charMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+	std::memcpy(charMapBuffer, mapBuffer, sizeof(uint8_t)* 256);
 
 	int selection = 0;
-
-
-
 	Character* targetSelection = NULL;
 	int finalTargetIndex = 0;
-	for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
-		if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
-			if(targetSelection->GetCharacterType() != DEAD){
+	for (int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++) {
+		if (characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn()) {
+			if (targetSelection->GetCharacterType() != DEAD) {
 				targetSelection = characters->GetCharacter(targetSelect);
 				finalTargetIndex = targetSelect;
 				break;
@@ -339,32 +296,29 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_Ha
 		}
 	}
 
-	LCD_FillScreen(LCD_WHITE);
-	HAL_Delay(500);
+//	LCD_FillScreen(LCD_WHITE);
+//	HAL_Delay(500);
 	LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
 	LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(70, ("Armor Class: " + std::to_string(targetSelection->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
-
-
 	key = '\0';
 	while (1) {
-
 		blinkLED(charMapBuffer , targetHex[selection]->GetHexRow(), targetHex[selection]->GetHexColumn(), targetType);
-
 		if (key == '#') {
 			key = '\0';
 			int attackRoll = getRoll("attack");
-			if(attackRoll >= targetSelection->GetArmorClass() ){
+			if (attackRoll >= targetSelection->GetArmorClass() ) {
 				LCD_WriteStringCentered(50, "ATTACK HIT", FONT, LCD_BLACK, LCD_WHITE);
+				HAL_Delay(2000);
+				LCD_FillScreen(LCD_WHITE);
 				HAL_Delay(500);
 				int damageRoll = getRoll("damage");
 				targetSelection->SetCurrentHealthPoints(targetSelection->GetCurrentHealthPoints() - damageRoll);
-
 				attackHit(charMapBuffer , targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
 				//if attack kills target
-				if((targetSelection->GetCurrentHealthPoints() - damageRoll) <= 0){
+				if ((targetSelection->GetCurrentHealthPoints() - damageRoll) <= 0) {
 					targetHex[selection]->SetType(BaseHex);
 					targetHex[selection]->SetPassable(true);
 					targetSelection->SetCharacterType(DEAD);
@@ -373,38 +327,38 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_Ha
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 
 					LCD_WriteStringCentered(30, (targetSelection->GetName() + " killed").c_str(), FONT, LCD_BLACK, LCD_WHITE);
-					HAL_Delay(1000);
+					HAL_Delay(2000);
 					LCD_FillScreen(LCD_WHITE);
 					HAL_Delay(500);
-
 				}
-				else{
+				else {
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 				}
 
 				break;
-
 			}
-			else{
+			else {
 				LCD_WriteStringCentered(50, "ATTACK MISSED", FONT, LCD_BLACK, LCD_WHITE);
 				HAL_Delay(2000);
+				LCD_FillScreen(LCD_WHITE);
+				HAL_Delay(500);
 				break;
 			}
-
 		}
 		if (key == 'A') {
 			key = '\0';
 			int prevSelection = selection;
 			selection = (selection > 0) ? selection - 1 : 0;
 			//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-			for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
-				if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
+			for (int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++) {
+				if (characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn()) {
 					targetSelection = characters->GetCharacter(targetSelect);
 				}
 			}
-			if(selection != prevSelection){
-				LCD_FillScreen(LCD_WHITE);
-				HAL_Delay(500);
+
+			if (selection != prevSelection) {
+//				LCD_FillScreen(LCD_WHITE);
+//				HAL_Delay(500);
 				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 				std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
 				LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
@@ -415,28 +369,25 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_Ha
 		if (key == 'D') {
 			key = '\0';
 			int prevSelection = selection;
-			selection = (selection < (targetHex.size()-1)) ? selection + 1 : (targetHex.size()-1);
+			selection = (selection < (targetHex.size()-1)) ? selection + 1 : (targetHex.size() - 1);
 			//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-			for(int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
-				if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn() ){
+			for (int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++){
+				if(characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() && characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn()) {
 					targetSelection = characters->GetCharacter(targetSelect);
 				}
 			}
 
-
-			if(selection != prevSelection){
-				LCD_FillScreen(LCD_WHITE);
-				HAL_Delay(500);
+			if (selection != prevSelection) {
+//				LCD_FillScreen(LCD_WHITE);
+//				HAL_Delay(500);
 				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 				std::string concatenated = "HP: " + std::to_string(targetSelection->GetCurrentHealthPoints()) + "/" + std::to_string(targetSelection->GetMaxHealthPoints());
 				LCD_WriteStringCentered(50, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(70, ("Armor Class: " + std::to_string(targetSelection->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
 			}
-
-
 		}
-		if(key == '*'){
+		if (key == '*') {
 		  key = '\0';
 		  break;
 		}
@@ -444,22 +395,20 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,MCP23017_Ha
 
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
-	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
-	bufferToMap(map,mapBuffer);
-
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+	bufferToMap(map, mapBuffer);
 
 	return map;
 }
 
 
-void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type){
+void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type) {
 	HAL_Delay(500);
 	mapCharBuffer[col + 16 * row] = BaseHex;
 	displayMap(htim1, htim3, mapCharBuffer, 256);
 	mapCharBuffer[col + 16 * row] = type;
 	HAL_Delay(500);
 	displayMap(htim1, htim3, mapCharBuffer, 256);
-
 }
 
 
@@ -477,10 +426,9 @@ void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
 
 
 int getRoll(const std::string& inputStr) {
-	LCD_FillScreen(LCD_WHITE);
 	LCD_WriteStringCentered(10, ("Insert " + inputStr).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(30, "roll", FONT, LCD_BLACK, LCD_WHITE);
-	char* initiative = new char[3];
+	char* roll_string = new char[3];
 	int no_character = 0;
 	int start_tick = HAL_GetTick();
 	while (1) {
@@ -491,8 +439,7 @@ int getRoll(const std::string& inputStr) {
 
 		if (key == '#' && no_character != 0) {
 			key = '\0';
-			initiative[no_character] = '\0';
-			//character->SetInitiative(atoi(initiative));
+			roll_string[no_character] = '\0';
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
 			break;
@@ -500,32 +447,32 @@ int getRoll(const std::string& inputStr) {
 		else if (key == '*') {
 			key = '\0';
 			if (no_character > 0) {
-				LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
+				LCD_WriteStringCentered(100, roll_string, FONT, LCD_WHITE, LCD_WHITE);
 				no_character--;
-				initiative[no_character] = '\0';
-				LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
+				roll_string[no_character] = '\0';
+				LCD_WriteStringCentered(100, roll_string, FONT, LCD_BLACK, LCD_WHITE);
 			}
 		}
 		else if (no_character < 2 && Key_Is_Number(key)) {
-			LCD_WriteStringCentered(100, initiative, FONT, LCD_WHITE, LCD_WHITE);
+			LCD_WriteStringCentered(100, roll_string, FONT, LCD_WHITE, LCD_WHITE);
 			initiative[no_character] = key;
 			no_character++;
 			initiative[no_character] = '\0';
-			LCD_WriteStringCentered(100, initiative, FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, roll_string, FONT, LCD_BLACK, LCD_WHITE);
 			key = '\0';
 		}
 	}
 
-	return atoi(initiative);
+	return atoi(roll_string);
 }
 
 
 void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
-	for(int i = 0; i < 3; i++){
-		if(type == Player){
+	for (int i = 0; i < 3; i++) {
+		if (type == Player){
 			mapCharBuffer[col + 16 * row] = 6;
 		}
-		else{
+		else {
 			mapCharBuffer[col + 16 * row] = 7;
 		}
 		displayMap(htim1, htim3, mapCharBuffer, 256);
@@ -534,7 +481,6 @@ void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
 		displayMap(htim1, htim3, mapCharBuffer, 256);
 		HAL_Delay(100);
 	}
-
 }
 
 
