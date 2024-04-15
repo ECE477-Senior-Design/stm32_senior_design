@@ -35,6 +35,7 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
             std::stoi(character_info[11]), std::stoi(character_info[12]), std::stoi(character_info[13]), std::stoi(character_info[14]),
 			std::stoi(character_info[15]));
 
+        character->SetRace(static_cast<Race> (std::stoi(character_info[16])));
         character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[17])));
         character->SetClass(static_cast<Class> (std::stoi(character_info[18])));
 

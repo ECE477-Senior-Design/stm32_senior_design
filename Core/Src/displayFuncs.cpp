@@ -17,6 +17,8 @@ void Display_Stats(Character* character, int select){
 	if (select == 0) {
 		LCD_WriteStringCentered(50, character->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
+		//add switch statement with class and race enums
+
 		std::string concatenated = "HP: " + std::to_string(character->GetCurrentHealthPoints()) + "/" + std::to_string(character->GetMaxHealthPoints());
 		LCD_WriteString(30, 80, concatenated.c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteString(30, 100, ("Armor Class: " + std::to_string(character->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);

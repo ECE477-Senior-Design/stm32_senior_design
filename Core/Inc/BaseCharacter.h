@@ -35,6 +35,7 @@ class Character {
 
         CharacterType _character_type;
         Class _class; //Class of character
+        Race _race;
 
     public:
         Character(std::string name, int column, int row,
@@ -62,6 +63,7 @@ class Character {
         void DisplayCharacterInfo(void); //Displays character info
         CharacterType GetCharacterType(void); //Returns type of character
         Class GetClass(void); //Returns class of character
+        Race GetRace(void);
         void SetColumn(int column); //Sets column position of character
         void SetRow(int row); //Sets row position of character
         void SetStrength(int strength); //Sets strength of character
@@ -79,6 +81,7 @@ class Character {
         void SetVisibility(int visibility);
         void SetCharacterType(CharacterType character_type);
         void SetClass(Class class_); //Sets class of character
+        void SetRace(Race race_);
 
         int CalculateModifier(int ability_score); //Returns modifier based on the ability score (may want to move to GamePlay file)
 

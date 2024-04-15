@@ -152,8 +152,7 @@ std::vector<double> GameMap::AxialCube(std::pair<double, double> coordinates) {
     double q = coordinates.first - 0.000003;
     double r = coordinates.second + 0.000002;
     double s = -q - r + 0.000001;
-    std::vector<double> coords = {q, r, s};
-    return coords;
+    return std::vector<double>{q, r, s};
 }
 
 Hexagon* GameMap::HexRound(std::vector<double> coordinates) {
@@ -202,6 +201,7 @@ std::vector<Hexagon*> GameMap::HexLineDraw(Hexagon* start, Hexagon* end) {
 
 // Function to calculate the field of view
 std::vector<Hexagon*> GameMap::FieldOfView(Hexagon* start, int range) {
+	std::vector<Hexagon*>visible_hexes;
     std::set<Hexagon*> unique_hexes;
     for (int row = 0; row < _rows; row++) {
         for (int col = 0; col < _columns; col++) {
@@ -217,7 +217,7 @@ std::vector<Hexagon*> GameMap::FieldOfView(Hexagon* start, int range) {
             }
         }
     }
-    std::vector<Hexagon*> visible_hexes(unique_hexes.begin(), unique_hexes.end());
+    visible_hexes.insert(visible_hexes.end(), unique_hexes.begin(), unique_hexes.end());
 
     return visible_hexes;
 }
