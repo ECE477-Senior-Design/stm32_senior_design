@@ -202,13 +202,13 @@ int main(void)
 //
 //    map = new GameMap(16, 16);
 //    bufferToMap(map, mapBuffer);
-//    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,100,0,0","Goblin,3,9,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,2,9,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
-//    std::vector<std::string> charMonsterInput = {"Goblin,8,11,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,8,2,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
+////    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,500,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,100,0,0","Goblin,3,9,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,2,9,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
+////    std::vector<std::string> charMonsterInput = {"Goblin,8,11,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,8,2,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
 //
-//    characters = new GameCharacters(charInput);
-//    monsters = new GameCharacters(charMonsterInput);
+//   // characters = new GameCharacters(charInput);
+// //   monsters = new GameCharacters(charMonsterInput);
 //
-//    displayMap(htim1, thim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+//    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
 //	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 //	while (1) {

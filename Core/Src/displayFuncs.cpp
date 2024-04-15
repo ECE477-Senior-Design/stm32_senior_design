@@ -22,6 +22,8 @@ void Display_Stats(Character* character, int select){
 		LCD_WriteString(30, 100, ("Armor Class: " + std::to_string(character->GetArmorClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteString(30, 120, ("Init: " + std::to_string(character->GetInitiative())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteString(30, 140, ("Speed: " + std::to_string(character->GetSpeed())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteString(30, 160, ("Visibility: " + std::to_string(character->GetVisibility())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteString(30, 180, ("Gold: " + std::to_string(character->GetGold())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
 		LCD_WriteStringCentered(240, "View Attributes", FONT, LCD_BLACK, LCD_WHITE);
 		LCD_WriteStringCentered(260, "Return", FONT, LCD_BLACK, LCD_WHITE);

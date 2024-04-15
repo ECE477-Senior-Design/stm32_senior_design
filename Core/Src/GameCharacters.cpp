@@ -32,10 +32,11 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
         Character* character = new Character(character_info[0], std::stoi(character_info[1]), std::stoi(character_info[2]),
             std::stoi(character_info[3]), std::stoi(character_info[4]), std::stoi(character_info[5]), std::stoi(character_info[6]),
             std::stoi(character_info[7]), std::stoi(character_info[8]), std::stoi(character_info[9]), std::stoi(character_info[10]),
-            std::stoi(character_info[11]), std::stoi(character_info[12]), std::stoi(character_info[13]));
+            std::stoi(character_info[11]), std::stoi(character_info[12]), std::stoi(character_info[13]), std::stoi(character_info[14]),
+			std::stoi(character_info[15]));
 
-        character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[14])));
-        character->SetClass(static_cast<Class> (std::stoi(character_info[15])));
+        character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[17])));
+        character->SetClass(static_cast<Class> (std::stoi(character_info[18])));
 
         charactersVec.push_back(character);
     }
@@ -45,6 +46,26 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
 //Returns number of characters
 int GameCharacters::GetNumberCharacters(void) {
     return _number_characters;
+}
+
+int GameCharacters::GetNumberPlayers(void) {
+	int num = 0;
+	for(int i = 0; i < _number_characters; i++){
+		if(charactersVec[i]->GetCharacterType() == Player){
+			num++;
+		}
+	}
+	return num;
+}
+
+int GameCharacters::GetNumberMonsters(void) {
+	int num = 0;
+	for(int i = 0; i < _number_characters; i++){
+		if(charactersVec[i]->GetCharacterType() == Monster){
+			num++;
+		}
+	}
+	return num;
 }
 
 ////Adds character to character vector

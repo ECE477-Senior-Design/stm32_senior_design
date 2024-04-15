@@ -19,12 +19,12 @@ DATE: 10/31/2023
 
 //Defines the type of hexes (eventually add chest)
 enum HexagonType {
-    BaseHex,
-    WallHex,
-    PlayerHex,
-    MonsterHex,
-	ChestHex,
-	MoveHex,
+    BaseHex = 8,
+    WallHex = 1,
+    PlayerHex = 2,
+    MonsterHex = 3,
+	ChestHex = 4,
+	MoveHex = 5,
 //	PlayerHexTurn,
 };
 

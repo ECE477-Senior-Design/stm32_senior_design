@@ -26,6 +26,8 @@ class Character {
         int _armor_class; //Armor class of character
         int _initiative; //Initiative of character
         int _speed; //Speed of character
+        int _gold;
+        int _visibility;
 
         //Possibly create class for weapons, I don't know yet
         //Maybe just do enum struct in a Weapons.hh file
@@ -37,7 +39,7 @@ class Character {
     public:
         Character(std::string name, int column, int row,
         int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-        int max_health_points, int current_health_points, int armor_class, int initiative, int speed); //Constructor for character class that keeps track of hex position, ability score, and some combat values
+        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, int gold, int visibility); //Constructor for character class that keeps track of hex position, ability score, and some combat values
         std::string GetName(void); //Returns name of character
 
         int GetColumn(void); //Returns column position of character
@@ -55,6 +57,8 @@ class Character {
         int GetArmorClass(void); //Returns armor class of character
         int GetInitiative(void)const; //Returns initiative of character
         int GetSpeed(void); //Returns speed of character
+        int GetGold(void);
+        int GetVisibility(void);
         void DisplayCharacterInfo(void); //Displays character info
         CharacterType GetCharacterType(void); //Returns type of character
         Class GetClass(void); //Returns class of character
@@ -71,6 +75,8 @@ class Character {
         void SetArmorClass(int armor_class); //Sets armor class of character
         void SetInitiative(int initiative); //Sets initiative of character
         void SetSpeed(int speed); //Sets speed of character
+        void SetGold(int gold);
+        void SetVisibility(int visibility);
         void SetCharacterType(CharacterType character_type);
         void SetClass(Class class_); //Sets class of character
 
