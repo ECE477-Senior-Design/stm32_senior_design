@@ -595,7 +595,6 @@ void Game_Loop(void) {
 			int action = 0;
 
 			while (movement > 0 || action == 1){
-
 				//Give option for info, action, move
 				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(100, "Move Player", FONT, LCD_BLACK, LCD_WHITE);
