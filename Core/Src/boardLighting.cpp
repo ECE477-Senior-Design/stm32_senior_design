@@ -290,6 +290,9 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 
 	uint8_t mapBuffer[256];
 	mapToBuffer(map, mapBuffer);
+	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	FOVToBuffer(mapBuffer, view);
+
 	uint8_t charMapBuffer[256];
 	std::memcpy(charMapBuffer, mapBuffer, sizeof(uint8_t)* 256);
 
@@ -318,6 +321,8 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 		blinkLED(charMapBuffer , targetHex[selection]->GetHexRow(), targetHex[selection]->GetHexColumn(), targetType);
 		if (key == '#') {
 			key = '\0';
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
 			int attackRoll = getRoll("attack");
 			if (attackRoll >= targetSelection->GetArmorClass() ) {
 				LCD_FillScreen(LCD_WHITE);
@@ -336,7 +341,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 					targetSelection->SetCharacterType(DEAD);
 
 					mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-					std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+					view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 					FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 
@@ -349,7 +354,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 				}
 				else {
 					mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-					std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+					view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 					FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 				}
@@ -415,7 +420,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	bufferToMap(map, mapBuffer);

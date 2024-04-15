@@ -458,6 +458,7 @@ void Game_Loop(void) {
 
 			//Display character name ex: it is neils turn
 			Character* character = characters->GetCharacter(i);
+			selection = 1;
 			y_pos = 25;
 			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_WriteStringCentered(60, (character->GetName() + "'s").c_str(), FONT, LCD_BLACK, LCD_WHITE);
