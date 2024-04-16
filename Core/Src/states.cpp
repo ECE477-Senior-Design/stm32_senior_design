@@ -485,16 +485,49 @@ void Game_Loop(void) {
 
 
 			//HAL_Delay(500);
-			int movement = 3;
-			int action = 1;
+			int movement = character->GetSpeed();
+			int action = 0;
+			int actionAttack = 0;
+			int actionChest = 0;
+
+			int targetType;
+			if (character->GetCharacterType() == Player) {
+				targetType = MonsterHex;
+			}
+			else {
+				targetType = PlayerHex;
+			}
+
+			std::vector<Hexagon*> neighbors = map->GetNeighbors(map->GetHex(character->GetRow(), character->GetColumn()));
+			for(int hex = 0; hex < neighbors.size(); hex++){
+				if(neighbors[hex]->GetType() == targetType){
+					actionAttack = 1;
+					action = 1;
+				}
+				if(neighbors[hex]->GetType() == ChestHex){
+					actionChest = 1;
+					action = 1;
+				}
+			}
 
 			while (movement > 0 || action == 1){
 				y_pos = 20;
 				selection = 1;
 				//Give option for info, action, move
 				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(100, "Move Character", FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(120, "Action", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				if(movement > 0){
+					LCD_WriteStringCentered(100, "Move Character", FONT, LCD_BLACK, LCD_WHITE);
+				}
+				else{
+					LCD_WriteStringCentered(100, "Move Character", FONT, LCD_GRAY, LCD_WHITE);
+					selection = 2;
+				}
+				if(action == 1){
+					LCD_WriteStringCentered(120, "Action", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+				}
+				else{
+					LCD_WriteStringCentered(120, "Action", FONT, LCD_GRAY, LCD_WHITE); //maybe add conditional here for if combat is possible
+				}
 				LCD_WriteStringCentered(140, "Character Info", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_WriteStringCentered(160, "End Turn", FONT, LCD_BLACK, LCD_WHITE);
 				LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
@@ -518,13 +551,26 @@ void Game_Loop(void) {
 								if (action == 1){
 									if(character->GetCharacterType() == Monster){
 										map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
+										action = 0;
 									}
 									else{ //should change page and give option for combat or chest
 							    		int selection = 1;
 							    		int prev_selection = 0;
 							    		int y_pos = 50;
-										LCD_WriteStringCentered(50, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE);
-										LCD_WriteStringCentered(100, "Loot Chest", FONT, LCD_BLACK, LCD_WHITE);
+							    		if(actionAttack){
+							    			LCD_WriteStringCentered(50, "Enter Combat", FONT, LCD_BLACK, LCD_WHITE);
+							    		}
+							    		else{
+							    			LCD_WriteStringCentered(50, "Enter Combat", FONT, LCD_GRAY, LCD_WHITE);
+							    		}
+
+							    		if(actionChest){
+							    			LCD_WriteStringCentered(100, "Loot Chest", FONT, LCD_BLACK, LCD_WHITE);
+							    		}
+							    		else{
+							    			LCD_WriteStringCentered(100, "Loot Chest", FONT, LCD_GRAY, LCD_WHITE);
+							    		}
+
 										LCD_WriteStringCentered(150, "Return to Options", FONT, LCD_BLACK, LCD_WHITE);
 										LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 										key = '\0';
@@ -536,8 +582,10 @@ void Game_Loop(void) {
 												switch (selection) {
 													case (1):
 														map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
+														action = 0;
 														break;
 													case (2):
+														action = 0;
 														//loot chest
 														break;
 													case(3):
@@ -550,10 +598,26 @@ void Game_Loop(void) {
 											if (key == 'A') {
 												key = '\0';
 											    selection = (selection > 1) ? selection - 1 : 1;
+											    if(actionAttack == 0 && selection == 1){
+											    	selection = 2;
+											    }
+
+											    if(actionChest == 0 && selection == 2){
+											    	if(actionAttack == 1){
+											    		selection = 1;
+											    	}
+											    	else{
+											    		selection = 3;
+											    	}
+											    }
 											}
 											if (key == 'D') {
 												key = '\0';
 											    selection = (selection < 3) ? selection + 1 : 3;
+
+											    if(actionChest == 0 && selection == 2){
+													selection = 3;
+												}
 											}
 
 											if (selection != prev_selection) {
@@ -564,7 +628,7 @@ void Game_Loop(void) {
 										}
 									}
 								}
-								action = 0;
+
 								break;
 							case (3):
 								View_Character_Info(character);
@@ -582,10 +646,29 @@ void Game_Loop(void) {
 					if (key == 'A') {
 						key = '\0';
 						selection = (selection > 1) ? selection - 1 : 1;
+
+						if(movement <= 0 &&  selection == 1){
+							selection = 2;
+						}
+						if(action == 0 && selection == 2){
+							if(movement > 0){
+								selection = 1;
+							}
+							else{
+								selection = 3;
+							}
+						}
 					}
 					if (key == 'D') {
 						key = '\0';
 						selection = (selection < 4) ? selection + 1 : 4;
+
+						if(action == 0 && selection == 2){
+							selection = 3;
+						}
+
+
+
 					}
 
 					if (selection != prev_selection) {

@@ -354,7 +354,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 					HAL_Delay(500);
 				}
 				else {
-					mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
+					//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
 					view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 					FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
@@ -420,7 +420,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
-	mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
+	//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
 	view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
