@@ -334,6 +334,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 				int damageRoll = getRoll("damage");
 				targetSelection->SetCurrentHealthPoints(targetSelection->GetCurrentHealthPoints() - damageRoll);
 				attackHit(charMapBuffer , targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
+
 				//if attack kills target
 				if ((targetSelection->GetCurrentHealthPoints() - damageRoll) <= 0) {
 					targetHex[selection]->SetType(BaseHex);

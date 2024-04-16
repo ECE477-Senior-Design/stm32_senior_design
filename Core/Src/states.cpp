@@ -595,37 +595,43 @@ void Game_Loop(void) {
 					}
 				}
 			}
-		}
-	}
 
 	//For winning conditions, chests = 0, and monsters = 0
 	//For losing conditions, players = 0
-	if ((characters->GetNumberMonsters() == 0)) {
-		LCD_FillScreen(LCD_WHITE);
-		HAL_Delay(500);
-		LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
-		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
-		key = '\0';
-		while (1) {
-			if (key == '#') {
+			if ((characters->GetNumberMonsters() == 0)) {
+				LCD_WriteStringCentered(80, "Congrats", FONT, LCD_BLACK, LCD_WHITE);
+				//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(120, "You win!", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
 				key = '\0';
-				break;
+				while (1) {
+					if (key == '#') {
+						key = '\0';
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
+						break;
+					}
+				}
+				game_state = MENU_STATE;
+				return;
 			}
-		}
-	}
-	else if((characters->GetNumberPlayers() == 0)){
-		LCD_FillScreen(LCD_WHITE);
-		HAL_Delay(500);
-		//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(120, "You Lose!", FONT, LCD_BLACK, LCD_WHITE);
-		LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
-		key = '\0';
-		while (1) {
-			if (key == '#') {
+			else if((characters->GetNumberPlayers() == 0)){
+				LCD_FillScreen(LCD_WHITE);
+				HAL_Delay(500);
+				//LCD_WriteStringCentered(100, characters->GetCharacter(0)->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(120, "You Lose!", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(200, "Enter to Continue", FONT, LCD_BLACK, LCD_WHITE);
 				key = '\0';
-				break;
+				while (1) {
+					if (key == '#') {
+						key = '\0';
+						LCD_FillScreen(LCD_WHITE);
+						HAL_Delay(500);
+						break;
+					}
+				}
+				game_state = MENU_STATE;
+				return;
 			}
 		}
 	}
