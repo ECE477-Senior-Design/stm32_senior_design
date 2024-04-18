@@ -14,4 +14,5 @@ MonsterFighter::MonsterFighter(int column, int row,
         max_health_points, current_health_points, armor_class, initiative, speed, gold, visibility) {
     _character_type = Monster; //Sets character type to monster
     _class = Fighter; //Sets class to fighter
+    _active = false;
 }

@@ -139,6 +139,10 @@ Class Character::GetClass(void) {
     return _class;
 }
 
+bool Character::GetActive(void){
+	return _active;
+}
+
 //Sets column position of character
 void Character::SetColumn(int column) {
     _column = column;
@@ -220,6 +224,10 @@ void Character::SetCharacterType(CharacterType character_type) {
 //Sets class of character
 void Character::SetClass(Class class_) {
     _class = class_;
+}
+
+bool Character::SetActive(bool active){
+	_active = active;
 }
 
 //Returns modifier based on the ability score

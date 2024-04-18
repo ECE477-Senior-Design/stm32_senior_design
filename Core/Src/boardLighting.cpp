@@ -168,76 +168,106 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 	  TIM_HandleTypeDef timers[] = {htim1, htim3};
 	  uint8_t mapBuffer[256];
 	  mapToBuffer(map, mapBuffer);
-//	  uint8_t prevMapBuffer[256];
-//	  std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
+
 
 	  int movement = *_movement;
-	  //Hexagon* currHex = map->GetHex(0,1);
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
 	  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 
-	  //clearMap(htim1,htim3);
 	  std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 	  FOVToBuffer(mapBuffer, view);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
 	  LCD_WriteStringCentered(50, "Move Piece", FONT, LCD_BLACK, LCD_WHITE);
+
+	  int y_pos = 20;
+	  int selection = 1;
+	  int prev_selection = 0;
+	  //Give option for info, action, move
+	  //LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+	  LCD_WriteStringCentered(100, "Confirm Move", FONT, LCD_BLACK, LCD_WHITE);
+	  LCD_WriteStringCentered(120, "Return To Options", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+	  LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
+
+	  int backToMenu = 0;
+
 	  key = '\0';
 	  while (1) {
 		  if (key == '#') {
 			  key = '\0';
-			  for (int hex = 0; hex < (int) possibleMoves.size(); hex++) {
-				  int row = possibleMoves[hex]->GetHexRow();
-				  int col = possibleMoves[hex]->GetHexColumn();
-				  bool hallTrig = checkHallSensor(row, col, hmcps1, hmcps2);
-				  if (hallTrig) {
-					  //update buffer or map
-					  mapBuffer[col + 16*row] = currHex->GetType();
-					  _character->SetColumn(col);
-					  _character->SetRow(row);
-					  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = BaseHex;
-					  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
-					  map->GetHex(row,col)->SetType(currHex->GetType());
-					  currHex->SetType(BaseHex);
-					  currHex->SetPassable(true);
-					  currHex = map->GetHex(row,col);
-					  currHex->SetPassable(false);
-					  //std::memcpy(prevMapBuffer, mapBuffer, sizeof(uint8_t) * 256);
-					  if (movement > 0) {
+			  switch (selection) {
+			  	  case (1):
+					for (int hex = 0; hex < (int) possibleMoves.size(); hex++) {
+						  int row = possibleMoves[hex]->GetHexRow();
+						  int col = possibleMoves[hex]->GetHexColumn();
+						  bool hallTrig = checkHallSensor(row, col, hmcps1, hmcps2);
+						  if (hallTrig) {
+							  //update buffer or map
+							  mapBuffer[col + 16*row] = currHex->GetType();
+							  _character->SetColumn(col);
+							  _character->SetRow(row);
+							  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = BaseHex;
+							  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
+							  map->GetHex(row,col)->SetType(currHex->GetType());
+							  currHex->SetType(BaseHex);
+							  currHex->SetPassable(true);
+							  currHex = map->GetHex(row,col);
+							  currHex->SetPassable(false);
+
+							  if (movement > 0) {
+								  mapToBuffer(map, mapBuffer);
+								  possibleMoves = map->PossibleMovements(currHex, movement);
+								  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
+								  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+								  FOVToBuffer(mapBuffer, view);
+								  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+							  }
+							  else {
+								  mapToBuffer(map, mapBuffer);
+								  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+								  FOVToBuffer(mapBuffer, view);
+								  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+								  break;
+							  }
+						  }
+					}
+
+					  if (movement <= 0) {
 						  mapToBuffer(map, mapBuffer);
-						  possibleMoves = map->PossibleMovements(currHex, movement);
-						  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 						  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 						  FOVToBuffer(mapBuffer, view);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-						 // std::memcpy(mapBuffer, prevMapBuffer, sizeof(uint8_t) * 256); //set mapBuffer back to default
-					  }
-					  else {
-						  mapToBuffer(map, mapBuffer);
-						  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
-						  FOVToBuffer(mapBuffer, view);
-						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+						  backToMenu = 1;
 						  break;
 					  }
-				  }
-			  }
-
-			  if (movement <= 0) {
-				  mapToBuffer(map, mapBuffer);
-				  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
-				  FOVToBuffer(mapBuffer, view);
-				  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-				  break;
+					  break;
+			  	  case (2):
+				    mapToBuffer(map, mapBuffer);
+				    view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+				    FOVToBuffer(mapBuffer, view);
+					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+					backToMenu = 1;
+					break;
 			  }
 		  }
-		  if (key == '*') {
-			  key = '\0';
-			  mapToBuffer(map, mapBuffer);
-			  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
-			  FOVToBuffer(mapBuffer, view);
-			  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+		  if(backToMenu){
 			  break;
 		  }
+
+		  if (key == 'A') {
+			key = '\0';
+			selection = (selection > 1) ? selection - 1 : 1;
+		  }
+		  if (key == 'D') {
+			  key = '\0';
+			  selection = (selection < 2) ? selection + 1 : 2;
+		  }
+		  if (selection != prev_selection) {
+			  LCD_FillRectangle(10, 80 + prev_selection * y_pos, 10, 18, LCD_WHITE);
+			  LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
+			  prev_selection = selection;
+		  }
+
 	  }
 	  LCD_FillScreen(LCD_WHITE);
 	  HAL_Delay(500);
@@ -514,5 +544,103 @@ void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
 	}
 }
 
+GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character) {
+
+	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
+	std::vector<Hexagon*> lootHex;
+	for (int hex = 0; hex < neighbors.size(); hex++) {
+		if (neighbors[hex]->GetType() == ChestHex ) {
+			lootHex.push_back(neighbors[hex]);
+		}
+	}
+
+	if (lootHex.size() == 0) {
+		LCD_WriteStringCentered(50, "No chests in range", FONT, LCD_BLACK, LCD_WHITE);
+		HAL_Delay(2000);
+		LCD_FillScreen(LCD_WHITE);
+		HAL_Delay(500);
+
+		return map;
+	}
+
+	uint8_t mapBuffer[256];
+	mapToBuffer(map, mapBuffer);
+	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	FOVToBuffer(mapBuffer, view);
+
+	uint8_t charMapBuffer[256];
+	std::memcpy(charMapBuffer, mapBuffer, sizeof(uint8_t)* 256);
+
+	int selection = 0;
+
+	LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, "Click To Continue", FONT, LCD_BLACK, LCD_WHITE);
+	key = '\0';
+	while (1) {
+		blinkLED(charMapBuffer , lootHex[selection]->GetHexRow(), lootHex[selection]->GetHexColumn(), ChestHex);
+		if (key == '#') {
+			key = '\0';
+
+			openChest(charMapBuffer, lootHex[selection]->GetHexRow(), lootHex[selection]->GetHexColumn());
+			lootHex[selection]->SetType(BaseHex);
+			lootHex[selection]->SetPassable(true);
+
+			mapBuffer[lootHex[selection]->GetHexColumn() + 16*lootHex[selection]->GetHexRow()] = BaseHex;
+			view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+			FOVToBuffer(mapBuffer, view);
+			displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
+
+
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+			LCD_WriteStringCentered(50, "+1 Gold Received!!!", FONT, LCD_BLACK, LCD_WHITE);
+			_character->SetGold(_character->GetGold() + 1);
+			LCD_WriteStringCentered(70, (_character->GetName() + " has " + std::to_string(_character->GetGold()) + " gold" ).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			HAL_Delay(2000);
+			break;
+
+		}
+		if (key == 'A') {
+			key = '\0';
+			int prevSelection = selection;
+			selection = (selection > 0) ? selection - 1 : 0;
+			LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+
+		}
+		if (key == 'D') {
+			key = '\0';
+			int prevSelection = selection;
+			selection = (selection < (lootHex.size()-1)) ? selection + 1 : (lootHex.size() - 1);
+
+			LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+		}
+		if (key == '*') {
+		  key = '\0';
+		  break;
+		}
+	}
+
+	LCD_FillScreen(LCD_WHITE);
+	HAL_Delay(500);
+	//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
+	view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	FOVToBuffer(mapBuffer, view);
+	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+	bufferToMap(map, mapBuffer);
+
+	return map;
+}
+
+
+void openChest(uint8_t* mapCharBuffer , int row, int col){
+	for (int i = 0; i < 3; i++) {
+		mapCharBuffer[col + 16 * row] = ChestHex;
+		displayMap(htim1, htim3, mapCharBuffer, 256);
+		HAL_Delay(100);
+		mapCharBuffer[col + 16 * row] = BaseHex;
+		displayMap(htim1, htim3, mapCharBuffer, 256);
+		HAL_Delay(100);
+	}
+}
 
 

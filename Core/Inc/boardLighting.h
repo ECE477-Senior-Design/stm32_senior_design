@@ -42,4 +42,8 @@ int getRoll(const std::string& inputStr);
 
 void attackHit(uint8_t* mapCharBuffer , int row, int col, int type);
 
+GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character);
+
+void openChest(uint8_t* mapCharBuffer , int row, int col);
+
 #endif /* INC_WS2812B_H_ */

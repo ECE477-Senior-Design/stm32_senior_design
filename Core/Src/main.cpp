@@ -190,7 +190,7 @@ int main(void)
 							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 							  0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
 							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+							  4,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
 							  0,0,0,2,0,1,0,0,0,0,1,0,0,0,0,0,
 							  0,0,3,3,0,1,0,0,0,0,1,0,0,0,0,0,
 							  0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
@@ -210,7 +210,7 @@ int main(void)
 //
 //    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
-//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
+	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 //	while (1) {
 //		for(int i = 0; i < 8; i++)
 //		{
@@ -226,6 +226,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	for(int i = 0; i < 8; i++)
+//	{
+//	  ledHallPCBSystemCheck(hmcps2[i], &htim3, channels[i], i);
+//	}
+
+
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();

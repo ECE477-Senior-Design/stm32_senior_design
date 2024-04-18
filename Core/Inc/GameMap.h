@@ -7,6 +7,7 @@ DATE: 10/27/2023
 #define GAMEMAP_HH
 
 #include "BaseHexagon.h"
+#include "GameCharacters.h"
 
 //Node structure to keep track of column, row, and distance of each hex for shortest path
 struct AStarNode {

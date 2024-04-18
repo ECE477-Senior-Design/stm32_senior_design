@@ -297,8 +297,8 @@ void Playing_Mode() {
 				    		selection = 1;
 				    		prev_selection = 0;
 				    		y_pos = 50;
-							LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
-							LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+				    		LCD_WriteStringCentered(50, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+							LCD_WriteStringCentered(100, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
 							LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 							key = '\0';
 							while (1) {
@@ -306,8 +306,9 @@ void Playing_Mode() {
 									key = '\0';
 									switch (selection) {
 										case (1):
-											View_Character_Info(character);
+											break;
 										case (2):
+										    View_Character_Info(character);
 											break;
 									}
 									break;
@@ -364,8 +365,8 @@ void Playing_Mode() {
     		int selection = 1;
     		int prev_selection = 0;
     		int y_pos = 50;
-			LCD_WriteStringCentered(50, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
-			LCD_WriteStringCentered(100, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(50, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+    		LCD_WriteStringCentered(100, "Check Stats", FONT, LCD_BLACK, LCD_WHITE);
 			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 			key = '\0';
 			while (1) {
@@ -373,8 +374,9 @@ void Playing_Mode() {
 					key = '\0';
 					switch (selection) {
 						case (1):
-							View_Character_Info(character);
+							break;
 						case (2):
+							View_Character_Info(character);
 							break;
 					}
 					LCD_FillScreen(LCD_WHITE);
@@ -446,6 +448,8 @@ void Game_Loop(void) {
 
 	while (characters->GetNumberCharacters() > 1) {
 		for (int i = 0; i < characters->GetNumberCharacters(); i++) {
+
+
 			//check conditions for continuing game
 //			if (map == NULL) {
 //				game_state = MENU_STATE;
@@ -458,6 +462,13 @@ void Game_Loop(void) {
 
 			//Display character name ex: it is neils turn
 			Character* character = characters->GetCharacter(i);
+			if(character->GetCharacterType() == DEAD) {
+				continue;
+			}
+			if(character->GetCharacterType() == Monster && character->GetActive() == false){
+				continue;
+			}
+
 			selection = 1;
 			y_pos = 25;
 			LCD_WriteStringCentered(40, "It is", FONT, LCD_BLACK, LCD_WHITE);
@@ -486,9 +497,7 @@ void Game_Loop(void) {
 
 			//HAL_Delay(500);
 			int movement = character->GetSpeed();
-			int action = 0;
-			int actionAttack = 0;
-			int actionChest = 0;
+			int action = 1;
 
 			int targetType;
 			if (character->GetCharacterType() == Player) {
@@ -498,19 +507,25 @@ void Game_Loop(void) {
 				targetType = PlayerHex;
 			}
 
-			std::vector<Hexagon*> neighbors = map->GetNeighbors(map->GetHex(character->GetRow(), character->GetColumn()));
-			for(int hex = 0; hex < neighbors.size(); hex++){
-				if(neighbors[hex]->GetType() == targetType){
-					actionAttack = 1;
-					action = 1;
-				}
-				if(neighbors[hex]->GetType() == ChestHex){
-					actionChest = 1;
-					action = 1;
-				}
-			}
+
 
 			while (movement > 0 || action == 1){
+				int possibleAction = 0;
+				int actionAttack = 0;
+				int actionChest = 0;
+				std::vector<Hexagon*> neighbors = map->GetNeighbors(map->GetHex(character->GetRow(), character->GetColumn()));
+				for(int hex = 0; hex < neighbors.size(); hex++){
+					if(neighbors[hex]->GetType() == targetType){
+						actionAttack = 1;
+						possibleAction = 1;
+					}
+					if(neighbors[hex]->GetType() == ChestHex && character->GetCharacterType() == Player ){
+						actionChest = 1;
+						possibleAction = 1;
+					}
+				}
+
+
 				y_pos = 20;
 				selection = 1;
 				//Give option for info, action, move
@@ -522,7 +537,7 @@ void Game_Loop(void) {
 					LCD_WriteStringCentered(100, "Move Character", FONT, LCD_GRAY, LCD_WHITE);
 					selection = 2;
 				}
-				if(action == 1){
+				if(action == 1 && possibleAction == 1){
 					LCD_WriteStringCentered(120, "Action", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
 				}
 				else{
@@ -548,7 +563,7 @@ void Game_Loop(void) {
 								break;
 							case (2):
 								//combat function here
-								if (action == 1){
+								if (action == 1 && possibleAction == 1){
 									if(character->GetCharacterType() == Monster){
 										map = combatMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
 										action = 0;
@@ -562,6 +577,7 @@ void Game_Loop(void) {
 							    		}
 							    		else{
 							    			LCD_WriteStringCentered(50, "Enter Combat", FONT, LCD_GRAY, LCD_WHITE);
+							    			selection = 2;
 							    		}
 
 							    		if(actionChest){
@@ -587,6 +603,7 @@ void Game_Loop(void) {
 													case (2):
 														action = 0;
 														//loot chest
+														map = chestMode(htim1, htim3, hmcps1, hmcps2, map, map->GetHex(character->GetRow(), character->GetColumn()), character);
 														break;
 													case(3):
 														break;
@@ -650,7 +667,7 @@ void Game_Loop(void) {
 						if(movement <= 0 &&  selection == 1){
 							selection = 2;
 						}
-						if(action == 0 && selection == 2){
+						if((action == 0 || possibleAction == 0) && selection == 2){
 							if(movement > 0){
 								selection = 1;
 							}
@@ -663,7 +680,7 @@ void Game_Loop(void) {
 						key = '\0';
 						selection = (selection < 4) ? selection + 1 : 4;
 
-						if(action == 0 && selection == 2){
+						if((action == 0 || possibleAction == 0) && selection == 2){
 							selection = 3;
 						}
 

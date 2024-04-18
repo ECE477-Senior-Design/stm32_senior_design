@@ -1,5 +1,7 @@
 #include "GameMap.h"
 
+extern GameCharacters* characters;
+
 GameMap::GameMap(int rows, int columns) : _rows(rows), _columns(columns) {
     map.resize(rows, std::vector<Hexagon*>(columns, nullptr));
 
@@ -213,6 +215,14 @@ std::vector<Hexagon*> GameMap::FieldOfView(Hexagon* start, int range) {
                 std::vector<Hexagon*> line = HexLineDraw(start, hexagon);
                 if (line.size() != 0) {
                     unique_hexes.insert(line.begin(), line.end());
+                    if(hexagon->GetType() == MonsterHex){
+                    	for (int i = 0; i < characters->GetNumberCharacters(); i++){
+                    		if (characters->GetCharacter(i)->GetRow() == hexagon->GetHexRow() &&  characters->GetCharacter(i)->GetColumn() == hexagon->GetHexColumn()) {
+                    			characters->GetCharacter(i)->SetActive(true);
+                    			break;
+                    		}
+                    	}
+                    }
                 }
             }
         }
