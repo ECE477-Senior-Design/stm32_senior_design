@@ -20,66 +20,73 @@ extern GameCharacters * characters;
 void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
 	//DISPLAY MAP
 	//clearMap(htim1,htim3);
-	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
-	int test[256] = {};
-	uint32_t color;
+//	int i = 0;
+//	while (i < 2) {
+		TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
+		int test[256] = {};
+		uint32_t color;
 
-	int channels[] = {4,3,2,1, 4, 3, 2, 1}; //only 4 because groups of two so only run 4 times while operating with half of board
-	for(int pcb = 0; pcb < ((int)bufferSize / MAX_LED); pcb++){
-		for(int led = 0; led < MAX_LED; led++){
-			color = ((LED_Data[led][1]<<16) | (LED_Data[led][2]<<8) | (LED_Data[led][3]));
-		  switch(mapBuffer[(MAX_LED*pcb) + led]){
-			  case BaseHex:
-				  Set_LED(led,50,50,55);
-				  test[led + (pcb*32)] = 8;
-				  break;
+		int channels[] = {4,3,2,1, 4, 3, 2, 1}; //only 4 because groups of two so only run 4 times while operating with half of board
 
-			  case WallHex:
-				  Set_LED(led,255,0,255); //wall
-				  test[led + (pcb*32)] = 1;
-				  break;
 
-			  case PlayerHex:
-				 Set_LED(led,0, 0, 255); //character/player
-				 test[led + (pcb*32)] = 2;
-				  break;
+		for(int pcb = 0; pcb < ((int)bufferSize / MAX_LED); pcb++){
+			for(int led = 0; led < MAX_LED; led++){
+				color = ((LED_Data[led][1]<<16) | (LED_Data[led][2]<<8) | (LED_Data[led][3]));
+			  switch(mapBuffer[(MAX_LED*pcb) + led]){
+				  case BaseHex:
+					  Set_LED(led,50,50,55);
+					  test[led + (pcb*32)] = 8;
+					  break;
 
-			 case MonsterHex:
-				 Set_LED(led,255,0,0); //enemy
-				 test[led + (pcb*32)] = 3;
-				  break;
+				  case WallHex:
+					  Set_LED(led,255,0,255); //wall
+					  test[led + (pcb*32)] = 1;
+					  break;
 
-			 case ChestHex:
-				 Set_LED(led,100,100,0); //chest
-				 test[led + (pcb*32)] = 4;
-				  break;
+				  case PlayerHex:
+					 Set_LED(led,0, 0, 255); //character/player
+					 test[led + (pcb*32)] = 2;
+					  break;
 
-			 case MoveHex:
-				 Set_LED(led,0, 255, 0); //possible moves
-				 test[led + (pcb*32)] = 5;
-				 break;
+				 case MonsterHex:
+					 Set_LED(led,255,0,0); //enemy
+					 test[led + (pcb*32)] = 3;
+					  break;
 
-			 case 6:  ///PlayerHit
-				 Set_LED(led,100, 100, 0); //hex of player when its their turn
-				 test[led + (pcb*32)] = 6;
-				 break;
+				 case ChestHex:
+					 Set_LED(led,100,100,0); //chest
+					 test[led + (pcb*32)] = 4;
+					  break;
 
-			 case 7:  ///MonsterHit
-				 Set_LED(led,252, 148, 3); //hex of player when its their turn
-				 test[led + (pcb*32)] = 7;
-				 break;
+				 case MoveHex:
+					 Set_LED(led,0, 255, 0); //possible moves
+					 test[led + (pcb*32)] = 5;
+					 break;
 
-			 default:
-				 Set_LED(led,0,0,0); //default off
-				 test[led + (pcb*32)] = 0;
-				  break;
+				 case 6:  ///PlayerHit
+					 Set_LED(led,100, 100, 0); //hex of player when its their turn
+					 test[led + (pcb*32)] = 6;
+					 break;
 
-		  }
+				 case 7:  ///MonsterHit
+					 Set_LED(led,252, 148, 3); //hex of player when its their turn
+					 test[led + (pcb*32)] = 7;
+					 break;
+
+				 default:
+					 Set_LED(led,0,0,0); //default off
+					 test[led + (pcb*32)] = 0;
+					  break;
+
+			  }
+			}
+			int timer = pcb / 4;
+			Set_Brightness(20);
+			WS2812_Send(&(timers[timer]), channels[pcb]);
 		}
-		int timer = pcb / 4;
-		Set_Brightness(20);
-		WS2812_Send(&(timers[timer]), channels[pcb]);
-	}
+//		i++;
+//	}
+
 }
 
 

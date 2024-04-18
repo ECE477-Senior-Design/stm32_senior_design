@@ -198,11 +198,21 @@ int main(void)
 							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
 							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
 							  0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,
-							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0};
 
-    map = new GameMap(16, 16);
+//	//Jackson Test
+//	uint8_t mapBuffer[256];
+//	memset(mapBuffer, 9, sizeof(mapBuffer));
+//	for (int i = 0; i < 16; i++) {
+//		mapBuffer[i] = 0;
+//	}
+//
+//	//End Jackson Test
+
+	map = new GameMap(16, 16);
     bufferToMap(map, mapBuffer);
-    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,3,0,5,0,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,3,0,5,0,0,0","Goblin,3,9,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0", "Orc,2,9,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0"};
+    //std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,3,0,5,0,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,3,0,5,0,0,0","Goblin,3,9,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0", "Orc,2,9,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0"};
+    std::vector<std::string> charInput = {"Neil,0,0,3,12,3,9,4,93,83,28,18,12,3,0,5,0,0,0", "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,3,0,5,0,0,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0"};
     //std::vector<std::string> charMonsterInput = {"Goblin,8,11,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,8,2,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
 
     characters = new GameCharacters(charInput);
@@ -210,7 +220,8 @@ int main(void)
 //
 //    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
-	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
+    //Hall Effect Test
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 //	while (1) {
 //		for(int i = 0; i < 8; i++)
 //		{
@@ -226,12 +237,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	for(int i = 0; i < 8; i++)
-//	{
-//	  ledHallPCBSystemCheck(hmcps2[i], &htim3, channels[i], i);
-//	}
-
-
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();
