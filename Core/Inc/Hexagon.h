@@ -15,14 +15,17 @@ DATE: 10/31/2023
 #include <iostream>
 #include <limits>
 #include <unordered_map>
+#include <set>
 
 //Defines the type of hexes (eventually add chest)
 enum HexagonType {
-    BaseHex,
-    WallHex,
-    PlayerHex,
-    MonsterHex,
-	MoveHex,
+    BaseHex = 8,
+    WallHex = 1,
+    PlayerHex = 2,
+    MonsterHex = 3,
+	ChestHex = 4,
+	MoveHex = 5,
+//	PlayerHexTurn,
 };
 
 // //Includes weight for each hex (everything except for base should be high)

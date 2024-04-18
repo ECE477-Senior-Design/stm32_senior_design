@@ -59,6 +59,7 @@ extern SPI_HandleTypeDef LCD_SPI_PORT;
 /****************************/
 
 // Color definitions
+#define LCD_GRAY    0x7BEF
 #define LCD_BLACK   0x0000
 #define LCD_BLUE    0x001F
 #define LCD_RED     0xF800

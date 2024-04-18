@@ -8,7 +8,7 @@ DATE: 10/27/2023
 //Constructor for character class that keeps track of hex position, ability score, and some combat values
 Character::Character(std::string name, int column, int row,
         int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-        int max_health_points, int current_health_points, int armor_class, int initiative, int speed) {
+        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, int gold, int visibility) {
     _name = name;
     _column = column;
     _row = row;
@@ -23,6 +23,8 @@ Character::Character(std::string name, int column, int row,
     _armor_class = armor_class;
     _initiative = initiative;
     _speed = speed;
+    _gold = gold;
+    _visibility = visibility;
 }
 
 //Returns name of character
@@ -41,7 +43,7 @@ int Character::GetRow(void) {
 }
 
 std::pair<int, int> Character::GetPosition(void) {
-    return std::make_pair(_column, _row);
+    return std::make_pair(_row, _column);
 }
 
 //Returns strength of character
@@ -90,13 +92,21 @@ int Character::GetArmorClass(void) {
 }
 
 //Returns initiative of character
-int Character::GetInitiative(void) {
+int Character::GetInitiative(void) const {
     return _initiative;
 }
 
 //Returns speed of character
 int Character::GetSpeed(void) {
     return _speed;
+}
+
+int Character::GetGold(void) {
+	return _gold;
+}
+
+int Character::GetVisibility(void) {
+	return _visibility;
 }
 
 //Displays character info
@@ -115,6 +125,8 @@ void Character::DisplayCharacterInfo(void) {
     std::cout << "Armor Class: " << _armor_class << std::endl;
     std::cout << "Initiative: " << _initiative << std::endl;
     std::cout << "Speed: " << _speed << std::endl;
+    std::cout << "Gold: " << _gold << std:: endl;
+    std::cout << "Visibility" << _visibility << std::endl;
 }
 
 //Returns type of character
@@ -125,6 +137,10 @@ CharacterType Character::GetCharacterType(void) {
 //Returns class of character
 Class Character::GetClass(void) {
     return _class;
+}
+
+bool Character::GetActive(void){
+	return _active;
 }
 
 //Sets column position of character
@@ -192,6 +208,14 @@ void Character::SetSpeed(int speed) {
     _speed = speed;
 }
 
+void Character::SetGold(int gold) {
+	_gold = gold;
+}
+
+void Character::SetVisibility(int visibility) {
+	_visibility = visibility;
+}
+
 //Sets type of character
 void Character::SetCharacterType(CharacterType character_type) {
     _character_type = character_type;
@@ -200,6 +224,10 @@ void Character::SetCharacterType(CharacterType character_type) {
 //Sets class of character
 void Character::SetClass(Class class_) {
     _class = class_;
+}
+
+bool Character::SetActive(bool active){
+	_active = active;
 }
 
 //Returns modifier based on the ability score

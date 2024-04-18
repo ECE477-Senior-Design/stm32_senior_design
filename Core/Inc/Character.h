@@ -13,6 +13,7 @@ DATE: 10/31/2023
 enum CharacterType {
     Player,
     Monster,
+	DEAD,
 };
 
 //Defines the class of the character (eventually add ranger and wizard)

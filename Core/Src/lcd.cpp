@@ -361,3 +361,92 @@ void LCD_Test(void) {
 	}
 	HAL_Delay(1000);
 }
+
+static void _swap(uint16_t *a, uint16_t *b)
+{
+    uint16_t tmp;
+    tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+//draws triangle with vertices (x0,y0),(x1,y1),(x2,y2)
+void LCD_DrawFillTriangle(uint16_t x0, uint16_t y0, uint16_t x1,uint16_t y1, uint16_t x2,uint16_t y2, uint16_t c)
+{
+    LCD_Select();
+    uint16_t a, b, y, last;
+    int dx01, dy01, dx02, dy02, dx12, dy12;
+    long sa = 0;
+    long sb = 0;
+    if (y0 > y1){
+    _swap(&y0,&y1);
+        _swap(&x0,&x1);
+    }
+
+    if (y1 > y2){
+    _swap(&y2,&y1);
+        _swap(&x2,&x1);
+    }
+
+    if (y0 > y1){
+    _swap(&y0,&y1);
+        _swap(&x0,&x1);
+    }
+
+    if(y0 == y2){
+        a = b = x0;
+        if(x1 < a){
+            a = x1;
+        }
+        else if(x1 > b){
+            b = x1;
+        }
+
+        if(x2 < a){
+            a = x2;
+        }
+        else if(x2 > b){
+            b = x2;
+        }
+        LCD_FillRectangle(a,y0,b,y0,c);
+        return;
+    }
+    dx01 = x1 - x0;
+    dy01 = y1 - y0;
+    dx02 = x2 - x0;
+    dy02 = y2 - y0;
+    dx12 = x2 - x1;
+    dy12 = y2 - y1;
+
+    if(y1 == y2){
+        last = y1;
+    }
+    else{
+        last = y1-1;
+    }
+
+    for(y=y0; y<=last; y++){
+        a = x0 + sa / dy01;
+        b = x0 + sb / dy02;
+        sa += dx01;
+        sb += dx02;
+        if(a > b){
+            _swap(&a,&b);
+        }
+        LCD_FillRectangle(a,y,b,y,c);
+    }
+    sa = dx12 * (y - y1);
+    sb = dx02 * (y - y0);
+
+    for(; y<=y2; y++){
+        a = x1 + sa / dy12;
+        b = x0 + sb / dy02;
+        sa += dx12;
+        sb += dx02;
+        if(a > b){
+            _swap(&a,&b);
+        }
+        LCD_FillRectangle(a,y,b,y,c);
+    }
+    LCD_Unselect();
+}

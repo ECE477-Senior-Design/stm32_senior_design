@@ -43,6 +43,21 @@ void Keypad_Test(void) {
 	}
 }
 
+bool Key_Is_Number(char key) {
+	if (key == '\0') {
+		return false;
+	}
+	else if (key == '*' || key == '#') {
+		return false;
+	}
+	else if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 {
 	current_mill = HAL_GetTick();
@@ -78,7 +93,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin)
 			key = '2';
 		}
 		else if(GPIO_pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_5)) {
-			key = '3';
+			key = '5';
 		}
 		else if(GPIO_pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_6)) {
 			key = '8';
