@@ -62,6 +62,15 @@ void GameMap::ChangeHex(int row, int column, HexagonType type) {
     }
 }
 
+Character* GameMap::HexToCharacter(Hexagon* hexagon) {
+	for (int i = 0; i < characters->GetCharactersVec().size(); i++) {
+		Character* character = characters->GetCharacter(i);
+		if (character->GetRow() == hexagon->GetHexRow() && character->GetColumn() == hexagon->GetHexColumn()) {
+			return character;
+		}
+	}
+}
+
 //utility function to retrieve the neighbors of a hexagon using q and r coordinates
 std::vector<Hexagon*> GameMap::GetNeighbors(Hexagon* hexagon) {
     std::vector<Hexagon*> neighbors;
@@ -215,14 +224,14 @@ std::vector<Hexagon*> GameMap::FieldOfView(Hexagon* start, int range) {
                 std::vector<Hexagon*> line = HexLineDraw(start, hexagon);
                 if (line.size() != 0) {
                     unique_hexes.insert(line.begin(), line.end());
-                    if(hexagon->GetType() == MonsterHex){
-                    	for (int i = 0; i < characters->GetNumberCharacters(); i++){
-                    		if (characters->GetCharacter(i)->GetRow() == hexagon->GetHexRow() &&  characters->GetCharacter(i)->GetColumn() == hexagon->GetHexColumn()) {
-                    			characters->GetCharacter(i)->SetActive(true);
-                    			break;
-                    		}
-                    	}
-                    }
+//                    if(hexagon->GetType() == MonsterHex){
+//                    	for (int i = 0; i < characters->GetNumberCharacters(); i++){
+//                    		if (characters->GetCharacter(i)->GetRow() == hexagon->GetHexRow() &&  characters->GetCharacter(i)->GetColumn() == hexagon->GetHexColumn()) {
+//                    			characters->GetCharacter(i)->SetActive(true);
+//                    			break;
+//                    		}
+//                    	}
+//                    }
                 }
             }
         }

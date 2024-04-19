@@ -209,8 +209,8 @@ int main(void)
 // //   monsters = new GameCharacters(charMonsterInput);
 //
 //    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-
-	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
+//
+//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
 //	while (1) {
 //		for(int i = 0; i < 8; i++)
 //		{

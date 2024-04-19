@@ -36,6 +36,7 @@ class GameMap {
 
         Hexagon* GetHex(int row, int column);
         void ChangeHex(int row, int column, HexagonType type);
+        Character* HexToCharacter(Hexagon* hexagon);
 
         std::vector<Hexagon*> GetNeighbors(Hexagon* hexagon);
         std::vector<Hexagon*> PossibleMovements(Hexagon* start, int movement);

@@ -37,6 +37,9 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
 
         character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[17])));
         character->SetClass(static_cast<Class> (std::stoi(character_info[18])));
+        if(character->GetCharacterType() == Monster){
+        	character->SetActive(false);
+        }
 
         charactersVec.push_back(character);
     }

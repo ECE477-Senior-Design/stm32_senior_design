@@ -10,6 +10,7 @@
 #include "mcp23017.h"
 #include "keypad.h"
 #include "lcd.h"
+#include <random>
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
@@ -180,14 +181,14 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 
 	  LCD_WriteStringCentered(50, "Move Piece", FONT, LCD_BLACK, LCD_WHITE);
 
-	  int y_pos = 20;
+	  int y_pos = 50;
 	  int selection = 1;
 	  int prev_selection = 0;
 	  //Give option for info, action, move
 	  //LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
 	  LCD_WriteStringCentered(100, "Confirm Move", FONT, LCD_BLACK, LCD_WHITE);
-	  LCD_WriteStringCentered(120, "Return To Options", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
-	  LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
+	  LCD_WriteStringCentered(150, "Return to Options", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+	  LCD_FillRectangle(10, 50 + selection * y_pos, 10, 18, LCD_BLACK);
 
 	  int backToMenu = 0;
 
@@ -214,6 +215,59 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 							  currHex = map->GetHex(row,col);
 							  currHex->SetPassable(false);
 
+							  uint8_t mapCharBuffer[256];
+							  mapToBuffer(map, mapBuffer);
+							  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+							  FOVToBuffer(mapBuffer, view);
+							  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+
+								if (_character->GetCharacterType() == Player) {
+									view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+									for (int i = 0; i < view.size(); i++) {
+										if (view[i]->GetType() == MonsterHex) {
+											Character* monster = map->HexToCharacter(view[i]);
+											if (monster->GetActive() == false) {
+												LCD_FillScreen(LCD_WHITE);
+												HAL_Delay(500);
+												LCD_WriteStringCentered(50, "Monster Spotted!", FONT, LCD_BLACK, LCD_WHITE);
+												HAL_Delay(2000);
+												LCD_FillScreen(LCD_WHITE);
+												HAL_Delay(500);
+												LCD_WriteStringCentered(50, "Place token for", FONT, LCD_BLACK, LCD_WHITE);
+												Character* monster = map->HexToCharacter(view[i]);
+												std::pair<int, int> position = monster->GetPosition();
+												monster->SetActive(true);
+												std::string name = monster->GetName();
+												const char* char_name = name.c_str();
+												LCD_WriteStringCentered(70, char_name, FONT, LCD_BLACK, LCD_WHITE);
+												std::memcpy(mapCharBuffer, mapBuffer, sizeof(uint8_t)* 256);
+
+												while (1) {
+													blinkLED(mapCharBuffer, position.first, position.second, MonsterHex);
+													bool hallTrig = checkHallSensor(position.first, position.second, hmcps1, hmcps2);
+													if (hallTrig) {
+														mapBuffer[position.second + 16 * position.first] = MonsterHex;
+														LCD_FillScreen(LCD_WHITE);
+														HAL_Delay(500);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+
+							 LCD_WriteStringCentered(50, "Move Piece", FONT, LCD_BLACK, LCD_WHITE);
+
+							  y_pos = 50;
+							  selection = 1;
+							  prev_selection = 0;
+							  //Give option for info, action, move
+							  //LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+							  LCD_WriteStringCentered(100, "Confirm Move", FONT, LCD_BLACK, LCD_WHITE);
+							  LCD_WriteStringCentered(150, "Return to Options", FONT, LCD_BLACK, LCD_WHITE); //maybe add conditional here for if combat is possible
+							  LCD_FillRectangle(10, 50 + selection * y_pos, 10, 18, LCD_BLACK);
+
 							  if (movement > 0) {
 								  mapToBuffer(map, mapBuffer);
 								  possibleMoves = map->PossibleMovements(currHex, movement);
@@ -221,6 +275,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 								  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
 								  FOVToBuffer(mapBuffer, view);
 								  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+
 							  }
 							  else {
 								  mapToBuffer(map, mapBuffer);
@@ -263,8 +318,8 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 			  selection = (selection < 2) ? selection + 1 : 2;
 		  }
 		  if (selection != prev_selection) {
-			  LCD_FillRectangle(10, 80 + prev_selection * y_pos, 10, 18, LCD_WHITE);
-			  LCD_FillRectangle(10, 80 + selection * y_pos, 10, 18, LCD_BLACK);
+			  LCD_FillRectangle(10, 50 + prev_selection * y_pos, 10, 18, LCD_WHITE);
+			  LCD_FillRectangle(10, 50 + selection * y_pos, 10, 18, LCD_BLACK);
 			  prev_selection = selection;
 		  }
 
@@ -310,7 +365,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 	}
 
 	if (targetHex.size() == 0) {
-		LCD_WriteStringCentered(50, "No enemies in range", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(50, "No Enemies in Range", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(2000);
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
@@ -341,11 +396,11 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 
 //	LCD_FillScreen(LCD_WHITE);
 //	HAL_Delay(500);
-	LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 //	LCD_WriteStringCentered(50, ("Race: " + std::to_string(targetSelection->GetRace())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
-	LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+	//LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(200, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
 	key = '\0';
 	while (1) {
 		blinkLED(charMapBuffer , targetHex[selection]->GetHexRow(), targetHex[selection]->GetHexColumn(), targetType);
@@ -353,15 +408,15 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 			key = '\0';
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
-			int attackRoll = getRoll("attack");
+			int attackRoll = getRoll("Attack");
 			if (attackRoll >= targetSelection->GetArmorClass() ) {
 				LCD_FillScreen(LCD_WHITE);
 				HAL_Delay(500);
-				LCD_WriteStringCentered(50, "ATTACK HIT", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(50, "Attack Succeeded", FONT, LCD_BLACK, LCD_WHITE);
 				HAL_Delay(2000);
 				LCD_FillScreen(LCD_WHITE);
 				HAL_Delay(500);
-				int damageRoll = getRoll("damage");
+				int damageRoll = getRoll("Damage");
 				targetSelection->SetCurrentHealthPoints(targetSelection->GetCurrentHealthPoints() - damageRoll);
 				attackHit(charMapBuffer , targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
 
@@ -378,10 +433,8 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 
 					LCD_FillScreen(LCD_WHITE);
 					HAL_Delay(500);
-					LCD_WriteStringCentered(30, (targetSelection->GetName() + " killed").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+					LCD_WriteStringCentered(30, (targetSelection->GetName() + " Killed").c_str(), FONT, LCD_BLACK, LCD_WHITE);
 					HAL_Delay(2000);
-					LCD_FillScreen(LCD_WHITE);
-					HAL_Delay(500);
 				}
 				else {
 					//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
@@ -393,10 +446,8 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 				break;
 			}
 			else {
-				LCD_WriteStringCentered(50, "ATTACK MISSED", FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(50, "Attack Missed", FONT, LCD_BLACK, LCD_WHITE);
 				HAL_Delay(2000);
-				LCD_FillScreen(LCD_WHITE);
-				HAL_Delay(500);
 				break;
 			}
 		}
@@ -412,13 +463,13 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 			}
 
 			if (selection != prevSelection) {
-//				LCD_FillScreen(LCD_WHITE);
+				LCD_FillScreen(LCD_WHITE);
 //				HAL_Delay(500);
-				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(50, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	//			LCD_WriteStringCentered(50, ("Race: " + std::to_string(targetSelection->GetRace())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
-				LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+				//LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(200, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
 			}
 		}
 		if (key == 'D') {
@@ -435,11 +486,11 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 			if (selection != prevSelection) {
 //				LCD_FillScreen(LCD_WHITE);
 //				HAL_Delay(500);
-				LCD_WriteStringCentered(30, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(50, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	//			LCD_WriteStringCentered(50, ("Race: " + std::to_string(targetSelection->GetRace())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 
-				LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-				LCD_WriteStringCentered(90, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
+				//LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(200, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
 			}
 		}
 		if (key == '*') {
@@ -487,8 +538,8 @@ void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
 }
 
 int getRoll(const std::string& inputStr) {
-	LCD_WriteStringCentered(10, ("Insert " + inputStr).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(30, "roll", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, ("Insert " + inputStr).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(70, "Roll", FONT, LCD_BLACK, LCD_WHITE);
 	char* roll_string = new char[3];
 	int no_character = 0;
 	int start_tick = HAL_GetTick();
@@ -496,6 +547,8 @@ int getRoll(const std::string& inputStr) {
 	while (1) {
 		int cur_tick = HAL_GetTick();
 		if ((cur_tick - start_tick) >= 60000) {
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
 			return 0;
 		}
 
@@ -509,18 +562,18 @@ int getRoll(const std::string& inputStr) {
 		else if (key == '*') {
 			key = '\0';
 			if (no_character > 0) {
-				LCD_WriteStringCentered(100, roll_string, FONT, LCD_WHITE, LCD_WHITE);
+				LCD_WriteStringCentered(110, roll_string, FONT, LCD_WHITE, LCD_WHITE);
 				no_character--;
 				roll_string[no_character] = '\0';
-				LCD_WriteStringCentered(100, roll_string, FONT, LCD_BLACK, LCD_WHITE);
+				LCD_WriteStringCentered(110, roll_string, FONT, LCD_BLACK, LCD_WHITE);
 			}
 		}
 		else if (no_character < 2 && Key_Is_Number(key)) {
-			LCD_WriteStringCentered(100, roll_string, FONT, LCD_WHITE, LCD_WHITE);
+			LCD_WriteStringCentered(110, roll_string, FONT, LCD_WHITE, LCD_WHITE);
 			roll_string[no_character] = key;
 			no_character++;
 			roll_string[no_character] = '\0';
-			LCD_WriteStringCentered(100, roll_string, FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(110, roll_string, FONT, LCD_BLACK, LCD_WHITE);
 			key = '\0';
 		}
 	}
@@ -548,6 +601,13 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 
 	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
 	std::vector<Hexagon*> lootHex;
+	int minGold = 10;
+	int maxGold = 100;
+	int goldVal = 0;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distr(minGold, maxGold);
+
 	for (int hex = 0; hex < neighbors.size(); hex++) {
 		if (neighbors[hex]->GetType() == ChestHex ) {
 			lootHex.push_back(neighbors[hex]);
@@ -555,7 +615,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 	}
 
 	if (lootHex.size() == 0) {
-		LCD_WriteStringCentered(50, "No chests in range", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(50, "No Chests in Range", FONT, LCD_BLACK, LCD_WHITE);
 		HAL_Delay(2000);
 		LCD_FillScreen(LCD_WHITE);
 		HAL_Delay(500);
@@ -573,8 +633,9 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 
 	int selection = 0;
 
-	LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(50, "Click To Continue", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(50, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(200, "Continue", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_FillRectangle(10, 200, 10, 18, LCD_BLACK);
 	key = '\0';
 	while (1) {
 		blinkLED(charMapBuffer , lootHex[selection]->GetHexRow(), lootHex[selection]->GetHexColumn(), ChestHex);
@@ -584,6 +645,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 			openChest(charMapBuffer, lootHex[selection]->GetHexRow(), lootHex[selection]->GetHexColumn());
 			lootHex[selection]->SetType(BaseHex);
 			lootHex[selection]->SetPassable(true);
+		    goldVal = distr(gen);
 
 			mapBuffer[lootHex[selection]->GetHexColumn() + 16*lootHex[selection]->GetHexRow()] = BaseHex;
 			view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
@@ -593,9 +655,10 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
-			LCD_WriteStringCentered(50, "+1 Gold Received!!!", FONT, LCD_BLACK, LCD_WHITE);
-			_character->SetGold(_character->GetGold() + 1);
-			LCD_WriteStringCentered(70, (_character->GetName() + " has " + std::to_string(_character->GetGold()) + " gold" ).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(50, (std::to_string(goldVal) + " Gold Received!").c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			_character->SetGold(_character->GetGold() + goldVal);
+			HAL_Delay(2000);
+			LCD_WriteStringCentered(100, (_character->GetName() + " Has " + std::to_string(_character->GetGold()) + " Gold" ).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 			HAL_Delay(2000);
 			break;
 
@@ -604,7 +667,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 			key = '\0';
 			int prevSelection = selection;
 			selection = (selection > 0) ? selection - 1 : 0;
-			LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(50, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
 
 		}
 		if (key == 'D') {
@@ -612,7 +675,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 			int prevSelection = selection;
 			selection = (selection < (lootHex.size()-1)) ? selection + 1 : (lootHex.size() - 1);
 
-			LCD_WriteStringCentered(30, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(50, "Open Chest", FONT, LCD_BLACK, LCD_WHITE);
 		}
 		if (key == '*') {
 		  key = '\0';
