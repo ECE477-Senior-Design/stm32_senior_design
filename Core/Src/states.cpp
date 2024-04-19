@@ -232,6 +232,7 @@ void View_Map() {
 		}
 	}
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
+	//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	game_state = MENU_STATE;
 }
 
