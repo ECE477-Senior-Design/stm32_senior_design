@@ -550,15 +550,20 @@ void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type) {
 
 void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
 	uint8_t fovBuffer[256] = {0};
+	int sizeTest2 = hexes.size();
 	for (uint8_t i = 0; i < hexes.size(); i++) {
 		 int colN = hexes[i]->GetHexColumn();
 		 int rowN = hexes[i]->GetHexRow();
+		 if(colN >= 16 || rowN >= 16){
+			 sizeTest2 = 0;
+		 }
 
 		 fovBuffer[colN + 16*rowN] = 1;
 		// hexes[i]->GetType();
 		// mapBuffer[colN + 16*rowN] = 1;
 	}
-	for (uint8_t i = 0; i < sizeof(fovBuffer); i++) {
+	int sizeTest = sizeof(fovBuffer);
+	for (int i = 0; i < 256; i++) {
 		if (fovBuffer[i] == 0) {
 			mapBuffer[i] = 0;
 		}
