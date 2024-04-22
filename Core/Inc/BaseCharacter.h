@@ -26,13 +26,8 @@ class Character {
         int _armor_class; //Armor class of character
         int _initiative; //Initiative of character
         int _speed; //Speed of character
-        int _gold;
         int _visibility;
-
-        //Possibly create class for weapons, I don't know yet
-        //Maybe just do enum struct in a Weapons.hh file
-        //Or keep enum struct in Player.hh
-
+        int _gold;
         CharacterType _character_type;
         Class _class; //Class of character
         bool _active; //if character is active
@@ -81,7 +76,7 @@ class Character {
         void SetVisibility(int visibility);
         void SetCharacterType(CharacterType character_type);
         void SetClass(Class class_); //Sets class of character
-        bool SetActive(bool active); //sets if character is active or not
+        void SetActive(bool active); //sets if character is active or not
 
         int CalculateModifier(int ability_score); //Returns modifier based on the ability score (may want to move to GamePlay file)
 

@@ -40,7 +40,9 @@ void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes);
 
 int getRoll(const std::string& inputStr);
 
-void attackHit(uint8_t* mapCharBuffer , int row, int col, int type);
+void attackMeleeHit(uint8_t* mapCharBuffer, int row, int col, int type);
+
+void attackRangeHit(uint8_t* mapCharBuffer, std::vector<Hexagon*> line, int type);
 
 GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character);
 

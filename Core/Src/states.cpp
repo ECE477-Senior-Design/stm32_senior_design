@@ -411,7 +411,7 @@ void Game_Loop(void) {
 			if(character->GetCharacterType() == DEAD) {
 				continue;
 			}
-			if(character->GetCharacterType() == Monster && character->GetActive() == false) {
+			else if (character->GetCharacterType() == Monster && character->GetActive() == false) {
 				continue;
 			}
 
@@ -450,7 +450,7 @@ void Game_Loop(void) {
 
 			if (character->GetCharacterType() == Player) {
 				std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
-				for (int i = 0; i < view.size(); i++) {
+				for (uint8_t i = 0; i < view.size(); i++) {
 					if (view[i]->GetType() == MonsterHex) {
 						Character* monster = map->HexToCharacter(view[i]);
 						if (monster->GetActive() == false) {
@@ -504,23 +504,37 @@ void Game_Loop(void) {
 				int actionAttack = 0;
 				int actionChest = 0;
 				std::vector<Hexagon*> neighbors = map->GetNeighbors(map->GetHex(character->GetRow(), character->GetColumn()));
-				for(int hex = 0; hex < neighbors.size(); hex++){
-					if(neighbors[hex]->GetType() == targetType){
-						actionAttack = 1;
-						possibleAction = 1;
-					}
-					if(neighbors[hex]->GetType() == ChestHex && character->GetCharacterType() == Player ){
+				for (uint8_t hex = 0; hex < neighbors.size(); hex++) {
+					if (neighbors[hex]->GetType() == ChestHex && character->GetCharacterType() == Player ) {
 						actionChest = 1;
 						possibleAction = 1;
 					}
 				}
-
+				if (character->GetClass() == Fighter) {
+					for (uint8_t hex = 0; hex < neighbors.size(); hex++) {
+						if (neighbors[hex]->GetType() == targetType) {
+							actionAttack = 1;
+							possibleAction = 1;
+						}
+					}
+				}
+				else if (character->GetClass() == Ranger) {
+					std::vector<Hexagon*> fov = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
+					for (uint8_t hex = 0; hex < fov.size(); hex++) {
+						if (fov[hex]->GetType() == targetType) {
+							actionAttack = 1;
+							possibleAction = 1;
+						}
+					}
+				}
 
 				y_pos = 50;
 				prev_selection = -1;
 				selection = 1;
 				//Give option for info, action, move
-				LCD_WriteStringCentered(50, "How will you proceed?", FONT, LCD_BLACK, LCD_WHITE);
+				std::string name = character->GetName();
+				const char* string_name = name.c_str();
+				LCD_WriteStringCentered(50, (std::string(string_name) + "'s Turn").c_str(), FONT, LCD_BLACK, LCD_WHITE);
 				if(movement > 0 && possibleMove == 1){
 					LCD_WriteStringCentered(100, "Move Character", FONT, LCD_BLACK, LCD_WHITE);
 				}
