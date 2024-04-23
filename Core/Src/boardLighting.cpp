@@ -172,7 +172,7 @@ void bufferToMap(GameMap* map, uint8_t* mapBuffer) {
 	}
 }
 
-GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character, int* _movement){
+GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* character, int* _movement){
 	  TIM_HandleTypeDef timers[] = {htim1, htim3};
 	  uint8_t mapBuffer[256];
 	  mapToBuffer(map, mapBuffer);
@@ -182,7 +182,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 	  std::vector<Hexagon*> possibleMoves = map->PossibleMovements(currHex, movement);//but get character hex and character movement score
 	  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
 
-	  std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	  std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 	  FOVToBuffer(mapBuffer, view);
 	  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
@@ -212,8 +212,8 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 						  if (hallTrig) {
 							  //update buffer or map
 							  mapBuffer[col + 16*row] = currHex->GetType();
-							  _character->SetColumn(col);
-							  _character->SetRow(row);
+							  character->SetColumn(col);
+							  character->SetRow(row);
 							  mapBuffer[currHex->GetHexColumn() + 16*currHex->GetHexRow()] = BaseHex;
 							  movement = movement - map->HexDistance(currHex, possibleMoves[hex]);
 							  map->GetHex(row,col)->SetType(currHex->GetType());
@@ -224,12 +224,12 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 
 							  uint8_t mapCharBuffer[256];
 							  mapToBuffer(map, mapBuffer);
-							  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+							  view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 							  FOVToBuffer(mapBuffer, view);
 							  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
-								if (_character->GetCharacterType() == Player) {
-									view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+								if (character->GetCharacterType() == Player) {
+									view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 									for (int i = 0; i < view.size(); i++) {
 										if (view[i]->GetType() == MonsterHex) {
 											Character* monster = map->HexToCharacter(view[i]);
@@ -279,14 +279,14 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 								  mapToBuffer(map, mapBuffer);
 								  possibleMoves = map->PossibleMovements(currHex, movement);
 								  mapHexesToBuffer(mapBuffer, possibleMoves, MoveHex);
-								  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+								  view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 								  FOVToBuffer(mapBuffer, view);
 								  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 
 							  }
 							  else {
 								  mapToBuffer(map, mapBuffer);
-								  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+								  view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 								  FOVToBuffer(mapBuffer, view);
 								  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 								  break;
@@ -296,7 +296,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 
 					  if (movement <= 0) {
 						  mapToBuffer(map, mapBuffer);
-						  view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+						  view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 						  FOVToBuffer(mapBuffer, view);
 						  displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 						  backToMenu = 1;
@@ -305,7 +305,7 @@ GameMap* movementMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017
 					  break;
 			  	  case (2):
 				    mapToBuffer(map, mapBuffer);
-				    view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+				    view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 				    FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 					backToMenu = 1;
@@ -354,35 +354,56 @@ void clearMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3){
 	}
 }
 
-GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character) {
+GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* character) {
 	int targetType;
-	if (_character->GetCharacterType() == Player) {
+	if (character->GetCharacterType() == Player) {
 		targetType = MonsterHex;
 	}
 	else {
 		targetType = PlayerHex;
 	}
 
-	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
 	std::vector<Hexagon*> targetHex;
-	for (int hex = 0; hex < neighbors.size(); hex++) {
-		if (neighbors[hex]->GetType() == targetType ) {
-			targetHex.push_back(neighbors[hex]);
+	if (character->GetClass() == Fighter) {
+		std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
+		for (int hex = 0; hex < neighbors.size(); hex++) {
+			if (neighbors[hex]->GetType() == targetType) {
+				targetHex.push_back(neighbors[hex]);
+			}
+		}
+
+		if (targetHex.size() == 0) {
+			LCD_WriteStringCentered(50, "No Enemies in Range", FONT, LCD_BLACK, LCD_WHITE);
+			HAL_Delay(2000);
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+
+			return map;
+		}
+	}
+	else if (character->GetClass() == Ranger) {
+		std::vector<Hexagon*> fov = map->FieldOfView(currHex, character->GetVisibility());
+		for (uint8_t i = 0; i < fov.size(); i++) {
+			if (fov[i]->GetType() == targetType) {
+				targetHex.push_back(fov[i]);
+			}
+		}
+
+		if (targetHex.size() == 0) {
+			LCD_WriteStringCentered(50, "No Enemies in Range", FONT, LCD_BLACK, LCD_WHITE);
+			HAL_Delay(2000);
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+
+			return map;
 		}
 	}
 
-	if (targetHex.size() == 0) {
-		LCD_WriteStringCentered(50, "No Enemies in Range", FONT, LCD_BLACK, LCD_WHITE);
-		HAL_Delay(2000);
-		LCD_FillScreen(LCD_WHITE);
-		HAL_Delay(500);
 
-		return map;
-	}
-
+	int finalTargetIndex = 0;
 	uint8_t mapBuffer[256];
 	mapToBuffer(map, mapBuffer);
-	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 
 	uint8_t charMapBuffer[256];
@@ -390,7 +411,6 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 
 	int selection = 0;
 	Character* targetSelection = NULL;
-	int finalTargetIndex = 0;
 	for (int targetSelect = 0; targetSelect < characters->GetNumberCharacters(); targetSelect++) {
 		if (characters->GetCharacter(targetSelect)->GetRow() == targetHex[selection]->GetHexRow() &&  characters->GetCharacter(targetSelect)->GetColumn() == targetHex[selection]->GetHexColumn()) {
 			if (targetSelection->GetCharacterType() != DEAD) {
@@ -401,12 +421,8 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 		}
 	}
 
-//	LCD_FillScreen(LCD_WHITE);
-//	HAL_Delay(500);
 	LCD_WriteStringCentered(50, targetSelection->GetName().c_str(), FONT, LCD_BLACK, LCD_WHITE);
 //	LCD_WriteStringCentered(50, ("Race: " + std::to_string(targetSelection->GetRace())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
-
-	//LCD_WriteStringCentered(70, ("Class: " + std::to_string(targetSelection->GetClass())).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 	LCD_WriteStringCentered(200, "Continue Attack", FONT, LCD_BLACK, LCD_WHITE);
 	key = '\0';
 	while (1) {
@@ -425,7 +441,12 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 				HAL_Delay(500);
 				int damageRoll = getRoll("Damage");
 				targetSelection->SetCurrentHealthPoints(targetSelection->GetCurrentHealthPoints() - damageRoll);
-				attackHit(charMapBuffer , targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
+				if ((character->GetClass() == Fighter) || (character->GetClass() == Ranger && map->HexDistance(currHex, targetHex[selection]) == 1)) {
+				    attackMeleeHit(charMapBuffer, targetSelection->GetRow(), targetSelection->GetColumn(), targetSelection->GetCharacterType());
+				}
+				else if ((character->GetClass() == Ranger) && (map->HexDistance(currHex, targetHex[selection]) > 1)) {
+					attackRangeHit(charMapBuffer, map->HexLineDraw(currHex, targetHex[selection]), targetSelection->GetCharacterType());
+				}
 
 				//if attack kills target
 				if ((targetSelection->GetCurrentHealthPoints() - damageRoll) <= 0) {
@@ -434,7 +455,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 					targetSelection->SetCharacterType(DEAD);
 
 					mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-					view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+					view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 					FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 
@@ -445,7 +466,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 				}
 				else {
 					//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-					view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+					view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 					FOVToBuffer(mapBuffer, view);
 					displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 				}
@@ -509,7 +530,7 @@ GameMap* combatMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_H
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-	view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	bufferToMap(map, mapBuffer);
@@ -529,15 +550,20 @@ void blinkLED(uint8_t* mapCharBuffer , int row, int col, int type) {
 
 void FOVToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes){
 	uint8_t fovBuffer[256] = {0};
-	for(int i = 0; i < hexes.size(); i++){
+	int sizeTest2 = hexes.size();
+	for (uint8_t i = 0; i < hexes.size(); i++) {
 		 int colN = hexes[i]->GetHexColumn();
 		 int rowN = hexes[i]->GetHexRow();
+		 if(colN >= 16 || rowN >= 16){
+			 sizeTest2 = 0;
+		 }
 
 		 fovBuffer[colN + 16*rowN] = 1;
 		// hexes[i]->GetType();
 		// mapBuffer[colN + 16*rowN] = 1;
 	}
-	for (int i = 0; i < sizeof(fovBuffer); i++) {
+	int sizeTest = sizeof(fovBuffer);
+	for (int i = 0; i < 256; i++) {
 		if (fovBuffer[i] == 0) {
 			mapBuffer[i] = 0;
 		}
@@ -588,7 +614,7 @@ int getRoll(const std::string& inputStr) {
 	return atoi(roll_string);
 }
 
-void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
+void attackMeleeHit(uint8_t* mapCharBuffer, int row, int col, int type) {
 	for (int i = 0; i < 3; i++) {
 		if (type == Player){
 			mapCharBuffer[col + 16 * row] = 6;
@@ -604,7 +630,26 @@ void attackHit(uint8_t* mapCharBuffer , int row, int col, int type){
 	}
 }
 
-GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* _character) {
+void attackRangeHit(uint8_t* mapCharBuffer, std::vector<Hexagon*> line, int type) {
+	uint8_t original_buffer[256];
+	std::memcpy(original_buffer, mapCharBuffer, sizeof(uint8_t) * 256);
+	for (uint8_t i = 0; i < line.size(); i++) {
+		Hexagon* hex = line[i];
+		int row = hex->GetHexRow();
+		int col = hex->GetHexColumn();
+		if (type == Player) {
+			mapCharBuffer[col + 16 * row] = 6;
+		}
+		else {
+			mapCharBuffer[col + 16 * row] = 7;
+		}
+		displayMap(htim1, htim3, mapCharBuffer, 256);
+		HAL_Delay(50);
+	}
+	displayMap(htim1, htim3, original_buffer, 256);
+}
+
+GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* character) {
 
 	std::vector<Hexagon*> neighbors = map->GetNeighbors(currHex);
 	std::vector<Hexagon*> lootHex;
@@ -615,7 +660,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distr(minGold, maxGold);
 
-	for (int hex = 0; hex < neighbors.size(); hex++) {
+	for (uint8_t hex = 0; hex < neighbors.size(); hex++) {
 		if (neighbors[hex]->GetType() == ChestHex ) {
 			lootHex.push_back(neighbors[hex]);
 		}
@@ -632,7 +677,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 
 	uint8_t mapBuffer[256];
 	mapToBuffer(map, mapBuffer);
-	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	std::vector<Hexagon*> view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 
 	uint8_t charMapBuffer[256];
@@ -655,7 +700,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 		    goldVal = distr(gen);
 
 			mapBuffer[lootHex[selection]->GetHexColumn() + 16*lootHex[selection]->GetHexRow()] = BaseHex;
-			view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+			view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 			FOVToBuffer(mapBuffer, view);
 			displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer)/sizeof(uint8_t));
 
@@ -663,9 +708,9 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
 			LCD_WriteStringCentered(50, (std::to_string(goldVal) + " Gold Received!").c_str(), FONT, LCD_BLACK, LCD_WHITE);
-			_character->SetGold(_character->GetGold() + goldVal);
+			character->SetGold(character->GetGold() + goldVal);
 			HAL_Delay(2000);
-			LCD_WriteStringCentered(100, (_character->GetName() + " Has " + std::to_string(_character->GetGold()) + " Gold" ).c_str(), FONT, LCD_BLACK, LCD_WHITE);
+			LCD_WriteStringCentered(100, (character->GetName() + " Has " + std::to_string(character->GetGold()) + " Gold" ).c_str(), FONT, LCD_BLACK, LCD_WHITE);
 			HAL_Delay(2000);
 			break;
 
@@ -693,7 +738,7 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 	LCD_FillScreen(LCD_WHITE);
 	HAL_Delay(500);
 	//mapBuffer[targetSelection->GetColumn() + 16*targetSelection->GetRow()] = BaseHex;
-	view = map->FieldOfView(map->GetHex(_character->GetRow(), _character->GetColumn()), _character->GetVisibility());
+	view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());
 	FOVToBuffer(mapBuffer, view);
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	bufferToMap(map, mapBuffer);

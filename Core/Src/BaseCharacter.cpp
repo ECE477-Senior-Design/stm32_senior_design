@@ -226,7 +226,7 @@ void Character::SetClass(Class class_) {
     _class = class_;
 }
 
-bool Character::SetActive(bool active){
+void Character::SetActive(bool active){
 	_active = active;
 }
 

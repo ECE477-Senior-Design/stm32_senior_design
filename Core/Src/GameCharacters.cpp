@@ -1,16 +1,4 @@
-/*
-MOST RECENT AUTHOR: JACKSON
-DATE: 10/27/2023
-*/
-
-
 #include "GameCharacters.h"
-
-
-//Constructor of characters vector
-//GameCharacters::GameCharacters(int number_characters) : _number_characters(number_characters) {
-//
-//}
 
 //Constructor of characters vector from string
 GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
@@ -37,7 +25,7 @@ GameCharacters::GameCharacters(std::vector<std::string> input_strlist) {
 
         character->SetCharacterType(static_cast<CharacterType> (std::stoi(character_info[17])));
         character->SetClass(static_cast<Class> (std::stoi(character_info[18])));
-        if(character->GetCharacterType() == Monster){
+        if (character->GetCharacterType() == Monster) {
         	character->SetActive(false);
         }
 
@@ -71,18 +59,6 @@ int GameCharacters::GetNumberMonsters(void) {
 	return num;
 }
 
-////Adds character to character vector
-//void GameCharacters::AddCharacter(int index, std::string name, int column, int row,
-//        int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma,
-//        int max_health_points, int current_health_points, int armor_class, int initiative, int speed, CharacterType character_type, Class class_) {
-//    Character character = Character(name, column, row,
-//        strength, dexterity, constitution, intelligence, wisdom, charisma,
-//        max_health_points, current_health_points, armor_class, initiative, speed);
-//    character.SetClass(class_); //Sets class of character
-//    character.SetCharacterType(character_type); //Sets character type
-//    characters.push_back(character); //Adds character to characters vector
-//}
-
 //Returns character at index
 Character* GameCharacters::GetCharacter(int index) {
     return charactersVec[index];
@@ -101,4 +77,3 @@ GameCharacters::~GameCharacters() {
 std::vector<Character*> GameCharacters::GetCharactersVec(){
 	return charactersVec;
 }
-
