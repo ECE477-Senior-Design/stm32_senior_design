@@ -11,6 +11,8 @@
 #include "keypad.h"
 #include "lcd.h"
 #include <random>
+#include <ctime>
+#include <chrono>
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
@@ -633,7 +635,8 @@ void attackMeleeHit(uint8_t* mapCharBuffer, int row, int col, int type) {
 void attackRangeHit(uint8_t* mapCharBuffer, std::vector<Hexagon*> line, int type) {
 	uint8_t original_buffer[256];
 	std::memcpy(original_buffer, mapCharBuffer, sizeof(uint8_t) * 256);
-	for (uint8_t i = 0; i < line.size(); i++) {
+	uint8_t i = 0;
+	for (i = 1; i < line.size()-1; i++) {
 		Hexagon* hex = line[i];
 		int row = hex->GetHexRow();
 		int col = hex->GetHexColumn();
@@ -646,7 +649,7 @@ void attackRangeHit(uint8_t* mapCharBuffer, std::vector<Hexagon*> line, int type
 		displayMap(htim1, htim3, mapCharBuffer, 256);
 		HAL_Delay(50);
 	}
-	displayMap(htim1, htim3, original_buffer, 256);
+	attackMeleeHit(mapCharBuffer, line[i]->GetHexRow(), line[i]->GetHexColumn(), type);
 }
 
 GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_HandleTypeDef hmcps1[8], MCP23017_HandleTypeDef hmcps2[8], GameMap* map, Hexagon* currHex, Character* character) {
@@ -656,9 +659,9 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 	int minGold = 10;
 	int maxGold = 100;
 	int goldVal = 0;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distr(minGold, maxGold);
+    int start = HAL_GetTick();
+
+    // Convert the current time to milliseconds since the epoch
 
 	for (uint8_t hex = 0; hex < neighbors.size(); hex++) {
 		if (neighbors[hex]->GetType() == ChestHex ) {
@@ -697,7 +700,8 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 			openChest(charMapBuffer, lootHex[selection]->GetHexRow(), lootHex[selection]->GetHexColumn());
 			lootHex[selection]->SetType(BaseHex);
 			lootHex[selection]->SetPassable(true);
-		    goldVal = distr(gen);
+			int end = HAL_GetTick();
+		    goldVal = (end - start) % 100 + 1;
 
 			mapBuffer[lootHex[selection]->GetHexColumn() + 16*lootHex[selection]->GetHexRow()] = BaseHex;
 			view = map->FieldOfView(map->GetHex(character->GetRow(), character->GetColumn()), character->GetVisibility());

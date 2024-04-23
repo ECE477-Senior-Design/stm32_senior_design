@@ -125,10 +125,7 @@ void Upload_Map(void) {
 	int usb_status = check_usb_connection();
 	if (usb_status) {
 		LCD_WriteStringCentered(100, "Waiting for USB", FONT, LCD_BLACK, LCD_WHITE);
-		HAL_Delay(2000);
-		LCD_FillScreen(LCD_WHITE);
-		HAL_Delay(500);
-		LCD_WriteStringCentered(90, "Connection...", FONT, LCD_BLACK, LCD_WHITE);
+		LCD_WriteStringCentered(150, "Connection...", FONT, LCD_BLACK, LCD_WHITE);
 	}
 
 	while (check_usb_connection());
