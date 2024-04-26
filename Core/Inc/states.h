@@ -17,6 +17,7 @@ typedef enum {
 	DM_MODE_STATE,
 	PLAYING_MODE_STATE,
 	UPLOAD_MAP_STATE,
+	CHOOSE_MAP_STATE,
 	VIEW_MAP_STATE,
 	GAME_LOOP_STATE
 } GameState;
@@ -25,6 +26,7 @@ void Welcome(void);
 void Menu(void);
 void DM_Mode(void);
 void Upload_Map(void);
+void Choose_Map(void);
 void View_Map(void);
 void Playing_Mode(void);
 void Game_Loop(void);

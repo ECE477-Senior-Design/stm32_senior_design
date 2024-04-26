@@ -124,8 +124,9 @@ void DM_Mode(void) {
 	int prev_selection = 0;
 	int y_pos = 50;
 	LCD_WriteStringCentered(50, "Upload Map", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(100, "View Map", FONT, LCD_BLACK, LCD_WHITE);
-	LCD_WriteStringCentered(150, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Choose Map", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(150, "View Map", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(200, "Return to Menu", FONT, LCD_BLACK, LCD_WHITE);
 	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
 	key = '\0';
 	while (1) {
@@ -136,9 +137,12 @@ void DM_Mode(void) {
 					game_state = UPLOAD_MAP_STATE;
 					break;
 				case (2):
-					game_state = VIEW_MAP_STATE;
+					game_state = CHOOSE_MAP_STATE;
 					break;
 				case (3):
+					game_state = VIEW_MAP_STATE;
+					break;
+				case (4):
 					game_state = MENU_STATE;
 					break;
 			}
@@ -152,7 +156,7 @@ void DM_Mode(void) {
 		}
 		if (key == 'D') {
 			key = '\0';
-		    selection = (selection < 3) ? selection + 1 : 3;
+		    selection = (selection < 4) ? selection + 1 : 4;
 		}
 
 		if (selection != prev_selection) {
@@ -234,6 +238,122 @@ void Upload_Map(void) {
 	}
 }
 
+void Choose_Map() {
+	int selection = 1;
+	int prev_selection = 0;
+	int y_pos = 50;
+	LCD_WriteStringCentered(50, "Map 1", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(100, "Map 2", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(150, "Map 3", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_WriteStringCentered(200, "Return to DM Mode", FONT, LCD_BLACK, LCD_WHITE);
+	LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+	key = '\0';
+	while (1) {
+		if (key == '#') {
+			key = '\0';
+			switch (selection) {
+				case (1): {
+					uint8_t mapBuffer[256] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+											   0,0,2,0,0,0,0,1,0,0,0,0,0,0,0,0,
+											  0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
+											   0,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,
+											   0,0,1,0,0,0,3,0,0,0,0,0,0,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+											   0,0,1,0,0,0,4,0,4,0,0,0,0,0,0,0,
+											  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+											   0,0,1,0,0,0,0,0,3,0,0,0,1,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
+											   0,0,0,1,1,1,0,0,0,1,1,0,1,1,0,0,
+											  0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
+											   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+											  0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,0,
+											   0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+
+					std::vector<std::string> charInput = {"Mychel,2,1,3,12,3,9,4,13,15,15,15,12,3,0,5,0,0,0", "Jimmi,14,14,5,8,5,9,4,14,15,15,14,12,3,0,5,0,0,1",
+								 	 	 	 	 	 	 "Orc,6,5,6,8,4,10,12,9,10,10,7,12,3,0,5,0,1,0", "Skeleton,8,9,2,5,3,5,7,4,9,9,6,12,3,0,5,0,1,1"};
+					map = new GameMap(16, 16);
+					bufferToMap(map, mapBuffer);
+					characters = new GameCharacters(charInput);
+					break;
+				}
+				case (2): {
+					uint8_t mapBuffer[256] = {0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
+											   2,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,
+											  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+											   0,0,1,1,1,1,1,0,0,1,3,4,0,0,0,0,
+											  2,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,
+											   0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,
+											  0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0,
+											   0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,
+											  0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,
+											   0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,0,0,0,1,4,0,
+											   0,0,0,1,1,1,0,0,3,1,1,0,1,1,0,0,
+											  0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1,
+											   0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,
+											   0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,};
+					std::vector<std::string> charInput = {"Brutalitops,0,1,3,12,3,9,4,13,16,16,12,12,3,0,5,0,0,1", "Clarisse,0,4,5,8,5,9,4,14,12,12,13,12,3,0,5,0,0,0",
+								 	 	 	 	 	 	 "Mom,10,3,6,8,4,10,12,9,12,12,15,12,3,0,5,0,1,1", "Dad,8,11,2,5,3,5,7,4,4,4,5,12,3,0,5,0,1,1"};
+					map = new GameMap(16, 16);
+					bufferToMap(map, mapBuffer);
+					characters = new GameCharacters(charInput);
+					break;
+				}
+				case (3): {
+					uint8_t mapBuffer[256] = {0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+											   0,0,1,0,0,0,0,1,0,0,0,4,0,0,0,0,
+											  0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,
+											   0,0,0,1,1,1,1,0,0,1,3,0,0,0,0,0,
+											  0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,
+											   0,0,1,0,0,0,3,0,0,1,0,0,0,0,0,0,
+											  0,0,0,1,0,0,1,0,0,1,0,0,1,1,1,0,
+											   0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,0,
+											  0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,
+											   0,0,1,0,0,0,1,0,3,1,0,0,1,0,0,0,
+											  0,0,0,1,0,4,0,1,1,1,0,0,0,1,0,0,
+											   0,0,0,1,1,1,1,0,0,1,1,0,1,1,0,0,
+											  0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,
+											   0,0,0,1,0,0,0,0,0,0,0,0,3,0,0,0,
+											  0,4,0,0,1,1,0,0,0,0,0,1,0,0,0,0,
+											   0,0,0,0,0,0,0,0,0,0,1,0,4,4,0,0,};
+					std::vector<std::string> charInput = {"Gambino,7,8,3,12,3,9,4,13,14,14,12,12,3,0,5,0,0,1", "Obama,8,8,5,8,5,9,4,14,13,13,11,12,3,0,5,0,0,0",
+								 	 	 	 	 	 	 "Wight,10,3,6,8,4,10,12,9,9,9,10,12,3,0,5,0,1,0", "Gollum,12,13,2,5,3,5,7,4,11,11,8,12,3,0,5,0,1,0"};
+					map = new GameMap(16, 16);
+					bufferToMap(map, mapBuffer);
+					characters = new GameCharacters(charInput);
+					break;
+				}
+				case (4):
+					game_state = DM_MODE_STATE;
+					LCD_FillScreen(LCD_WHITE);
+					HAL_Delay(500);
+
+					return;
+			}
+			game_state = VIEW_MAP_STATE;
+			LCD_FillScreen(LCD_WHITE);
+			HAL_Delay(500);
+			break;
+		}
+		if (key == 'A') {
+			key = '\0';
+		    selection = (selection > 1) ? selection - 1 : 1;
+		}
+		if (key == 'D') {
+			key = '\0';
+		    selection = (selection < 4) ? selection + 1 : 4;
+		}
+
+		if (selection != prev_selection) {
+			LCD_FillRectangle(10, prev_selection * y_pos, 10, 18, LCD_WHITE);
+			LCD_FillRectangle(10, selection * y_pos, 10, 18, LCD_BLACK);
+			prev_selection = selection;
+		}
+	}
+}
+
 void View_Map() {
 	if (map == NULL) {
 		game_state = DM_MODE_STATE;
@@ -271,7 +391,6 @@ void View_Map() {
 		}
 	}
 	displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-	//displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
 	game_state = MENU_STATE;
 }
 
