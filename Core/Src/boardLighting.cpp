@@ -80,6 +80,11 @@ void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuf
 				 test[led + (pcb*32)] = 7;
 				 break;
 
+			  case 11: //DRAGON TONGUE
+				  Set_LED(led, 255, 255, 150);
+				  test[led + (pcb * 32)] = 7;
+				  break;
+
 			 default:
 				 Set_LED(led,0,0,0); //default off
 				 test[led + (pcb*32)] = 0;
