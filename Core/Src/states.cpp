@@ -12,24 +12,66 @@ extern GameCharacters* characters;
 extern MCP23017_HandleTypeDef hmcps1[8];
 extern MCP23017_HandleTypeDef hmcps2[8];
 
+uint8_t startBuffer1[256] =  {  0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,
+        1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,
+       0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,1,1,0,3,3,1,1,1,1,3,3,0,1,1,0,
+       0,0,0,1,0,3,3,1,0,1,3,3,0,1,0,0,
+        0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,
+       0,0,0,0,1,0,1,1,0,1,1,0,1,0,0,0,
+        0,3,0,1,0,0,1,0,0,1,0,0,1,0,0,0,
+       0,0,3,0,1,9,0,1,0,1,0,9,1,0,0,0,
+        0,3,3,0,1,9,9,1,1,9,9,1,0,0,0,0,
+       0,3,10,3,0,1,9,9,3,9,9,1,0,3,0,0,
+        3,10,10,3,3,1,9,3,3,9,1,0,3,3,0,3,
+       10,10,7,10,3,3,1,9,3,9,1,3,10,3,3,10,
+       10,7,7,10,10,10,1,3,3,1,10,10,3,10,10,7,
+        10,7,7,7,10,7,7,3,1,3,7,7,7,10,10,7,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+
+uint8_t startBuffer2[256] = {0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,
+        1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,
+       0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,1,1,0,3,3,1,1,1,1,3,3,0,1,1,0,
+       0,0,0,1,0,3,3,1,0,1,3,3,0,1,0,0,
+        0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,
+       0,0,0,0,1,0,1,1,0,1,1,0,1,0,0,0,
+        0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,
+       0,0,0,0,1,9,0,1,0,1,0,9,1,0,0,0,
+        0,3,0,0,1,9,9,1,1,9,9,1,0,0,0,0,
+       0,3,3,0,0,1,9,9,3,9,9,1,0,0,0,0,
+        3,10,3,0,0,1,9,3,3,9,1,0,3,0,0,0,
+       10,10,10,3,0,3,1,9,3,9,1,3,3,0,0,3,
+       10,10,7,10,3,10,1,3,3,1,10,3,3,3,10,10,
+        10,7,7,7,10,7,7,3,1,3,7,10,7,10,7,10,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+
 void Welcome(void) {
+	clearMap(htim1, htim3);
 	int counter = 0;
 	LCD_WriteStringCentered(50, "The Dungeon Crawler", FONT, LCD_BLACK, LCD_WHITE);
 	HAL_Delay(2000);
+	displayMap(htim1, htim3, startBuffer1, sizeof(startBuffer1) / sizeof(uint8_t));
+
 	key = '\0';
 	while (1) {
 		if (key == '#') {
 			key = '\0';
 			game_state = MENU_STATE;
+			clearMap(htim1, htim3);
 			LCD_FillScreen(LCD_WHITE);
 			HAL_Delay(500);
 			break;
 		}
 		if (counter % 2 == 0) {
 			LCD_WriteStringCentered(200, "Enter The Dungeon", FONT, LCD_BLACK, LCD_WHITE);
+			displayMap(htim1, htim3, startBuffer2, sizeof(startBuffer2) / sizeof(uint8_t));
+
 		}
 		else {
 			LCD_FillRectangle(0, 200, 240, 18, LCD_WHITE);
+			displayMap(htim1, htim3, startBuffer1, sizeof(startBuffer1) / sizeof(uint8_t));
+
 		}
 
 		HAL_Delay(500);
@@ -717,7 +759,7 @@ void Game_Loop(void) {
 						break;
 					}
 				}
-				game_state = MENU_STATE;
+				game_state = WELCOME_STATE;
 				return;
 			}
 			else if((characters->GetNumberPlayers() == 0)){
@@ -734,11 +776,11 @@ void Game_Loop(void) {
 						break;
 					}
 				}
-				game_state = MENU_STATE;
+				game_state = WELCOME_STATE;
 				return;
 			}
 		}
 	}
-	game_state = MENU_STATE;
+	game_state = WELCOME_STATE;
 }
 
