@@ -1,8 +1,3 @@
-/*
-MOST RECENT AUTHOR: JACKSON
-DATE: 10/27/2023
-*/
-
 #include "BaseCharacter.h"
 
 //Constructor for character class that keeps track of hex position, ability score, and some combat values

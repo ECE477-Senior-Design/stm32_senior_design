@@ -1,7 +1,3 @@
-//MOST RECENT AUTHOR: Landon
-//DATE: 4/3/2024
-
-
 #include <ws2812b.h>
 #include "boardLighting.h"
 #include <cstddef>
@@ -16,99 +12,64 @@
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
-extern GameCharacters * characters;
-//extern GameCharacters * monsters;
+extern GameCharacters* characters;
 
-
-void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,uint8_t* mapBuffer, size_t bufferSize ){
-	TIM_HandleTypeDef timers[] = {htim1, htim3}; //, htim3, htim4, htim5};4,1,3,5
-	int test[256] = {};
-	uint32_t color;
-
-	int channels[] = {4,3,2,1, 4, 3, 2, 1}; //only 4 because groups of two so only run 4 times while operating with half of board
-
-	for(int pcb = 0; pcb < ((int)bufferSize / MAX_LED); pcb++){
-		for(int led = 0; led < MAX_LED; led++){
-			color = ((LED_Data[led][1]<<16) | (LED_Data[led][2]<<8) | (LED_Data[led][3]));
-		  switch(mapBuffer[(MAX_LED*pcb) + led]){
+void DisplayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, uint8_t* map_buffer, size_t buffer_size) {
+	TIM_HandleTypeDef timers[] = {htim1, htim3};
+	int channels[] = {4, 3, 2, 1, 4, 3, 2, 1};
+	for (int pcb = 0; pcb < ((int) buffer_size / MAX_LED); pcb++) {
+		for (int led = 0; led < MAX_LED; led++) {
+			switch(map_buffer[(MAX_LED * pcb) + led]) {
 			  case BaseHex:
 				  Set_LED(led,50,50,55);
-				  test[led + (pcb*32)] = 8;
 				  break;
-
 			  case WallHex:
 				  Set_LED(led,255,0,255); //wall
-				  test[led + (pcb*32)] = 1;
 				  break;
-
 			  case PlayerHex:
-				 Set_LED(led,0, 0, 255); //character/player
-				 test[led + (pcb*32)] = 2;
+				 Set_LED(led,0, 0, 255); //player
 				  break;
-
 			 case MonsterHex:
 				 Set_LED(led,255,0,0); //enemy
-				 test[led + (pcb*32)] = 3;
 				  break;
-
 			 case ChestHex:
 				 Set_LED(led,100,100,0); //chest
-				 test[led + (pcb*32)] = 4;
 				  break;
-
 			 case MoveHex:
 				 Set_LED(led,0, 255, 0); //possible moves
-				 test[led + (pcb*32)] = 5;
 				 break;
-
 			 case 6:  ///PlayerHit
-				 Set_LED(led,100, 100, 0); //hex of player when its their turn
-				 test[led + (pcb*32)] = 6;
+				 Set_LED(led,100, 100, 0);
 				 break;
-
 			 case 7:  ///MonsterHit
-				 Set_LED(led,252, 148, 3); //hex of player when its their turn
-				 test[led + (pcb*32)] = 7;
+				 Set_LED(led,252, 148, 3);
 				 break;
 			 case 9:  ///DRAGON MOUTH
-				 Set_LED(led,245, 0, 100); //hex of player when its their turn
-				 test[led + (pcb*32)] = 7;
+				 Set_LED(led,245, 0, 100);
 				 break;
-
 			  case 10:  ///FIRE ORANGE
-				 Set_LED(led,255, 60, 0); //hex of player when its their turn
-				 test[led + (pcb*32)] = 7;
+				 Set_LED(led,255, 60, 0);
 				 break;
-
 			  case 11: //DRAGON TONGUE
 				  Set_LED(led, 255, 255, 150);
-				  test[led + (pcb * 32)] = 7;
 				  break;
-
 			 default:
 				 Set_LED(led,0,0,0); //default off
-				 test[led + (pcb*32)] = 0;
 				  break;
-
-		  }
+			}
 		}
+
 		int timer = pcb / 4;
 		Set_Brightness(20);
 		WS2812_Send(&(timers[timer]), channels[pcb]);
 	}
 }
 
-
-
-void mapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int colorMod){
-	//std::memcpy(mapBufferPrev, mapBuffer, sizeof(uint8_t) * 256);
-	int sizeHexes = hexes.size();
-	int colN;
-	int rowN;
-	for (int i = 0; i < sizeHexes; i++) {
-		 colN = hexes[i]->GetHexColumn();
-		 rowN = hexes[i]->GetHexRow();
-		 mapBuffer[colN + 16*rowN] = colorMod;
+void MapHexesToBuffer(uint8_t* map_buffer, std::vector<Hexagon*> hexes, int color_mod) {
+	for (int i = 0; i < (int) hexes.size(); i++) {
+		int row = hexes[i]->GetHexRow();
+		int col = hexes[i]->GetHexColumn();
+		mapBuffer[col + 16 * row] = color_mod;
 	}
 }
 

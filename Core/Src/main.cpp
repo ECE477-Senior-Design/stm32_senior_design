@@ -80,10 +80,9 @@ uint32_t previous_mill = 0;
 
 char key = '\0';
 
-GameState game_state;
+GameState game_state = WELCOME_STATE;
 GameMap* map = NULL;
 GameCharacters* characters = NULL;
-GameCharacters* monsters = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -155,18 +154,16 @@ int main(void)
   MX_TIM3_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-	game_state = WELCOME_STATE;
-
-	int numExpanders = 8;
-	unsigned int mcpAddress[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
-	for (int i = 0; i < numExpanders; i++) {
-	  mcp23017_init(&hmcps1[i], &hi2c1, mcpAddress[i]);
+	int expanders = 8;
+	unsigned int mcp_address[] = {MCP23017_ADDRESS_20, MCP23017_ADDRESS_21, MCP23017_ADDRESS_22, MCP23017_ADDRESS_23, MCP23017_ADDRESS_24, MCP23017_ADDRESS_25, MCP23017_ADDRESS_26, MCP23017_ADDRESS_27};
+	for (int i = 0; i < expanders; i++) {
+	  mcp23017_init(&hmcps1[i], &hi2c1, mcp_address[i]);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
 	  mcp23017_iodir(&hmcps1[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	}
 
-	for (int i = 0; i < numExpanders; i++) {
-	  mcp23017_init(&hmcps2[i], &hi2c2, mcpAddress[i]);
+	for (int i = 0; i < expanders; i++) {
+	  mcp23017_init(&hmcps2[i], &hi2c2, mcp_address[i]);
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTA, MCP23017_IODIR_ALL_INPUT);
 	  mcp23017_iodir(&hmcps2[i], MCP23017_PORTB, MCP23017_IODIR_ALL_INPUT);
 	 }
@@ -181,46 +178,6 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
 
 	clearMap(htim1, htim3);
-
-	//TESTING CODE
-//	uint8_t mapBuffer[256] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-//							   0,0,2,0,0,0,0,1,0,0,0,0,0,0,0,0,
-//							  0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
-//							   0,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,
-//							  0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,
-//							   0,0,1,0,0,0,3,0,0,0,0,0,0,0,0,0,
-//							  0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
-//							   0,0,1,0,0,0,4,0,4,0,0,0,0,0,0,0,
-//							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-//							   0,0,1,0,0,0,0,0,3,0,0,0,1,0,0,0,
-//							  0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
-//							   0,0,0,1,1,1,0,0,0,1,1,0,1,1,0,0,
-//							  0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
-//							   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-//							  0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,0,
-//							   0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,};
-//
-//    map = new GameMap(16, 16);
-//    bufferToMap(map, mapBuffer);
-//    std::vector<std::string> charInput = {"Mychel,2,1,3,12,3,9,4,13,15,15,18,12,3,0,5,0,0,0", "Jimmi,14,14,5,8,5,9,4,14,15,15,18,12,3,0,5,0,0,1", "Orc,6,7,6,8,4,10,12,9,15,15,18,12,3,0,5,0,1,0", "Skeleton,8,7,2,5,3,5,7,4,15,15,18,12,3,0,5,0,1,1"};
-    //std::vector<std::string> charMonsterInput = {"Goblin,8,11,3,12,3,9,4,93,83,28,18,12,500,1,0", "Orc,8,2,3,12,3,9,4,93,83,28,18,12,500,1,0","Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,500,1,0"};
-    // "Jimmy,3,8,100,100,100,100,100,100,100,100,100,100,3,0,5,0,0,0"
-    //"Goblin,3,9,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0",
-    //"Skeleton,9,3,3,12,3,9,4,93,83,28,18,12,3,1,5,0,1,0"
-
-//    characters = new GameCharacters(charInput);
-
-// //   monsters = new GameCharacters(charMonsterInput);
-//
-//    displayMap(htim1, htim3, mapBuffer, sizeof(mapBuffer) / sizeof(uint8_t));
-//
-//	int channels[] = {4, 4, 3, 3, 2, 2, 1, 1};
-//	while (1) {
-//		for(int i = 0; i < 8; i++)
-//		{
-//		  ledHallPCBSystemCheck(hmcps1[i], &htim1, channels[i], i);
-//		}
-//	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -230,12 +187,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	for(int i = 0; i < 8; i++)
-//	{
-//	  ledHallPCBSystemCheck(hmcps2[i], &htim3, channels[i], i);
-//	}
-
-
 	  switch (game_state) {
 	  		case WELCOME_STATE:
 	  			Welcome();

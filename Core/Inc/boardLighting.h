@@ -1,12 +1,6 @@
-/*
- * boardLighting.h
- *
- *  Created on: Apr 3, 2024
- *      Author: lando
- */
-
 #ifndef BOARDLIGHTING_H
 #define BOARDLIGHTING_H
+
 #include <cstddef>
 #include "stm32f4xx_hal.h"
 #include "GameMap.h"
@@ -16,11 +10,9 @@
 #include "GameCharacters.h"
 #include <string>
 
-//void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3,TIM_HandleTypeDef htim4, TIM_HandleTypeDef htim5,uint8_t* mapBuffer, size_t bufferSize ){};
-void displayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, uint8_t* mapBuffer, size_t bufferSize );
+void DisplayMap(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, uint8_t* map_buffer, size_t buffer_size);
 
-
-void mapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int colorMod);
+void MapHexesToBuffer(uint8_t* mapBuffer, std::vector<Hexagon*> hexes, int colorMod);
 
 void mapHexesToMap(std::vector<Hexagon*> hexes, GameMap *map, HexagonType type);
 
@@ -48,4 +40,4 @@ GameMap* chestMode(TIM_HandleTypeDef htim1, TIM_HandleTypeDef htim3, MCP23017_Ha
 
 void openChest(uint8_t* mapCharBuffer , int row, int col);
 
-#endif /* INC_WS2812B_H_ */
+#endif
